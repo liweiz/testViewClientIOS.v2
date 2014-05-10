@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="20140509" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5064" systemVersion="13C1021" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="TVBase" representedClassName="TVBase" isAbstract="YES" syncable="YES">
+        <attribute name="editAction" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="lastModifiedAtLocal" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="lastModifiedAtServer" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="localID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="serverID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="versionNo" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="hasReqID" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TVRequestID" inverseName="belongTo" inverseEntity="TVRequestID" syncable="YES"/>
+    </entity>
+    <entity name="TVCard" representedClassName="TVCard" parentEntity="TVBase" syncable="YES">
+        <attribute name="belongTo" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="collectedAt" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="context" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="detail" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="sourceLang" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="target" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="targetLang" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="translation" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="belongToUser" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TVUser" inverseName="hasCards" inverseEntity="TVUser" syncable="YES"/>
+    </entity>
+    <entity name="TVRequestID" representedClassName="TVRequestID" syncable="YES">
+        <attribute name="createdAtLocal" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="done" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="lastModifiedAtLocal" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="operationVersion" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="requestID" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="belongTo" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TVBase" inverseName="hasReqID" inverseEntity="TVBase" syncable="YES"/>
+    </entity>
+    <entity name="TVUser" representedClassName="TVUser" parentEntity="TVBase" syncable="YES">
+        <attribute name="activated" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="deviceUUID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="email" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="isLoggedIn" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="rememberMe" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="sortOption" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="sourceLang" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="targetLang" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="hasCards" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TVCard" inverseName="belongToUser" inverseEntity="TVCard" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="TVBase" positionX="0" positionY="36" width="128" height="148"/>
+        <element name="TVCard" positionX="-128" positionY="272" width="128" height="178"/>
+        <element name="TVUser" positionX="-306" positionY="0" width="128" height="178"/>
+        <element name="TVRequestID" positionX="225" positionY="189" width="128" height="133"/>
+    </elements>
+</model>
