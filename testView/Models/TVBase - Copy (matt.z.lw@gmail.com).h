@@ -2,31 +2,31 @@
 //  TVBase.h
 //  testView
 //
-//  Created by Liwei on 2014-05-17.
+//  Created by Liwei on 2014-05-13.
 //  Copyright (c) 2014 Liwei. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class TVRequestId;
+@class TVRequestID;
 
 @interface TVBase : NSManagedObject
 
 @property (nonatomic, retain) NSDate * lastModifiedAtLocal;
 @property (nonatomic, retain) NSDate * lastModifiedAtServer;
 @property (nonatomic, retain) NSNumber * lastUnsyncAction;
-@property (nonatomic, retain) NSString * localId;
-@property (nonatomic, retain) NSString * serverId;
+@property (nonatomic, retain) NSString * localID;
+@property (nonatomic, retain) NSString * serverID;
 @property (nonatomic, retain) NSString * versionNo;
-@property (nonatomic, retain) NSSet *hasReqId;
+@property (nonatomic, retain) NSSet *hasReqID;
 @end
 
 @interface TVBase (CoreDataGeneratedAccessors)
 
-- (void)addHasReqIdObject:(TVRequestId *)value;
-- (void)removeHasReqIdObject:(TVRequestId *)value;
-- (void)addHasReqId:(NSSet *)values;
-- (void)removeHasReqId:(NSSet *)values;
+- (void)addHasReqIDObject:(TVRequestID *)value;
+- (void)removeHasReqIDObject:(TVRequestID *)value;
+- (void)addHasReqID:(NSSet *)values;
+- (void)removeHasReqID:(NSSet *)values;
 
 @end
