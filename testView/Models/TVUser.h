@@ -2,7 +2,7 @@
 //  TVUser.h
 //  testView
 //
-//  Created by Liwei on 2014-05-17.
+//  Created by Liwei on 2014-05-20.
 //  Copyright (c) 2014 Liwei. All rights reserved.
 //
 
@@ -22,6 +22,7 @@
 @property (nonatomic, retain) NSString * sortOption;
 @property (nonatomic, retain) NSString * sourceLang;
 @property (nonatomic, retain) NSString * targetLang;
+@property (nonatomic, retain) NSString * deviceInfoId;
 @property (nonatomic, retain) TVCard *hasCards;
 
 @end

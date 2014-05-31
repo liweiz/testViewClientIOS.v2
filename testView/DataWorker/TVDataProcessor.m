@@ -40,6 +40,8 @@
     return self;
 }
 
+
+
 - (void)actionAfterDBChange:(NSNotification *)n
 {
     self.updated = [n valueForKey:@"NSUpdatedObjectsKey"];
@@ -62,7 +64,7 @@
         self.backgroundWorker = [[NSOperationQueue alloc] init];
     }
     [self.backgroundWorker addOperationWithBlock:^{
-        [self startCommunicationWithServer];
+        
     }];
 }
 
@@ -111,11 +113,7 @@
             for (TVBase *y in cSet) {
                 // Prepare request
                 NSMutableDictionary *m = [self analyzeOneUndone:y inCtx:c];
-                // Send request
-                [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
-                 {
-                     
-                 }];
+                
             }
             
         }
@@ -229,5 +227,7 @@
     }
     return outDic;
 }
+
+
 
 @end

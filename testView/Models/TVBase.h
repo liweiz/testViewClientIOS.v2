@@ -18,7 +18,7 @@
 @property (nonatomic, retain) NSNumber * lastUnsyncAction;
 @property (nonatomic, retain) NSString * localId;
 @property (nonatomic, retain) NSString * serverId;
-@property (nonatomic, retain) NSString * versionNo;
+@property (nonatomic, retain) NSNumber * versionNo;
 @property (nonatomic, retain) NSSet *hasReqId;
 @end
 

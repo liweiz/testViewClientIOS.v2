@@ -7,9 +7,12 @@
 //
 
 #import "TVAppRootViewController.h"
+#import "TVRequester.h"
+#import "NSObject+DataHandler.h"
+#import "NSObject+NetworkHandler.h"
 
 NSString *const tvEnglishFontName = @"TimesNewRomanPSMT";
-NSString *const tvServerUrl = @"localhost:3000";
+NSString *const tvServerUrl = @"http://localhost:3000";
 //UIColor *const tvBackgroundColor = [UIColor colorWithRed:43/255.0f green:43/255.0f blue:42/255.0f alpha:1.0f];
 //UIColor *const tvBackgroundColorAlternative = [UIColor colorWithRed:148/255.0f green:180/255.0f blue:7/255.0f alpha:1.0f];
 //UIColor *const tvFontColor = [UIColor colorWithRed:246/255.0f green:247/255.0f blue:242/255.0f alpha:1.0f];
@@ -39,6 +42,8 @@ NSString *const tvServerUrl = @"localhost:3000";
 {
     self.view = [[UIView alloc] initWithFrame:self.appRect];
     self.view.backgroundColor = [UIColor lightGrayColor];
+    
+    
 }
 
 - (void)viewDidLoad

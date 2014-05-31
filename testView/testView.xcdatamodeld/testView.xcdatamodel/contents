@@ -6,7 +6,7 @@
         <attribute name="lastUnsyncAction" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="localId" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="serverId" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="versionNo" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="versionNo" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
         <relationship name="hasReqId" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TVRequestId" inverseName="belongTo" inverseEntity="TVRequestId" syncable="YES"/>
     </entity>
     <entity name="TVCard" representedClassName="TVCard" parentEntity="TVBase" syncable="YES">
@@ -31,6 +31,7 @@
     </entity>
     <entity name="TVUser" representedClassName="TVUser" parentEntity="TVBase" syncable="YES">
         <attribute name="activated" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="deviceInfoId" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="deviceUUID" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="email" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="isLoggedIn" optional="YES" attributeType="Boolean" syncable="YES"/>
@@ -44,6 +45,6 @@
         <element name="TVBase" positionX="0" positionY="36" width="128" height="150"/>
         <element name="TVCard" positionX="-128" positionY="272" width="128" height="178"/>
         <element name="TVRequestId" positionX="225" positionY="189" width="128" height="148"/>
-        <element name="TVUser" positionX="-306" positionY="0" width="128" height="178"/>
+        <element name="TVUser" positionX="-306" positionY="0" width="128" height="195"/>
     </elements>
 </model>

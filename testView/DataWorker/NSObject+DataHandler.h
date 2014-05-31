@@ -23,9 +23,13 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 
 - (TVBase *)scanDBForUndone:(NSSet *)objSet;
 
+- (void)saveAccessToken:(NSString *)aToken refreshToken:(NSString *)rToken toAccount:(NSString *)email;
+- (NSString *)getAccessTokenForAccount:(NSString *)email;
+- (NSString *)getRefreshTokenForAccount:(NSString *)email;
+
 - (void)setupNewDocBaseLocal:(TVBase *)doc;
-- (void)setupNewDocBaseServer:(TVBase *)doc fromRequest:(NSMutableDictionary *)dic;
-- (void)setupNewUser:(TVUser *)user withDic:(NSMutableDictionary *)dic;
+- (void)setupNewDocBaseServer:(TVBase *)doc fromRequest:(NSMutableDictionary *)dicInside;
+- (void)setupNewUserServer:(TVUser *)user withDic:(NSMutableDictionary *)dic;
 - (void)setupNewCard:(TVCard *)card withDic:(NSMutableDictionary *)dic;
 - (void)setupNewRequestId:(TVRequestId *)doc action:(NSInteger)a for:(TVBase *)base;
 
@@ -36,7 +40,5 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 - (void)updateCard:(TVCard *)card withDic:(NSMutableDictionary *)dic;
 
 - (NSInteger)getRequestIdOperationVersion:(TVBase *)base;
-
-- (BOOL)dismissChangeToDbRecord:(TVBase *)base requestIdObj:(TVRequestId *)d;
 
 @end

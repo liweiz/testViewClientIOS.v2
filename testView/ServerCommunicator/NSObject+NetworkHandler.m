@@ -11,20 +11,6 @@
 #import "TVCard.h"
 #import "TVAppRootViewController.h"
 
-typedef NS_ENUM(NSInteger, TVRequestType) {
-    TVSignUp,
-    TVSignIn,
-    TVForgotPassword, // send email to server
-    TVRenewTokens,
-    TVNewDeviceInfo,
-    TVOneDeviceInfo,
-    TVEmailForActivation,
-    TVEmailForPasswordResetting, // send token to server
-    TVSync,
-    TVNewCard,
-    TVOneCard
-};
-
 @implementation NSObject (NetworkHandler)
 
 #pragma mark - prepare JSON for requests
@@ -196,64 +182,6 @@ typedef NS_ENUM(NSInteger, TVRequestType) {
     return urlBranch;
 }
 
-#pragma mark - decompose response
-- (NSMutableDictionary *)getBodyIn200Response:(NSURLResponse *)response data:(NSData *)data err:(NSError **)err
-{
-    NSMutableDictionary *dict;
-    if ([(NSHTTPURLResponse *)response statusCode] == 200 && !err && data.length > 0) {
-        dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:err];
-    }
-    return dict;
-}
-
-- (NSString *)getBodyInNon200Response:(NSURLResponse *)response data:(NSData *)data
-{
-    if ([(NSHTTPURLResponse *)response statusCode] != 200 && data.length > 0) {
-        return [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-    }
-    return nil;
-}
-
-- (void)processResponseFor:(NSInteger)reqType json:(NSMutableDictionary *)dict text:(NSString *)errMsg info:(NSMutableDictionary *)info err:(NSError **)err
-{
-    switch (reqType) {
-        case TVSignUp:
-            
-            break;
-        case TVSignIn:
-            
-            break;
-        case TVForgotPassword:
-            
-            break;
-        case TVRenewTokens:
-            
-            break;
-        case TVNewDeviceInfo:
-            
-            break;
-        case TVOneDeviceInfo:
-            
-            break;
-        case TVEmailForActivation:
-            
-            break;
-        case TVEmailForPasswordResetting:
-            
-            break;
-        case TVSync:
-            
-            break;
-        case TVNewCard:
-            
-            break;
-        case TVOneCard:
-            
-            break;
-        default:
-            break;
-    }
-}
 
 // Check connection error, if no error, proceed to handle specific response by returning YES
 //- (BOOL)handleBasicResponse:(NSHTTPURLResponse *)response withJSONData:(NSData *)data error:(NSError *)error

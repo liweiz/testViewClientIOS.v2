@@ -2,7 +2,7 @@
 //  TVUser.m
 //  testView
 //
-//  Created by Liwei on 2014-05-17.
+//  Created by Liwei on 2014-05-20.
 //  Copyright (c) 2014 Liwei. All rights reserved.
 //
 
@@ -20,6 +20,7 @@
 @dynamic sortOption;
 @dynamic sourceLang;
 @dynamic targetLang;
+@dynamic deviceInfoId;
 @dynamic hasCards;
 
 @end

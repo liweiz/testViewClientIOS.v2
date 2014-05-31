@@ -10,6 +10,20 @@
 #import "TVUser.h"
 #import "TVCard.h"
 
+typedef NS_ENUM(NSInteger, TVRequestType) {
+    TVSignUp,
+    TVSignIn,
+    TVForgotPassword, // send email request to server in the case that user only know email address, in which case the userId is not available.
+    TVRenewTokens,
+    TVNewDeviceInfo,
+    TVOneDeviceInfo,
+    TVEmailForActivation,
+    TVEmailForPasswordResetting,
+    TVSync,
+    TVNewCard,
+    TVOneCard
+};
+
 @interface NSObject (NetworkHandler)
 
 - (NSData *)getJSONSignUpOrInWithEmail:(NSString *)email password:(NSString *)password err:(NSError **)err;
@@ -36,14 +50,6 @@
 
 - (NSString *)authenticationStringWithToken:(NSString *)token;
 
-- (void)addAuthenticationToRequest:(NSMutableURLRequest *)request withString:(NSString *)string;
-
-- (void)addUuidToRequest:(NSMutableURLRequest *)request;
-
 - (NSString *)getUrlBranchFor:(NSInteger)reqType userId:(NSString *)userId deviceInfoId:(NSString *)deviceInfoId cardId:(NSString *)cardId;
-
-- (NSMutableDictionary *)getBodyIn200Response:(NSURLResponse *)response data:(NSData *)data err:(NSError **)err;
-
-- (NSString *)getBodyInNon200Response:(NSURLResponse *)response data:(NSData *)data;
 
 @end

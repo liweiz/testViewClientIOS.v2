@@ -9,7 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "TVTableViewCell.h"
 #import "TVUser.h"
-#import "TVSortBox.h"
 
 @interface TVTableViewController : UITableViewController <NSFetchedResultsControllerDelegate>
 
