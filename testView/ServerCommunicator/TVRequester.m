@@ -24,11 +24,11 @@
 @synthesize email;
 @synthesize password;
 @synthesize accessToken;
-@synthesize authNeeded;
 @synthesize isBearer;
 @synthesize requestType;
 @synthesize userId;
 @synthesize deviceInfoId;
+@synthesize deviceUuid;
 @synthesize cardId;
 @synthesize internetIsOn;
 @synthesize ctx;
@@ -314,8 +314,6 @@
         // SignIn
     } else if ([errMsg isEqualToString:@"User does not exist."]) {
         // ForgotPassword
-    } else if ([errMsg isEqualToString:@"DeviceInfo already exists, please update it if needed."]) {
-        // NewDeviceInfo
     } else if ([errMsg isEqualToString:@"No deviceInfo found for this account, please create one on device first."]) {
         // Sync
         // Launch setting interface for user
@@ -380,21 +378,21 @@
     NSLog(@"request URL: %@", request.URL.host);
     [request setHTTPMethod:self.method];
     [request setValue:self.contentType forHTTPHeaderField:@"Content-type"];
+    [request setValue:self.contentType forHTTPHeaderField:@"Content-type"];
     if (self.body) {
         [request setHTTPBody:self.body];
         NSLog(@"2");
     }
     NSString *auth;
-    if (authNeeded) {
-        if (self.isBearer) {
-            auth = [self authenticationStringWithToken:self.accessToken];
-        } else {
-            auth = [self authenticationStringWithEmail:self.email password:self.password];
-        }
-        [request setValue:@"Authorization" forHTTPHeaderField:auth];
+    if (self.isBearer) {
+        auth = [self authenticationStringWithToken:self.accessToken];
+    } else {
+        auth = [self authenticationStringWithEmail:self.email password:self.password];
     }
+    [request setValue:auth forHTTPHeaderField:@"Authorization"];
     // Setup request "X-REMOLET-DEVICE-ID" in header
-    [request setValue:@"X-REMOLET-DEVICE-ID" forHTTPHeaderField:[[[UIDevice currentDevice] identifierForVendor] UUIDString]];
+    [request setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forHTTPHeaderField:@"X-REMOLET-DEVICE-ID"];
+    NSLog(@"X-REMOLET-DEVICE-ID: %@", [request valueForHTTPHeaderField:@"X-REMOLET-DEVICE-ID"]);
     return request;
 }
 

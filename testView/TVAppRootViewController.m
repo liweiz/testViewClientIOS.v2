@@ -10,6 +10,7 @@
 #import "TVRequester.h"
 #import "NSObject+DataHandler.h"
 #import "NSObject+NetworkHandler.h"
+#import "TVTestViewController.h"
 
 NSString *const tvEnglishFontName = @"TimesNewRomanPSMT";
 NSString *const tvServerUrl = @"http://localhost:3000";
@@ -53,6 +54,10 @@ NSString *const tvServerUrl = @"http://localhost:3000";
     self.requestReceivedResponse = YES;
     self.willSendRequest = YES;
 //    [self loadController];
+    TVTestViewController *c = [[TVTestViewController alloc] init];
+    [self addChildViewController:c];
+    [self.view addSubview:c.view];
+    [c didMoveToParentViewController:self];
 }
 
 - (void)loadController

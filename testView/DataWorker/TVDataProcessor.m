@@ -40,8 +40,6 @@
     return self;
 }
 
-
-
 - (void)actionAfterDBChange:(NSNotification *)n
 {
     self.updated = [n valueForKey:@"NSUpdatedObjectsKey"];

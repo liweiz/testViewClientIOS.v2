@@ -24,6 +24,8 @@
     
     NSString *email;
     NSString *password;
+    NSString *userId;
+    NSString *deviceInfoId;
     NSMutableDictionary *card1;
     NSMutableDictionary *card2;
     NSMutableDictionary *card3;
@@ -82,6 +84,9 @@
     email = @"matt.z.lw@gmail.com";
     password = @"1a2b!!";
     
+    userId = @"";
+    deviceInfoId = @"";
+    
     context = @"As designers, we must not forget that we design for the people. We must gain empathy and ride on the arc of modern design.";
     target = @"empathy";
     translation = @"感同身受";
@@ -91,19 +96,71 @@
     detail4 = @"a直译为“移情作用”，在中文中不易理解。";
     detail5 = @"a直译为“移情作用”。wiki中有详解，却不易理解。";
     detail6 = @"a直译为“移情作用”。";
+    
+    UILabel *btn1 = [[UILabel alloc] initWithFrame:CGRectMake(10.0f, 10.0f, 60.0f, 50.0f)];
+    btn1.userInteractionEnabled = YES;
+    btn1.text = @"signUp";
+    UITapGestureRecognizer *g1 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(signUp)];
+    [btn1 addGestureRecognizer:g1];
+    [self.view addSubview:btn1];
+    
+    UILabel *btn2 = [[UILabel alloc] initWithFrame:CGRectMake(80.0f, 10.0f, 60.0f, 50.0f)];
+    btn2.userInteractionEnabled = YES;
+    btn2.text = @"signIn";
+    UITapGestureRecognizer *g2 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(signIn)];
+    [btn2 addGestureRecognizer:g2];
+    [self.view addSubview:btn2];
+    
+    UILabel *btn3 = [[UILabel alloc] initWithFrame:CGRectMake(150.0f, 10.0f, 60.0f, 50.0f)];
+    btn3.userInteractionEnabled = YES;
+    btn3.text = @"renewTokens";
+    UITapGestureRecognizer *g3 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(renewTokens)];
+    [btn3 addGestureRecognizer:g3];
+    [self.view addSubview:btn3];
+    
+    UILabel *btn4 = [[UILabel alloc] initWithFrame:CGRectMake(220.0f, 10.0f, 60.0f, 50.0f)];
+    btn4.userInteractionEnabled = YES;
+    btn4.text = @"newDeviceInfo";
+    UITapGestureRecognizer *g4 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(newDeviceInfo)];
+    [btn4 addGestureRecognizer:g4];
+    [self.view addSubview:btn4];
+    
+    UILabel *btn5 = [[UILabel alloc] initWithFrame:CGRectMake(10.0f, 70.0f, 60.0f, 50.0f)];
+    btn5.userInteractionEnabled = YES;
+    btn5.text = @"oneDeviceInfo";
+    UITapGestureRecognizer *g5 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(oneDeviceInfo)];
+    [btn5 addGestureRecognizer:g5];
+    [self.view addSubview:btn5];
+    
+    UILabel *btn6 = [[UILabel alloc] initWithFrame:CGRectMake(80.0f, 70.0f, 60.0f, 50.0f)];
+    btn6.userInteractionEnabled = YES;
+    btn6.text = @"getUser";
+    UITapGestureRecognizer *g6 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(getUser)];
+    [btn6 addGestureRecognizer:g6];
+    [self.view addSubview:btn6];
+}
+
+- (void)getUser
+{
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
+    NSPredicate *pUser = [NSPredicate predicateWithFormat:@"email like %@", email];
+    [fetchRequest setPredicate:pUser];
+    NSArray *r = [self.managedObjectContext executeFetchRequest:fetchRequest error:nil];
+    self.user = r[0];
 }
 
 - (void)signUp
 {
+    NSLog(@"signUp");
     TVRequester *reqster = [[TVRequester alloc] init];
     reqster.ctx = self.managedObjectContext;
     reqster.requestType = [reqTypeArray[0] integerValue];
     reqster.email = email;
     reqster.password = password;
+    reqster.isBearer = NO;
     reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    reqster.authNeeded = NO;
     [reqster proceedToRequest];
 }
 
@@ -114,10 +171,10 @@
     reqster.requestType = [reqTypeArray[1] integerValue];
     reqster.email = email;
     reqster.password = password;
+    reqster.isBearer = NO;
     reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    reqster.authNeeded = YES;
     [reqster proceedToRequest];
 }
 
@@ -128,31 +185,50 @@
     reqster.requestType = [reqTypeArray[3] integerValue];
     NSString *a = [self getAccessTokenForAccount:self.user.serverId];
     NSString *r = [self getRefreshTokenForAccount:self.user.serverId];
+    reqster.isBearer = YES;
     reqster.body = [self getJSONRenewTokensWithAccessToken:a refreshToken:r err:nil];
+    reqster.userId = self.user.serverId;
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    reqster.authNeeded = YES;
     reqster.accessToken = a;
     [reqster proceedToRequest];
 }
 
 - (void)newDeviceInfo
 {
+    TVRequestId *rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:self.managedObjectContext];
+    [self setupNewRequestId:rId action:TVDocNew for:(TVBase *)self.user];
+    [self.managedObjectContext save:nil];
     TVRequester *reqster = [[TVRequester alloc] init];
     reqster.ctx = self.managedObjectContext;
     reqster.requestType = [reqTypeArray[4] integerValue];
     NSString *a = [self getAccessTokenForAccount:self.user.serverId];
-    TVRequestId *rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:reqster.ctx];
-    self setupNewRequestId:rId action:TVDocNew for:<#(TVBase *)#>
-    reqster.reqId =
-    reqster.body = [self getJSONDeviceInfo:self.user requestId:reqster.reqId err:nil];
+    reqster.reqId = rId;
+    reqster.isBearer = YES;
+    reqster.body = [self getJSONDeviceInfo:self.user requestId:reqster.reqId.requestId err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    reqster.authNeeded = YES;
     reqster.accessToken = a;
     [reqster proceedToRequest];
 }
 
+- (void)oneDeviceInfo
+{
+    TVRequestId *rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:self.managedObjectContext];
+    [self setupNewRequestId:rId action:TVDocUpdated for:(TVBase *)self.user];
+    [self.managedObjectContext save:nil];
+    TVRequester *reqster = [[TVRequester alloc] init];
+    reqster.ctx = self.managedObjectContext;
+    reqster.requestType = [reqTypeArray[5] integerValue];
+    NSString *a = [self getAccessTokenForAccount:self.user.serverId];
+    reqster.reqId = rId;
+    reqster.isBearer = YES;
+    reqster.body = [self getJSONDeviceInfo:self.user requestId:reqster.reqId.requestId err:nil];
+    reqster.method = @"POST";
+    reqster.contentType = @"application/json";
+    reqster.accessToken = a;
+    [reqster proceedToRequest];
+}
 
 - (void)didReceiveMemoryWarning
 {

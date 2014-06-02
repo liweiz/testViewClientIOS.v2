@@ -9,6 +9,7 @@
 #import "TVAppDelegate.h"
 #import "TVAppRootViewController.h"
 #import <Crashlytics/Crashlytics.h>
+#import "TVTestViewController.h"
 
 
 @implementation TVAppDelegate
@@ -28,13 +29,20 @@
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
 
+    
+    TVTestViewController *c = [[TVTestViewController alloc] init];
+    self.window.rootViewController = c;
+    c.managedObjectContext = self.managedObjectContext;
+    c.managedObjectModel = self.managedObjectModel;
+    c.persistentStoreCoordinator = self.persistentStoreCoordinator;
+    
     // set TVRootViewController as rootViewController
-    TVAppRootViewController *tempViewController = [[TVAppRootViewController alloc] init];
-    tempViewController.managedObjectContext = self.managedObjectContext;
-    tempViewController.managedObjectModel = self.managedObjectModel;
-    tempViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
-    tempViewController.appRect = self.appRect;
-    self.window.rootViewController = tempViewController;
+//    TVAppRootViewController *tempViewController = [[TVAppRootViewController alloc] init];
+//    tempViewController.managedObjectContext = self.managedObjectContext;
+//    tempViewController.managedObjectModel = self.managedObjectModel;
+//    tempViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+//    tempViewController.appRect = self.appRect;
+//    self.window.rootViewController = tempViewController;
     return YES;
 }
 
