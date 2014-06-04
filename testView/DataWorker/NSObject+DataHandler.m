@@ -54,7 +54,6 @@
     }
     if ([dic valueForKey:@"deviceInfo"]) {
         NSMutableDictionary *d = [dic valueForKey:@"user"];
-        user.deviceInfoId = [d valueForKey:@"_id"];
         if (!user.deviceUUID) {
             user.deviceUUID = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
         }
@@ -150,6 +149,9 @@
         user.sortOption = [d valueForKey:@"sortOption"];
         user.sourceLang = [d valueForKey:@"sourceLang"];
         user.targetLang = [d valueForKey:@"targetLang"];
+        if (!user.deviceInfoId || [user.deviceInfoId isEqualToString:@""]) {
+            user.deviceInfoId = [d valueForKey:@"_id"];
+        }
     }
 }
 

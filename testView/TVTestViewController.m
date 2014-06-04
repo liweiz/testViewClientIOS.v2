@@ -24,8 +24,12 @@
     
     NSString *email;
     NSString *password;
-    NSString *userId;
-    NSString *deviceInfoId;
+    
+    NSString *sourceLang;
+    NSString *targetLang;
+    NSString *sortOption1;
+    NSString *sortOption2;
+    
     NSMutableDictionary *card1;
     NSMutableDictionary *card2;
     NSMutableDictionary *card3;
@@ -84,8 +88,10 @@
     email = @"matt.z.lw@gmail.com";
     password = @"1a2b!!";
     
-    userId = @"";
-    deviceInfoId = @"";
+    sourceLang = @"English";
+    targetLang = @"简体中文";
+    sortOption1 = @"collectedAtDescending";
+    sortOption2 = @"collectedAtAscending";
     
     context = @"As designers, we must not forget that we design for the people. We must gain empathy and ride on the arc of modern design.";
     target = @"empathy";
@@ -98,6 +104,7 @@
     detail6 = @"a直译为“移情作用”。";
     
     UILabel *btn1 = [[UILabel alloc] initWithFrame:CGRectMake(10.0f, 10.0f, 60.0f, 50.0f)];
+    btn1.adjustsFontSizeToFitWidth = YES;
     btn1.userInteractionEnabled = YES;
     btn1.text = @"signUp";
     UITapGestureRecognizer *g1 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(signUp)];
@@ -105,6 +112,7 @@
     [self.view addSubview:btn1];
     
     UILabel *btn2 = [[UILabel alloc] initWithFrame:CGRectMake(80.0f, 10.0f, 60.0f, 50.0f)];
+    btn2.adjustsFontSizeToFitWidth = YES;
     btn2.userInteractionEnabled = YES;
     btn2.text = @"signIn";
     UITapGestureRecognizer *g2 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(signIn)];
@@ -112,6 +120,7 @@
     [self.view addSubview:btn2];
     
     UILabel *btn3 = [[UILabel alloc] initWithFrame:CGRectMake(150.0f, 10.0f, 60.0f, 50.0f)];
+    btn3.adjustsFontSizeToFitWidth = YES;
     btn3.userInteractionEnabled = YES;
     btn3.text = @"renewTokens";
     UITapGestureRecognizer *g3 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(renewTokens)];
@@ -119,6 +128,7 @@
     [self.view addSubview:btn3];
     
     UILabel *btn4 = [[UILabel alloc] initWithFrame:CGRectMake(220.0f, 10.0f, 60.0f, 50.0f)];
+    btn4.adjustsFontSizeToFitWidth = YES;
     btn4.userInteractionEnabled = YES;
     btn4.text = @"newDeviceInfo";
     UITapGestureRecognizer *g4 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(newDeviceInfo)];
@@ -126,6 +136,7 @@
     [self.view addSubview:btn4];
     
     UILabel *btn5 = [[UILabel alloc] initWithFrame:CGRectMake(10.0f, 70.0f, 60.0f, 50.0f)];
+    btn5.adjustsFontSizeToFitWidth = YES;
     btn5.userInteractionEnabled = YES;
     btn5.text = @"oneDeviceInfo";
     UITapGestureRecognizer *g5 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(oneDeviceInfo)];
@@ -133,20 +144,62 @@
     [self.view addSubview:btn5];
     
     UILabel *btn6 = [[UILabel alloc] initWithFrame:CGRectMake(80.0f, 70.0f, 60.0f, 50.0f)];
+    btn6.adjustsFontSizeToFitWidth = YES;
     btn6.userInteractionEnabled = YES;
-    btn6.text = @"getUser";
-    UITapGestureRecognizer *g6 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(getUser)];
+    btn6.text = @"refreshUser";
+    UITapGestureRecognizer *g6 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(refreshUser)];
     [btn6 addGestureRecognizer:g6];
     [self.view addSubview:btn6];
+    
+    UILabel *btn7 = [[UILabel alloc] initWithFrame:CGRectMake(150.0f, 70.0f, 60.0f, 50.0f)];
+    btn7.adjustsFontSizeToFitWidth = YES;
+    btn7.userInteractionEnabled = YES;
+    btn7.text = @"emailForActivation";
+    UITapGestureRecognizer *g7 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(emailForActivation)];
+    [btn7 addGestureRecognizer:g7];
+    [self.view addSubview:btn7];
+    
+    UILabel *btn8 = [[UILabel alloc] initWithFrame:CGRectMake(220.0f, 70.0f, 60.0f, 50.0f)];
+    btn8.adjustsFontSizeToFitWidth = YES;
+    btn8.userInteractionEnabled = YES;
+    btn8.text = @"createDeviceInfo";
+    UITapGestureRecognizer *g8 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(createDeviceInfo)];
+    [btn8 addGestureRecognizer:g8];
+    [self.view addSubview:btn8];
+    
+    UILabel *btn9 = [[UILabel alloc] initWithFrame:CGRectMake(10.0f, 130.0f, 60.0f, 50.0f)];
+    btn9.adjustsFontSizeToFitWidth = YES;
+    btn9.userInteractionEnabled = YES;
+    btn9.text = @"changeDeviceInfo";
+    UITapGestureRecognizer *g9 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(changeDeviceInfo)];
+    [btn9 addGestureRecognizer:g9];
+    [self.view addSubview:btn9];
 }
 
-- (void)getUser
+- (void)refreshUser
 {
     NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
     NSPredicate *pUser = [NSPredicate predicateWithFormat:@"email like %@", email];
     [fetchRequest setPredicate:pUser];
     NSArray *r = [self.managedObjectContext executeFetchRequest:fetchRequest error:nil];
     self.user = r[0];
+    NSLog(@"self.user.serverId: %@, self.user.deviceInfoId: %@, self.user.sortOption: %@", self.user.serverId, self.user.deviceInfoId, self.user.sortOption);
+}
+
+- (void)createDeviceInfo
+{
+    self.user.sourceLang = sourceLang;
+    self.user.targetLang = targetLang;
+    self.user.sortOption = sortOption1;
+    [self.managedObjectContext save:nil];
+    [self refreshUser];
+}
+
+- (void)changeDeviceInfo
+{
+    self.user.sortOption = sortOption2;
+    [self.managedObjectContext save:nil];
+    [self refreshUser];
 }
 
 - (void)signUp
@@ -161,7 +214,7 @@
     reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    [reqster proceedToRequest];
+    [reqster proceedToRequest:nil];
 }
 
 - (void)signIn
@@ -175,7 +228,7 @@
     reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    [reqster proceedToRequest];
+    [reqster proceedToRequest:nil];
 }
 
 - (void)renewTokens
@@ -191,7 +244,19 @@
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
     reqster.accessToken = a;
-    [reqster proceedToRequest];
+    [reqster proceedToRequest:nil];
+}
+
+- (void)emailForActivation
+{
+    TVRequester *reqster = [[TVRequester alloc] init];
+    reqster.requestType = [reqTypeArray[6] integerValue];
+    NSString *a = [self getAccessTokenForAccount:self.user.serverId];
+    reqster.isBearer = YES;
+    reqster.method = @"GET";
+    reqster.accessToken = a;
+    reqster.userId = self.user.serverId;
+    [reqster proceedToRequest:nil];
 }
 
 - (void)newDeviceInfo
@@ -209,7 +274,8 @@
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
     reqster.accessToken = a;
-    [reqster proceedToRequest];
+    reqster.userId = self.user.serverId;
+    [reqster proceedToRequest:nil];
 }
 
 - (void)oneDeviceInfo
@@ -227,7 +293,11 @@
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
     reqster.accessToken = a;
-    [reqster proceedToRequest];
+    reqster.userId = self.user.serverId;
+    reqster.deviceInfoId = self.user.deviceInfoId;
+    reqster.objectIdArray = [NSMutableArray arrayWithCapacity:0];
+    [reqster.objectIdArray addObject:self.user.deviceInfoId];
+    [reqster proceedToRequest:nil];
 }
 
 - (void)didReceiveMemoryWarning

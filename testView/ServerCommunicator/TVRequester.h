@@ -26,12 +26,18 @@
 @property (strong, nonatomic) NSString *deviceInfoId;
 @property (strong, nonatomic) NSString *deviceUuid;
 @property (strong, nonatomic) NSString *cardId;
+
+@property (strong, nonatomic) NSMutableArray *objectIdArray;
+@property (strong, nonatomic) NSMutableArray *objectArray;
+
 @property (strong, nonatomic) NSManagedObjectContext *ctx;
+@property (strong, nonatomic) NSManagedObjectModel *model;
+@property (strong, nonatomic) NSPersistentStoreCoordinator *coordinator;
 
 @property (strong, nonatomic) TVBase *record;
 @property (strong, nonatomic) TVRequestId *reqId;
 
-- (void)proceedToRequest;
+- (void)proceedToRequest:(NSError **)aErr;
 - (void)checkServerAvailabilityToProceed;
 
 @end

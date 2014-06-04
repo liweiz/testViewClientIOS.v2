@@ -31,7 +31,13 @@
 @synthesize deviceUuid;
 @synthesize cardId;
 @synthesize internetIsOn;
+
+@synthesize objectIdArray;
+@synthesize objectArray;
+
 @synthesize ctx;
+@synthesize model;
+@synthesize coordinator;
 
 @synthesize record;
 @synthesize reqId;
@@ -41,7 +47,9 @@
     self = [super init];
     if (self) {
         // Custom initialization
-        
+        self.model = [self managedObjectModel];
+        self.coordinator = [self persistentStoreCoordinator];
+        self.ctx = [self managedObjectContext];
     }
     return self;
 }
@@ -58,6 +66,8 @@
             if ([dict valueForKey:@"user"]) {
                 [self setupNewDocBaseServer:newUser fromRequest:[dict valueForKey:@"user"]];
                 NSLog(@"userId: %@", newUser.serverId);
+                NSLog(@"user: %@", [dict valueForKey:@"user"]);
+                NSLog(@"tokens: %@", [dict valueForKey:@"tokens"]);
                 [self setupNewUserServer:newUser withDic:dict];
                 if ([dict valueForKey:@"tokens"]) {
                     NSMutableDictionary *t = [dict valueForKey:@"tokens"];
@@ -72,7 +82,7 @@
         {
             TVUser *aUser;
             if ([dict valueForKey:@"user"]) {
-                for (TVBase *x in self.ctx.registeredObjects) {
+                for (NSManagedObject *x in self.objectArray) {
                     if ([x isKindOfClass:[TVUser class]]) {
                         if ([(TVUser *)x email] == [[dict valueForKey:@"user"] valueForKey:@"email"]) {
                             // TVUser exists already.
@@ -112,12 +122,12 @@
             TVUser *aUser;
             if ([dict valueForKey:@"deviceInfo"]) {
                 NSMutableDictionary *d = [dict valueForKey:@"deviceInfo"];
-                for (TVBase *x in self.ctx.registeredObjects) {
+                for (NSManagedObject *x in self.objectArray) {
                     if ([x isKindOfClass:[TVUser class]]) {
                         if ([(TVUser *)x serverId] == [d valueForKey:@"belongTo"]) {
                             // TVUser exists already.
                             aUser = (TVUser *)x;
-                            [self setupNewUserServer:aUser withDic:dict];
+                            [self updateUser:aUser withDic:dict];
                             toSave = YES;
                             break;
                         }
@@ -131,7 +141,7 @@
             TVUser *aUser;
             if ([dict valueForKey:@"deviceInfo"]) {
                 NSMutableDictionary *d = [dict valueForKey:@"deviceInfo"];
-                for (TVBase *x in self.ctx.registeredObjects) {
+                for (NSManagedObject *x in self.objectArray) {
                     if ([x isKindOfClass:[TVUser class]]) {
                         if ([(TVUser *)x serverId] == [d valueForKey:@"belongTo"]) {
                             // TVUser exists already.
@@ -187,31 +197,34 @@
         }
         case TVSync:
         {
-            [self.ctx reset];
-            NSFetchRequest *fUser = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
-            NSPredicate *pUser = [NSPredicate predicateWithFormat:@"serverId like %@", self.userId];
-            [fUser setPredicate:pUser];
-            NSFetchRequest *fCards = [NSFetchRequest fetchRequestWithEntityName:@"TVCard"];
-            NSArray *u = [self.ctx executeFetchRequest:fUser error:err];
-            if ([u count] == 0) {
-                break;
+            TVUser *aUser;
+            for (NSManagedObject *x in self.objectArray) {
+                if ([x isKindOfClass:[TVUser class]]) {
+                    if ([(TVUser *)x email] == [[dict valueForKey:@"user"] valueForKey:@"email"]) {
+                        // TVUser exists already.
+                        aUser = (TVUser *)x;
+                        break;
+                    }
+                }
             }
-            [self updateDocBaseServer:u[0] withDic:[dict valueForKey:@"user"]];
-            [self updateUser:u[0] withDic:dict];
+            [self updateDocBaseServer:aUser withDic:[dict valueForKey:@"user"]];
+            [self updateUser:aUser withDic:dict];
+            
             if ([dict valueForKey:@"cardList"]) {
                 NSMutableArray *c = [dict valueForKey:@"cardList"];
                 if ([c count] > 0) {
+                    BOOL found;
                     for (NSMutableDictionary *x in c) {
-                        NSPredicate *pCards = [NSPredicate predicateWithFormat:@"serverId like %@", [x valueForKey:@"serverId"]];
-                        [fCards setPredicate:pCards];
-                        NSArray *r = [self.ctx executeFetchRequest:fCards error:err];
-                        if (err) {
-                            err = nil;
-                            break;
+                        for (NSManagedObject *y in self.objectArray) {
+                            if ([[x valueForKey:@"serverId"] isEqualToString:[(TVCard *)y serverId]]) {
+                                [self updateDocBaseServer:(TVBase *)y withDic:x];
+                                [self updateCard:(TVCard *)y withDic:x];
+                                found = YES;
+                                break;
+                            }
                         }
-                        if ([r count] > 0) {
-                            [self updateDocBaseServer:r[0] withDic:x];
-                            [self updateCard:r[0] withDic:x];
+                        if (found) {
+                            break;
                         } else {
                             TVCard *newCard = [NSEntityDescription insertNewObjectForEntityForName:@"TVCard" inManagedObjectContext:self.ctx];
                             [self setupNewDocBaseServer:newCard fromRequest:x];
@@ -224,16 +237,13 @@
                 NSMutableArray *c = [dict valueForKey:@"cardToDelete"];
                 if ([c count] > 0) {
                     for (NSString *i in c) {
-                        NSPredicate *pCards = [NSPredicate predicateWithFormat:@"serverId like %@", i];
-                        [fCards setPredicate:pCards];
-                        NSArray *r = [self.ctx executeFetchRequest:fCards error:err];
-                        if (err) {
-                            err = nil;
-                            break;
+                        for (NSManagedObject *y in self.objectArray) {
+                            if ([i isEqualToString:[(TVCard *)y serverId]]) {
+                                [self.ctx deleteObject:y];
+                                break;
+                            }
                         }
-                        if ([r count] > 0) {
-                            [self.ctx deleteObject:r[0]];
-                        }
+
                     }
                 }
             }
@@ -264,7 +274,7 @@
      {
          if ([(NSHTTPURLResponse *)response statusCode] == 200) {
              TVRequester *req = [[TVRequester alloc] init];
-             [req proceedToRequest];
+             [req proceedToRequest:&error];
          } else {
              // For user triggered connecting attempt, show a notice to mention the unavailability of network.
          }
@@ -272,38 +282,57 @@
 }
 
 // No batch operation so far. each time, we handle only a single step operation for one record only.
-- (void)proceedToRequest
+- (void)proceedToRequest:(NSError **)aErr
 {
-    // Setup request and send
-    NSMutableURLRequest *request = [self setupRequest];
-    NSLog(@"3: %@, %@", request.URL.host, request.URL.path);
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
-     {
-         NSLog(@"4");
-         NSError *err;
-         if ([(NSHTTPURLResponse *)response statusCode] == 200) {
-             self.record.lastUnsyncAction = [NSNumber numberWithInteger:TVDocNoAction];
-             if (self.reqId) {
-                 self.reqId.done = [NSNumber numberWithBool:YES];
-             }
-             if (data.length > 0) {
-                 NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&err];
-                 if (!err) {
-                     [self processResponseJSON:dict err:&err];
-                     NSLog(@"JSON of response %i: %@", self.requestType, dict);
+    [self getObjInCtx:aErr];
+    if (!aErr) {
+        // Setup request and send
+        NSMutableURLRequest *request = [self setupRequest];
+        NSLog(@"3: %@, %@", request.URL.host, request.URL.path);
+        [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
+         {
+             NSLog(@"4");
+             NSError *err;
+             if ([(NSHTTPURLResponse *)response statusCode] == 200) {
+                 self.record.lastUnsyncAction = [NSNumber numberWithInteger:TVDocNoAction];
+                 if (self.reqId) {
+                     self.reqId.done = [NSNumber numberWithBool:YES];
+                 }
+                 if (data.length > 0) {
+                     NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&err];
+                     if (!err) {
+                         [self processResponseJSON:dict err:&err];
+                         NSLog(@"JSON of response %li: %@", (long)self.requestType, dict);
+                     } else {
+                         // For non-sync request, mark requestId as done, wait for the sync request to do the job. Sync returns with a body every time. So even a failure here deos not stop the next try.
+                     }
                  } else {
-                     // For non-sync request, mark requestId as done, wait for the sync request to do the job. Sync returns with a body every time. So even a failure here deos not stop the next try.
+                     // Request has been successfully processed on server previously. Set related requestId to done.
                  }
              } else {
-                 // Request has been successfully processed on server previously. Set related requestId to done.
+                 NSString *errMsg = [self processResponseText:response data:data];
+                 // Need a module to handle unsuccessful requests.
+                 [self processResponseErrMsg:errMsg];
              }
-         } else {
-             NSString *errMsg = [self processResponseText:response data:data];
-             // Need a module to handle unsuccessful requests.
-             [self processResponseErrMsg:errMsg];
-         }
-     }];
-    NSLog(@"5");
+         }];
+        NSLog(@"5");
+    }
+}
+
+- (void)getObjInCtx:(NSError **)err
+{
+    if ([self.objectIdArray count] > 0) {
+        for (NSManagedObjectID *i in self.objectIdArray) {
+            NSManagedObject *x = [self.ctx existingObjectWithID:i error:err];
+            if (err) {
+                return;
+            }
+            if (!self.objectArray) {
+                self.objectArray = [NSMutableArray arrayWithCapacity:0];
+            }
+            [self.objectArray addObject:x];
+        }
+    }
 }
 
 - (void)processResponseErrMsg:(NSString *)errMsg
@@ -377,8 +406,9 @@
     NSLog(@"URLWithString: %@", [tvServerUrl stringByAppendingString:self.urlBranch]);
     NSLog(@"request URL: %@", request.URL.host);
     [request setHTTPMethod:self.method];
-    [request setValue:self.contentType forHTTPHeaderField:@"Content-type"];
-    [request setValue:self.contentType forHTTPHeaderField:@"Content-type"];
+    if (self.contentType) {
+        [request setValue:self.contentType forHTTPHeaderField:@"Content-type"];
+    }
     if (self.body) {
         [request setHTTPBody:self.body];
         NSLog(@"2");
@@ -396,6 +426,56 @@
     return request;
 }
 
+#pragma mark - Core Data stack
 
+// Returns the managed object context for the application.
+// If the context doesn't already exist, it is created and bound to the persistent store coordinator for the application.
+- (NSManagedObjectContext *)managedObjectContext
+{
+    if (self.ctx != nil) {
+        return self.ctx;
+    }
+    if (self.coordinator != nil) {
+        self.ctx = [[NSManagedObjectContext alloc] init];
+        [self.ctx setPersistentStoreCoordinator:self.coordinator];
+    }
+    return self.ctx;
+}
+
+// Returns the managed object model for the application.
+// If the model doesn't already exist, it is created from the application's model.
+- (NSManagedObjectModel *)managedObjectModel
+{
+    if (self.model != nil) {
+        return self.model;
+    }
+    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"testView" withExtension:@"momd"];
+    self.model = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
+    return self.model;
+}
+
+// Returns the persistent store coordinator for the application.
+// If the coordinator doesn't already exist, it is created and the application's store added to it.
+- (NSPersistentStoreCoordinator *)persistentStoreCoordinator
+{
+    if (self.coordinator != nil) {
+        return self.coordinator;
+    }
+    
+    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"testView.sqlite"];
+    
+    NSError *error = nil;
+    self.coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:self.model];
+    if (![self.coordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error]) {
+        NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+        abort();
+    }
+    return self.coordinator;
+}
+
+- (NSURL *)applicationDocumentsDirectory
+{
+    return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+}
 
 @end
