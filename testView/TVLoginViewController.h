@@ -24,16 +24,26 @@
 @property (strong, nonatomic) UILabel *signUpButton;
 @property (strong, nonatomic) UITapGestureRecognizer *signUpButtonTap;
 
-@property (strong, nonatomic) UILabel *loginButton;
-@property (strong, nonatomic) UITapGestureRecognizer *loginButtonTap;
+@property (strong, nonatomic) UILabel *signInButton;
+@property (strong, nonatomic) UITapGestureRecognizer *signInButtonTap;
+
+@property (strong, nonatomic) UILabel *switchToSignIn;
+@property (strong, nonatomic) UITapGestureRecognizer *switchToSignInTap;
+
+@property (strong, nonatomic) UILabel *switchToSignUp;
+@property (strong, nonatomic) UITapGestureRecognizer *switchToSignUpTap;
 
 @property (strong, nonatomic) UIView *termsBox;
 @property (strong, nonatomic) UILabel *agreeToTermsTextBox;
 @property (strong, nonatomic) UILabel *agreeToPrivacyTextBox;
-@property (strong, nonatomic) UILabel *allContentIsOpenTextBox;
+@property (strong, nonatomic) UILabel *introTextBox;
 
 @property (strong, nonatomic) UILabel *forgotPassword;
 @property (strong, nonatomic) UITapGestureRecognizer *forgotPasswordTap;
+
+@property (strong, nonatomic) UILabel *terms;
+@property (strong, nonatomic) UITapGestureRecognizer *termsTap;
+
 @property (assign, nonatomic) BOOL isSigningUP;
 
 @property (strong, nonatomic) UITapGestureRecognizer *tapDetector;

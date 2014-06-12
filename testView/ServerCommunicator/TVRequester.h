@@ -37,7 +37,8 @@
 @property (strong, nonatomic) TVBase *record;
 @property (strong, nonatomic) TVRequestId *reqId;
 
-- (void)proceedToRequest:(NSError **)aErr;
+- (NSError *)proceedToRequest;
 - (void)checkServerAvailabilityToProceed;
+- (void)printUser;
 
 @end

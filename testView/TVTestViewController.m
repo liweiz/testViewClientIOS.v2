@@ -10,6 +10,7 @@
 #import "TVRequester.h"
 #import "NSObject+DataHandler.h"
 #import "NSObject+NetworkHandler.h"
+//#import <Crashlytics/Crashlytics.h>
 
 @interface TVTestViewController ()
 
@@ -24,6 +25,11 @@
     
     NSString *email;
     NSString *password;
+    
+    NSString *userId;
+    NSString *deviceInfoId;
+    
+    NSMutableArray *objIdArray;
     
     NSString *sourceLang;
     NSString *targetLang;
@@ -64,8 +70,6 @@
 {
     self.view = [[UIView alloc] initWithFrame:self.appRect];
     self.view.backgroundColor = [UIColor lightGrayColor];
-    
-    
 }
 
 - (void)viewDidLoad
@@ -87,6 +91,8 @@
     
     email = @"matt.z.lw@gmail.com";
     password = @"1a2b!!";
+    
+    objIdArray = [NSMutableArray arrayWithCapacity:0];
     
     sourceLang = @"English";
     targetLang = @"简体中文";
@@ -146,8 +152,8 @@
     UILabel *btn6 = [[UILabel alloc] initWithFrame:CGRectMake(80.0f, 70.0f, 60.0f, 50.0f)];
     btn6.adjustsFontSizeToFitWidth = YES;
     btn6.userInteractionEnabled = YES;
-    btn6.text = @"refreshUser";
-    UITapGestureRecognizer *g6 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(refreshUser)];
+    btn6.text = @"setUserId";
+    UITapGestureRecognizer *g6 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(setUserId)];
     [btn6 addGestureRecognizer:g6];
     [self.view addSubview:btn6];
     
@@ -174,39 +180,100 @@
     UITapGestureRecognizer *g9 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(changeDeviceInfo)];
     [btn9 addGestureRecognizer:g9];
     [self.view addSubview:btn9];
+    
+    UILabel *btn10 = [[UILabel alloc] initWithFrame:CGRectMake(80.0f, 130.0f, 60.0f, 50.0f)];
+    btn10.adjustsFontSizeToFitWidth = YES;
+    btn10.userInteractionEnabled = YES;
+    btn10.text = @"printUser";
+    UITapGestureRecognizer *g10 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(printUser)];
+    [btn10 addGestureRecognizer:g10];
+    [self.view addSubview:btn10];
+    
+    UILabel *btn11 = [[UILabel alloc] initWithFrame:CGRectMake(150.0f, 130.0f, 60.0f, 50.0f)];
+    btn11.adjustsFontSizeToFitWidth = YES;
+    btn11.userInteractionEnabled = YES;
+    btn11.text = @"printUserWithRequester";
+    UITapGestureRecognizer *g11 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(printUserWithRequester)];
+    [btn11 addGestureRecognizer:g11];
+    [self.view addSubview:btn11];
 }
 
-- (void)refreshUser
+- (void)setUserId
 {
     NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
     NSPredicate *pUser = [NSPredicate predicateWithFormat:@"email like %@", email];
     [fetchRequest setPredicate:pUser];
     NSArray *r = [self.managedObjectContext executeFetchRequest:fetchRequest error:nil];
-    self.user = r[0];
-    NSLog(@"self.user.serverId: %@, self.user.deviceInfoId: %@, self.user.sortOption: %@", self.user.serverId, self.user.deviceInfoId, self.user.sortOption);
+    if ([r count] > 0) {
+        [self.managedObjectContext refreshObject:r[0] mergeChanges:NO];
+        self.user = r[0];
+        userId = [r[0] serverId];
+    }
+}
+
+- (void)printUser
+{
+//    [[Crashlytics sharedInstance] crash];
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
+    NSPredicate *pUser = [NSPredicate predicateWithFormat:@"email like %@", email];
+    [fetchRequest setPredicate:pUser];
+    NSArray *r = [self.managedObjectContext executeFetchRequest:fetchRequest error:nil];
+    
+    if ([r count] > 0) {
+        [self.managedObjectContext refreshObject:r[0] mergeChanges:NO];
+        if ([r[0] isFault]) {
+            NSLog(@"Get fault [r[0] serverId: %@", [r[0] serverId]);
+        }
+        NSLog(@"User found %lu in local db. [r[0]: %@", (unsigned long)[r count], r[0]);
+    }
+}
+
+-(void)printUserWithRequester
+{
+    TVRequester *reqster = [[TVRequester alloc] init];
+    reqster.coordinator = self.persistentStoreCoordinator;
+    [reqster printUser];
 }
 
 - (void)createDeviceInfo
 {
+    [self setUserId];
     self.user.sourceLang = sourceLang;
     self.user.targetLang = targetLang;
     self.user.sortOption = sortOption1;
     [self.managedObjectContext save:nil];
-    [self refreshUser];
 }
 
 - (void)changeDeviceInfo
 {
+    [self setUserId];
     self.user.sortOption = sortOption2;
     [self.managedObjectContext save:nil];
-    [self refreshUser];
+}
+
+- (void)createCard
+{
+    TVCard *aCard = [NSEntityDescription insertNewObjectForEntityForName:@"TVCard" inManagedObjectContext:self.managedObjectContext];
+    [self setupNewDocBaseLocal:aCard];
+    NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
+    [d setValue:userId forKey:@"belongTo"];
+    [d setValue:context forKey:@"context"];
+    [d setValue:detail1 forKey:@"detail"];
+    [d setValue:target forKey:@"target"];
+    [d setValue:translation forKey:@"translation"];
+    [d setValue:self.user.sourceLang forKey:@"sourceLang"];
+    [d setValue:self.user.targetLang forKey:@"targetLang"];
+    [self setupNewCard:aCard withDic:d];
+    TVRequestId *rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:self.managedObjectContext];
+    [self setupNewRequestId:rId action:TVDocNew for:(TVBase *)aCard];
+    [self.managedObjectContext save:nil];
 }
 
 - (void)signUp
 {
     NSLog(@"signUp");
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.ctx = self.managedObjectContext;
+    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = [reqTypeArray[0] integerValue];
     reqster.email = email;
     reqster.password = password;
@@ -214,49 +281,54 @@
     reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    [reqster proceedToRequest:nil];
+    [reqster proceedToRequest];
 }
 
 - (void)signIn
 {
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.ctx = self.managedObjectContext;
+    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = [reqTypeArray[1] integerValue];
+    if (self.user) {
+        reqster.objectIdArray = [NSMutableArray arrayWithCapacity:0];
+        [reqster.objectIdArray addObject:self.user.objectID];
+    }
     reqster.email = email;
     reqster.password = password;
     reqster.isBearer = NO;
     reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    [reqster proceedToRequest:nil];
+    [reqster proceedToRequest];
 }
 
 - (void)renewTokens
 {
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.ctx = self.managedObjectContext;
+    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = [reqTypeArray[3] integerValue];
-    NSString *a = [self getAccessTokenForAccount:self.user.serverId];
-    NSString *r = [self getRefreshTokenForAccount:self.user.serverId];
+    NSString *a = [self getAccessTokenForAccount:userId];
+    NSString *r = [self getRefreshTokenForAccount:userId];
     reqster.isBearer = YES;
     reqster.body = [self getJSONRenewTokensWithAccessToken:a refreshToken:r err:nil];
-    reqster.userId = self.user.serverId;
+    reqster.userId = userId;
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
     reqster.accessToken = a;
-    [reqster proceedToRequest:nil];
+    [reqster proceedToRequest];
 }
 
 - (void)emailForActivation
 {
     TVRequester *reqster = [[TVRequester alloc] init];
+    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = [reqTypeArray[6] integerValue];
-    NSString *a = [self getAccessTokenForAccount:self.user.serverId];
+    NSString *a = [self getAccessTokenForAccount:userId];
     reqster.isBearer = YES;
     reqster.method = @"GET";
     reqster.accessToken = a;
-    reqster.userId = self.user.serverId;
-    [reqster proceedToRequest:nil];
+    reqster.userId = userId;
+    [reqster proceedToRequest];
 }
 
 - (void)newDeviceInfo
@@ -265,17 +337,19 @@
     [self setupNewRequestId:rId action:TVDocNew for:(TVBase *)self.user];
     [self.managedObjectContext save:nil];
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.ctx = self.managedObjectContext;
+    reqster.coordinator = self.persistentStoreCoordinator;
+    reqster.objectIdArray = [NSMutableArray arrayWithCapacity:0];
+    [reqster.objectIdArray addObject:self.user.objectID];
     reqster.requestType = [reqTypeArray[4] integerValue];
-    NSString *a = [self getAccessTokenForAccount:self.user.serverId];
+    NSString *a = [self getAccessTokenForAccount:userId];
     reqster.reqId = rId;
     reqster.isBearer = YES;
     reqster.body = [self getJSONDeviceInfo:self.user requestId:reqster.reqId.requestId err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
     reqster.accessToken = a;
-    reqster.userId = self.user.serverId;
-    [reqster proceedToRequest:nil];
+    reqster.userId = userId;
+    [reqster proceedToRequest];
 }
 
 - (void)oneDeviceInfo
@@ -284,20 +358,41 @@
     [self setupNewRequestId:rId action:TVDocUpdated for:(TVBase *)self.user];
     [self.managedObjectContext save:nil];
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.ctx = self.managedObjectContext;
+    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = [reqTypeArray[5] integerValue];
-    NSString *a = [self getAccessTokenForAccount:self.user.serverId];
+    NSString *a = [self getAccessTokenForAccount:userId];
     reqster.reqId = rId;
     reqster.isBearer = YES;
     reqster.body = [self getJSONDeviceInfo:self.user requestId:reqster.reqId.requestId err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
     reqster.accessToken = a;
-    reqster.userId = self.user.serverId;
+    reqster.userId = userId;
     reqster.deviceInfoId = self.user.deviceInfoId;
     reqster.objectIdArray = [NSMutableArray arrayWithCapacity:0];
-    [reqster.objectIdArray addObject:self.user.deviceInfoId];
-    [reqster proceedToRequest:nil];
+    [reqster.objectIdArray addObject:self.user.objectID];
+    [reqster proceedToRequest];
+}
+
+- (void)newCard
+{
+    TVRequestId *rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:self.managedObjectContext];
+    [self setupNewRequestId:rId action:TVDocNew for:(TVBase *)self.user];
+    [self.managedObjectContext save:nil];
+    TVRequester *reqster = [[TVRequester alloc] init];
+    reqster.coordinator = self.persistentStoreCoordinator;
+    reqster.objectIdArray = [NSMutableArray arrayWithCapacity:0];
+    [reqster.objectIdArray addObject:self.user.objectID];
+    reqster.requestType = [reqTypeArray[4] integerValue];
+    NSString *a = [self getAccessTokenForAccount:userId];
+    reqster.reqId = rId;
+    reqster.isBearer = YES;
+    reqster.body = [self getJSONDeviceInfo:self.user requestId:reqster.reqId.requestId err:nil];
+    reqster.method = @"POST";
+    reqster.contentType = @"application/json";
+    reqster.accessToken = a;
+    reqster.userId = userId;
+    [reqster proceedToRequest];
 }
 
 - (void)didReceiveMemoryWarning

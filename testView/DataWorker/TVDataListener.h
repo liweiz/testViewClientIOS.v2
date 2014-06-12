@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "TVRequester.h"
 
-@interface TVDataContext : NSObject
+@interface TVDataListener : NSObject
 
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 @property (strong, nonatomic) NSManagedObjectModel *managedObjectModel;
@@ -25,6 +25,13 @@
 @property (strong, nonatomic) NSSet *updated;
 @property (strong, nonatomic) NSSet *inserted;
 @property (strong, nonatomic) NSSet *deleted;
+
+
+@property (assign, nonatomic) NSInteger requestType;
+@property (strong, nonatomic) NSString *userId;
+@property (strong, nonatomic) NSString *deviceInfoId;
+@property (strong, nonatomic) NSString *deviceUuid;
+@property (strong, nonatomic) NSString *cardId;
 
 - (NSMutableDictionary *)analyzeOneUndone:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx;
 

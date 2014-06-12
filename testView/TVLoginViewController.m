@@ -19,7 +19,14 @@
 @synthesize managedObjectModel;
 @synthesize persistentStoreCoordinator;
 
-@synthesize emailInput, passwordInput, signUpButton, loginButton, termsBox, agreeToTermsTextBox, agreeToPrivacyTextBox, allContentIsOpenTextBox, forgotPassword, signUpButtonTap, loginButtonTap, isSigningUP, tapDetector, passItem, forgotPasswordTap, appRect;
+@synthesize emailInput, passwordInput;
+@synthesize signUpButton, signUpButtonTap;
+@synthesize signInButton, signInButtonTap;
+@synthesize switchToSignIn, switchToSignInTap;
+@synthesize switchToSignUp, switchToSignUpTap;
+@synthesize terms, termsTap;
+
+@synthesize termsBox, agreeToTermsTextBox, agreeToPrivacyTextBox, introTextBox, forgotPassword, isSigningUP, tapDetector, passItem, forgotPasswordTap, appRect;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -42,45 +49,77 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     self.isSigningUP = NO;
-    self.emailInput = [[UITextField alloc] initWithFrame:CGRectMake(20.0, 50.0, self.view.frame.size.width - 20.0 * 2, 50.0)];
+    
+    self.emailInput = [[UITextField alloc] initWithFrame:CGRectMake(20.0f, 200.0f, self.view.frame.size.width - 20.0f * 2.0f, 50.0f)];
     self.emailInput.backgroundColor = [UIColor whiteColor];
     self.emailInput.delegate = self;
     self.emailInput.returnKeyType = UIReturnKeyNext;
+    self.emailInput.placeholder = @"Email";
     [self.view addSubview:self.emailInput];
     
-    self.passwordInput = [[UITextField alloc] initWithFrame:CGRectMake(20.0, 20.0 + self.emailInput.frame.origin.y + self.emailInput.frame.size.height, self.view.frame.size.width - 20.0 * 2, 50.0)];
+    self.forgotPassword = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, 20.0f + self.emailInput.frame.origin.y + self.emailInput.frame.size.height, self.view.frame.size.width - 20.0f * 2.0f, 26.0f)];
+    [self.view addSubview:self.forgotPassword];
+    self.forgotPassword.userInteractionEnabled = YES;
+    self.forgotPassword.text = @"Forgot password?";
+    self.forgotPassword.textAlignment = NSTextAlignmentRight;
+    self.forgotPasswordTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chooseToLogin)];
+    [self.forgotPassword addGestureRecognizer:self.forgotPasswordTap];
+    
+    self.terms = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, 20.0f + self.emailInput.frame.origin.y + self.emailInput.frame.size.height, self.view.frame.size.width - 20.0f * 2.0f, 26.0f)];
+    [self.view addSubview:self.terms];
+    self.terms.hidden = YES;
+    self.terms.userInteractionEnabled = YES;
+    self.terms.text = @"Forgot password?";
+    self.terms.textAlignment = NSTextAlignmentRight;
+    self.termsTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chooseToLogin)];
+    [self.terms addGestureRecognizer:self.termsTap];
+    
+    self.passwordInput = [[UITextField alloc] initWithFrame:CGRectMake(20.0f, 20.0f + self.forgotPassword.frame.origin.y + self.forgotPassword.frame.size.height, self.view.frame.size.width - 20.0f * 2.0f, 50.0f)];
     self.passwordInput.backgroundColor = [UIColor whiteColor];
     self.passwordInput.clearsOnBeginEditing = YES;
     [self.view addSubview:self.passwordInput];
     self.passwordInput.delegate = self;
     self.passwordInput.returnKeyType = UIReturnKeyDone;
+    self.passwordInput.placeholder = @"Password";
     self.passwordInput.secureTextEntry = YES;
     
-    self.signUpButton = [[UILabel alloc] initWithFrame:CGRectMake(20.0, 20.0 + self.passwordInput.frame.origin.y + self.passwordInput.frame.size.height, ((self.view.frame.size.width - 20.0 * 2) - 20.0) / 2, 50.0)];
+    self.signUpButton = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, 20.0f + self.passwordInput.frame.origin.y + self.passwordInput.frame.size.height, self.view.frame.size.width - 20.0f * 2.0f, 50.0f)];
     [self.view addSubview:self.signUpButton];
+    self.signUpButton.backgroundColor = [UIColor greenColor];
+    self.signUpButton.hidden = YES;
     self.signUpButton.userInteractionEnabled = YES;
     self.signUpButton.text = @"Sign Up";
     self.signUpButton.textAlignment = NSTextAlignmentCenter;
     self.signUpButtonTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chooseToSignUp)];
     [self.signUpButton addGestureRecognizer:self.signUpButtonTap];
     
-    self.loginButton = [[UILabel alloc] initWithFrame:CGRectMake(20.0 + 20.0 + self.signUpButton.frame.size.width, 20.0 + self.passwordInput.frame.origin.y + self.passwordInput.frame.size.height, ((self.view.frame.size.width - 20.0 * 2) - 20.0) / 2, 50.0)];
-    [self.view addSubview:self.loginButton];
-    self.loginButton.userInteractionEnabled = YES;
-    self.loginButton.text = @"Login";
-    self.loginButton.textAlignment = NSTextAlignmentCenter;
-    self.loginButtonTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chooseToLogin)];
-    [self.loginButton addGestureRecognizer:self.loginButtonTap];
+    self.signInButton = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, 20.0f + self.passwordInput.frame.origin.y + self.passwordInput.frame.size.height, self.view.frame.size.width - 20.0f * 2.0f, 50.0f)];
+    [self.view addSubview:self.signInButton];
+    self.signInButton.backgroundColor = [UIColor greenColor];
+    self.signInButton.userInteractionEnabled = YES;
+    self.signInButton.text = @"Sign In";
+    self.signInButton.textAlignment = NSTextAlignmentCenter;
+    self.signInButtonTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chooseToLogin)];
+    [self.signInButton addGestureRecognizer:self.signInButtonTap];
     
-    self.forgotPassword = [[UILabel alloc] initWithFrame:CGRectMake(20.0 + 20.0 + self.loginButton.frame.size.width, 20.0 + self.passwordInput.frame.origin.y + self.passwordInput.frame.size.height, ((self.view.frame.size.width - 20.0 * 2) - 20.0) / 2, 50.0)];
-    [self.view addSubview:self.forgotPassword];
-    self.forgotPassword.userInteractionEnabled = YES;
-    self.forgotPassword.text = @"Forgot password?";
-    self.forgotPassword.textAlignment = NSTextAlignmentCenter;
-    self.forgotPasswordTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chooseToLogin)];
-    [self.forgotPassword addGestureRecognizer:self.forgotPasswordTap];
+    self.switchToSignIn = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, 20.0f + self.signInButton.frame.origin.y + self.signInButton.frame.size.height, self.view.frame.size.width - 20.0f * 2.0f, 26.0f)];
+    [self.view addSubview:self.switchToSignIn];
+    self.switchToSignIn.userInteractionEnabled = YES;
+    self.switchToSignIn.hidden = YES;
+    self.switchToSignIn.text = @"Already a member? Sign in.";
+    self.switchToSignIn.textAlignment = NSTextAlignmentCenter;
+    self.switchToSignInTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chooseToLogin)];
+    [self.switchToSignIn addGestureRecognizer:self.switchToSignInTap];
     
-    [self switchSignUpLogin];
+    self.switchToSignUp = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, 20.0f + self.signInButton.frame.origin.y + self.signInButton.frame.size.height, self.view.frame.size.width - 20.0f * 2.0f, 26.0f)];
+    [self.view addSubview:self.switchToSignUp];
+    self.switchToSignUp.userInteractionEnabled = YES;
+    self.switchToSignUp.text = @"New member? Sign up.";
+    self.switchToSignUp.textAlignment = NSTextAlignmentCenter;
+    self.switchToSignUpTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(chooseToLogin)];
+    [self.switchToSignUp addGestureRecognizer:self.switchToSignUpTap];
+    
+//    [self switchSignUpLogin];
 }
 
 - (void)dismissKeyboard
@@ -105,19 +144,9 @@
     } else {
         self.isSigningUP = YES;
     }
-    [self switchSignUpLogin];
+    
 }
 
-- (void)switchSignUpLogin
-{
-    if (self.isSigningUP == YES) {
-        self.signUpButton.backgroundColor = [UIColor greenColor];
-        self.loginButton.backgroundColor = [UIColor grayColor];
-    } else {
-        self.signUpButton.backgroundColor = [UIColor grayColor];
-        self.loginButton.backgroundColor = [UIColor greenColor];
-    }
-}
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {

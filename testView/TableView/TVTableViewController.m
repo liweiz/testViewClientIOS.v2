@@ -71,7 +71,7 @@
     
     // This will refresh data manually and both cardsTable and tagTable will be refreshed
     self.refreshControl = [[UIRefreshControl alloc] init];
-    [self.refreshControl addTarget:self action:@selector(refreshTable:) forControlEvents:UIControlEventValueChanged];
+    [self.refreshControl addTarget:self action:@selector(refreshTable) forControlEvents:UIControlEventValueChanged];
     
     // Config fetch request
     self.fetchRequest = [[NSFetchRequest alloc] init];
@@ -89,17 +89,18 @@
     
     // Populate table with data
     NSError *err;
-    [self refreshTable:&err];
+    err = [self refreshTable];
     if (err) {
         // handle err
     }
 }
 
-- (void)refreshTable:(NSError **)err
+- (NSError *)refreshTable
 {
-    [self refreshData:err];
+    NSError *err;
+    err = [self refreshData];
     if (err) {
-        return;
+        return err;
     }
     // This will be changed, since communication with back-end will take time
     // Before testing with back-end, keep it this way for standalone app test
@@ -108,13 +109,15 @@
     if (self.startWithEditMode == YES) {
         [self.tableView setEditing:YES animated:NO];
     }
+    return err;
 }
 
-- (void)refreshData:(NSError **)err
+- (NSError *)refreshData
 {
-    [self.fetchedResultsController performFetch:err];
+    NSError *err;
+    [self.fetchedResultsController performFetch:&err];
     if (err) {
-        return;
+        return err;
     } else if (self.fetchedResultsController.fetchedObjects == nil) {
         // Handle the error.
         //        UIAlertView *emptyDataNotice = [[UIAlertView alloc] initWithTitle:@"No record found" message:@"Add new one or retry later" delegate:self cancelButtonTitle:@"Got it" otherButtonTitles:nil];
@@ -123,6 +126,7 @@
     self.dataSourceArray = nil;
     self.dataSourceArray = [NSMutableArray arrayWithCapacity:0];
     [self.dataSourceArray addObjectsFromArray:[self getDataArray]];
+    return err;
 }
 
 - (NSIndexPath *)convertControllerResultsObject:(NSManagedObject *)object toNewArray:(NSArray *)array
@@ -376,7 +380,9 @@
                 
             case NSFetchedResultsChangeUpdate:
                 // this is from http://oleb.net/blog/2013/02/nsfetchedresultscontroller-documentation-bug/
-                [tableView reloadRowsAtIndexPaths:@[pathNeeded] withRowAnimation:UITableViewRowAnimationAutomatic];
+                if (pathNeeded) {
+                    [tableView reloadRowsAtIndexPaths:@[pathNeeded] withRowAnimation:UITableViewRowAnimationAutomatic];
+                }
                 //[self configureCell:[tableView cellForRowAtIndexPath:indexPath]
                 //atIndexPath:indexPath];
                 break;
@@ -402,7 +408,7 @@
         }
     }
     NSError *err;
-    [self refreshData:&err];
+    err = [self refreshData];
     if (err) {
         // handle err
     }

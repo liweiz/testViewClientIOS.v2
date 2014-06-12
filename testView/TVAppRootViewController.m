@@ -53,11 +53,7 @@ NSString *const tvServerUrl = @"http://localhost:3000";
 	// Do any additional setup after loading the view.
     self.requestReceivedResponse = YES;
     self.willSendRequest = YES;
-//    [self loadController];
-    TVTestViewController *c = [[TVTestViewController alloc] init];
-    [self addChildViewController:c];
-    [self.view addSubview:c.view];
-    [c didMoveToParentViewController:self];
+    [self loadController];
 }
 
 - (void)loadController

@@ -159,7 +159,7 @@
             urlBranch = [[@"/users/" stringByAppendingString:userId] stringByAppendingString:@"/deviceinfos"];
             break;
         case TVOneDeviceInfo:
-            urlBranch = [[[@"/users/" stringByAppendingString:userId] stringByAppendingString:@"/deviceinfos"] stringByAppendingString:deviceInfoId];
+            urlBranch = [[[@"/users/" stringByAppendingString:userId] stringByAppendingString:@"/deviceinfos/"] stringByAppendingString:deviceInfoId];
             break;
         case TVEmailForActivation:
             urlBranch = [[@"/users/" stringByAppendingString:userId] stringByAppendingString:@"/activation"];
@@ -174,7 +174,7 @@
             urlBranch = [[@"/users/" stringByAppendingString:userId] stringByAppendingString:@"/cards"];
             break;
         case TVOneCard:
-            urlBranch = [[[@"/users/" stringByAppendingString:userId] stringByAppendingString:@"/cards"] stringByAppendingString:cardId];
+            urlBranch = [[[@"/users/" stringByAppendingString:userId] stringByAppendingString:@"/cards/"] stringByAppendingString:cardId];
             break;
         default:
             break;

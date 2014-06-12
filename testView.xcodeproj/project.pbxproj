@@ -28,8 +28,8 @@
 		D090B05417A5685C00E003DF /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D090B05317A5685C00E003DF /* AVFoundation.framework */; };
 		D09364E518186CC9002424A2 /* TVLangPickViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D09364E418186CC9002424A2 /* TVLangPickViewController.m */; };
 		D09364E81818711A002424A2 /* TVLangPickTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D09364E71818711A002424A2 /* TVLangPickTableViewController.m */; };
+		D094BB0419476BBA00BE0E7B /* TVSignUpListener.m in Sources */ = {isa = PBXBuildFile; fileRef = D094BB0319476BBA00BE0E7B /* TVSignUpListener.m */; };
 		D0957C8417DD85190054C117 /* TVView.m in Sources */ = {isa = PBXBuildFile; fileRef = D0957C8317DD85190054C117 /* TVView.m */; };
-		D09597B6191BEDF8003BA124 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D09597B5191BEDF8003BA124 /* Crashlytics.framework */; };
 		D095FF15192C4F35000604A1 /* TVUser.m in Sources */ = {isa = PBXBuildFile; fileRef = D095FF14192C4F35000604A1 /* TVUser.m */; };
 		D096CE79182F618500D09446 /* TVLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = D096CE78182F618500D09446 /* TVLabel.m */; };
 		D096CE7C182F61A100D09446 /* TVTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = D096CE7B182F61A100D09446 /* TVTextField.m */; };
@@ -39,12 +39,10 @@
 		D098EE7419282D1F0051B305 /* TVCard.m in Sources */ = {isa = PBXBuildFile; fileRef = D098EE7319282D1F0051B305 /* TVCard.m */; };
 		D098EE77192852830051B305 /* NSObject+NetworkHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = D098EE76192852830051B305 /* NSObject+NetworkHandler.m */; };
 		D098EE7A192854760051B305 /* TVRequester.m in Sources */ = {isa = PBXBuildFile; fileRef = D098EE79192854760051B305 /* TVRequester.m */; };
-		D09F10231924372B00CDF21E /* TVDataProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = D09F10221924372B00CDF21E /* TVDataProcessor.m */; };
+		D09C923E1946DAD2003B6660 /* TVDataListener.m in Sources */ = {isa = PBXBuildFile; fileRef = D09C923D1946DAD2003B6660 /* TVDataListener.m */; };
 		D09F1026192465AA00CDF21E /* NSObject+DataHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = D09F1025192465AA00CDF21E /* NSObject+DataHandler.m */; };
-		D0A0AFA21932AA7400C6E11E /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D09597B5191BEDF8003BA124 /* Crashlytics.framework */; };
 		D0A0AFA41932CBC000C6E11E /* TVRequesterTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = D0A0AFA31932CBC000C6E11E /* TVRequesterTestCase.m */; };
 		D0A0AFA51932CBEE00C6E11E /* NSObject+DataHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = D09F1025192465AA00CDF21E /* NSObject+DataHandler.m */; };
-		D0A0AFA61932CBF100C6E11E /* TVDataProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = D09F10221924372B00CDF21E /* TVDataProcessor.m */; };
 		D0A0AFA71932CBF800C6E11E /* TVCard.m in Sources */ = {isa = PBXBuildFile; fileRef = D098EE7319282D1F0051B305 /* TVCard.m */; };
 		D0A0AFA81932CBFA00C6E11E /* TVBase.m in Sources */ = {isa = PBXBuildFile; fileRef = D098EE7019282D1F0051B305 /* TVBase.m */; };
 		D0A0AFA91932CBFD00C6E11E /* TVRequestId.m in Sources */ = {isa = PBXBuildFile; fileRef = D098EE6A19282D1E0051B305 /* TVRequestId.m */; };
@@ -101,9 +99,10 @@
 		D09364E418186CC9002424A2 /* TVLangPickViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVLangPickViewController.m; sourceTree = "<group>"; };
 		D09364E61818711A002424A2 /* TVLangPickTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVLangPickTableViewController.h; sourceTree = "<group>"; };
 		D09364E71818711A002424A2 /* TVLangPickTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVLangPickTableViewController.m; sourceTree = "<group>"; };
+		D094BB0219476BBA00BE0E7B /* TVSignUpListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVSignUpListener.h; sourceTree = "<group>"; };
+		D094BB0319476BBA00BE0E7B /* TVSignUpListener.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVSignUpListener.m; sourceTree = "<group>"; };
 		D0957C8217DD85190054C117 /* TVView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVView.h; sourceTree = "<group>"; };
 		D0957C8317DD85190054C117 /* TVView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVView.m; sourceTree = "<group>"; };
-		D09597B5191BEDF8003BA124 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		D095FF13192C4F35000604A1 /* TVUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVUser.h; sourceTree = "<group>"; };
 		D095FF14192C4F35000604A1 /* TVUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVUser.m; sourceTree = "<group>"; };
 		D096CE77182F618500D09446 /* TVLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVLabel.h; sourceTree = "<group>"; };
@@ -122,8 +121,8 @@
 		D098EE76192852830051B305 /* NSObject+NetworkHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+NetworkHandler.m"; sourceTree = "<group>"; };
 		D098EE78192854760051B305 /* TVRequester.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVRequester.h; sourceTree = "<group>"; };
 		D098EE79192854760051B305 /* TVRequester.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVRequester.m; sourceTree = "<group>"; };
-		D09F10211924372B00CDF21E /* TVDataProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVDataProcessor.h; sourceTree = "<group>"; };
-		D09F10221924372B00CDF21E /* TVDataProcessor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVDataProcessor.m; sourceTree = "<group>"; };
+		D09C923C1946DAD2003B6660 /* TVDataListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVDataListener.h; sourceTree = "<group>"; };
+		D09C923D1946DAD2003B6660 /* TVDataListener.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVDataListener.m; sourceTree = "<group>"; };
 		D09F1024192465AA00CDF21E /* NSObject+DataHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+DataHandler.h"; sourceTree = "<group>"; };
 		D09F1025192465AA00CDF21E /* NSObject+DataHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+DataHandler.m"; sourceTree = "<group>"; };
 		D0A0AFA31932CBC000C6E11E /* TVRequesterTestCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVRequesterTestCase.m; sourceTree = "<group>"; };
@@ -151,7 +150,6 @@
 			files = (
 				EEFDD930180F09050058A366 /* Security.framework in Frameworks */,
 				D006DE7617B21CE600AA8B43 /* QuartzCore.framework in Frameworks */,
-				D09597B6191BEDF8003BA124 /* Crashlytics.framework in Frameworks */,
 				D090B05417A5685C00E003DF /* AVFoundation.framework in Frameworks */,
 				D06A1A3E179DC6A3003346F4 /* CoreGraphics.framework in Frameworks */,
 				D06A1A42179DC6A3003346F4 /* CoreData.framework in Frameworks */,
@@ -165,7 +163,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D06A1A5A179DC6A3003346F4 /* XCTest.framework in Frameworks */,
-				D0A0AFA21932AA7400C6E11E /* Crashlytics.framework in Frameworks */,
 				D06A1A5D179DC6A3003346F4 /* CoreData.framework in Frameworks */,
 				D06A1A5C179DC6A3003346F4 /* UIKit.framework in Frameworks */,
 				D06A1A5B179DC6A3003346F4 /* Foundation.framework in Frameworks */,
@@ -197,7 +194,6 @@
 		D06A1A3A179DC6A3003346F4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				D09597B5191BEDF8003BA124 /* Crashlytics.framework */,
 				EEFDD92F180F09050058A366 /* Security.framework */,
 				D09097A217ECC63D003205C3 /* CFNetwork.framework */,
 				D006DE7517B21CE600AA8B43 /* QuartzCore.framework */,
@@ -276,6 +272,15 @@
 			name = SearchServer;
 			sourceTree = "<group>";
 		};
+		D094BB0119476BBA00BE0E7B /* DataListener */ = {
+			isa = PBXGroup;
+			children = (
+				D094BB0219476BBA00BE0E7B /* TVSignUpListener.h */,
+				D094BB0319476BBA00BE0E7B /* TVSignUpListener.m */,
+			);
+			path = DataListener;
+			sourceTree = "<group>";
+		};
 		D096CE76182F616200D09446 /* Appearance */ = {
 			isa = PBXGroup;
 			children = (
@@ -318,8 +323,9 @@
 			children = (
 				D09F1024192465AA00CDF21E /* NSObject+DataHandler.h */,
 				D09F1025192465AA00CDF21E /* NSObject+DataHandler.m */,
-				D09F10211924372B00CDF21E /* TVDataProcessor.h */,
-				D09F10221924372B00CDF21E /* TVDataProcessor.m */,
+				D09C923C1946DAD2003B6660 /* TVDataListener.h */,
+				D09C923D1946DAD2003B6660 /* TVDataListener.m */,
+				D094BB0119476BBA00BE0E7B /* DataListener */,
 			);
 			path = DataWorker;
 			sourceTree = "<group>";
@@ -470,7 +476,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "./Crashlytics.framework/run d30dc014389e0e949766f2cd80d7559c4af53569 37af7979b92bd233a1ef2853dec65600134fd225924f45874392a1e4d246e811";
+			shellScript = "";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -484,11 +490,11 @@
 				D0F668C6191E9E830091E801 /* TVTableViewCell.m in Sources */,
 				D098EE6B19282D1E0051B305 /* TVRequestId.m in Sources */,
 				D0347975179EDD55006FFCF6 /* TVSearchBaseViewController.m in Sources */,
+				D09C923E1946DAD2003B6660 /* TVDataListener.m in Sources */,
 				D096CE7C182F61A100D09446 /* TVTextField.m in Sources */,
 				D095FF15192C4F35000604A1 /* TVUser.m in Sources */,
 				D0957C8417DD85190054C117 /* TVView.m in Sources */,
 				EEFDD933180F12CA0058A366 /* KeychainItemWrapper.m in Sources */,
-				D09F10231924372B00CDF21E /* TVDataProcessor.m in Sources */,
 				D0F668C7191E9E830091E801 /* TVTableViewController.m in Sources */,
 				D09F1026192465AA00CDF21E /* NSObject+DataHandler.m in Sources */,
 				EEE4F8711812E869009939F1 /* TVLoginViewController.m in Sources */,
@@ -498,6 +504,7 @@
 				D096CE79182F618500D09446 /* TVLabel.m in Sources */,
 				EEE3ED0D18110AFE004A232C /* TVAppRootViewController.m in Sources */,
 				D0AE0C5D1937756800514AD9 /* TVTestViewController.m in Sources */,
+				D094BB0419476BBA00BE0E7B /* TVSignUpListener.m in Sources */,
 				D075DA4717F2B3C600F0DB0E /* testView.xcdatamodeld in Sources */,
 				D098EE7119282D1F0051B305 /* TVBase.m in Sources */,
 				D09364E518186CC9002424A2 /* TVLangPickViewController.m in Sources */,
@@ -511,7 +518,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D0A0AFA91932CBFD00C6E11E /* TVRequestId.m in Sources */,
-				D0A0AFA61932CBF100C6E11E /* TVDataProcessor.m in Sources */,
 				D0A0AFAD1932CC0B00C6E11E /* TVAppRootViewController.m in Sources */,
 				D0A0AFAC1932CC0400C6E11E /* TVRequester.m in Sources */,
 				D0A0AFA71932CBF800C6E11E /* TVCard.m in Sources */,
@@ -634,6 +640,7 @@
 					"$(inherited)",
 					/Users/liwei/Documents/testView,
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/CrashlyticsFramework-master",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "testView/testView-Prefix.pch";
@@ -657,6 +664,7 @@
 					"$(inherited)",
 					/Users/liwei/Documents/testView,
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/CrashlyticsFramework-master",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "testView/testView-Prefix.pch";

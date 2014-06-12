@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Liwei. All rights reserved.
 //
 
-#import "TVDataProcessor.h"
+#import "TVDataListener.h"
 #import "TVRequester.h"
 #import "TVBase.h"
 #import "TVUser.h"
@@ -14,12 +14,18 @@
 #import "TVRequestId.h"
 #import "NSObject+DataHandler.h"
 
-@implementation TVDataContext
+@implementation TVDataListener
 
 @synthesize managedObjectContext, managedObjectModel, persistentStoreCoordinator;
 @synthesize fetchRequest, fetchedResultsController, sortDescriptors, predicate, parentFetchedResultsController;
 @synthesize requester, backgroundWorker;
 @synthesize updated, inserted, deleted;
+
+@synthesize requestType;
+@synthesize userId;
+@synthesize deviceInfoId;
+@synthesize deviceUuid;
+@synthesize cardId;
 
 - (id)initForUserOperation
 {
@@ -55,6 +61,7 @@
             } else {
                 [self setupNewRequestId:r action:TVDocUpdated for:x];
             }
+            [self.managedObjectContext save:nil];
         }
     }
     // Try to communicate with server on another operationQueue
@@ -62,24 +69,19 @@
         self.backgroundWorker = [[NSOperationQueue alloc] init];
     }
     [self.backgroundWorker addOperationWithBlock:^{
-        
+        [self doWorkInBackground];
     }];
 }
 
-- (TVBase *)insertDocInClass:(Class)docClass
+- (NSError *)doWorkInBackground
 {
-    TVBase *doc;
-    if ([docClass isSubclassOfClass:[TVCard class]]) {
-        doc = (TVCard *)[NSEntityDescription insertNewObjectForEntityForName:@"TVCard" inManagedObjectContext:self.managedObjectContext];
-    } else if ([docClass isSubclassOfClass:[TVUser class]]) {
-        doc = (TVUser *)[NSEntityDescription insertNewObjectForEntityForName:@"TVUser" inManagedObjectContext:self.managedObjectContext];
-    }
-    return doc;
+    // Overwrite this in subclass
+    return nil;
 }
 
 #pragma mark - check internet availability and process
 // Check server availablity before sending request
-- (void)startCommunicationWithServerByBranch
+- (void)startCommunicationWithServer
 {
     // Prepare change set
     NSMutableSet *all = [[NSMutableSet alloc] init];
@@ -88,36 +90,25 @@
     [all unionSet:self.deleted];
     if ([all count] > 0) {
         // Send to server with a new context
-        NSString *name;
-        if ([all.anyObject isKindOfClass:TVCard.class]) {
-            name = @"TVCard";
-        }
-        if ([all.anyObject isKindOfClass:TVUser.class]) {
-            name = @"TVUser";
-        }
-        NSFetchRequest *fetchReq = [NSFetchRequest fetchRequestWithEntityName:name];
         // Launch a new managedObjCtx in background operationQueue
         NSManagedObjectContext *c = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-        NSError *err;
         for (TVBase *x in all) {
-            NSPredicate *p = [NSPredicate predicateWithFormat:@"localId like %@",
-                              x.localId];
-            fetchReq.predicate = p;
-            [c executeFetchRequest:fetchReq error:&err];
-        }
-        NSSet *cSet;
-        if (!err) {
-            cSet = c.registeredObjects;
-            for (TVBase *y in cSet) {
-                // Prepare request
-                NSMutableDictionary *m = [self analyzeOneUndone:y inCtx:c];
-                
-            }
+            // Prepare request
+            TVRequester *reqster = [[TVRequester alloc] init];
+            reqster.coordinator = self.persistentStoreCoordinator;
+            reqster.objectIdArray = [NSMutableArray arrayWithObjects:x.objectID, nil];
             
+            NSMutableDictionary *m = [self analyzeOneUndone:x inCtx:c];
+            
+            [reqster checkServerAvailabilityToProceed];
         }
     }
 }
 
+// Return dictionary:
+// @"class": @"User"/@"Card"
+// @"body"
+// @"decision": @"no serverId, no requestId in hasReqId"/@"no serverId, last requestId in hasReqId done"/@"no serverId, last requestId in hasReqId undone"/@"valid serverId, no requestId in hasReqId"/@"valid serverId, last requestId in hasReqId done"/@"valid serverId, last requestId in hasReqId undone"
 - (NSMutableDictionary *)analyzeOneUndone:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx
 {
     NSMutableDictionary *outDic = [NSMutableDictionary dictionaryWithCapacity:0];
@@ -161,7 +152,9 @@
                     [outDic setObject:@"Card" forKey:@"class"];
                     body = [self.requester getJSONCard:(TVCard *)b requestId:x.requestId err:&err];
                 }
-                [outDic setObject:body forKey:@"body"];
+                if (body) {
+                    [outDic setObject:body forKey:@"body"];
+                }
                 [outDic setObject:@"no serverId, last requestId in hasReqId undone" forKey:@"decision"];
             }
         }
@@ -225,7 +218,5 @@
     }
     return outDic;
 }
-
-
 
 @end

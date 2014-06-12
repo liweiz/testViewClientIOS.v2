@@ -134,7 +134,10 @@
     if ([dicInside valueForKey:@"lastModified"]) {
         doc.lastModifiedAtServer = [dicInside valueForKey:@"lastModified"];
     }
-    doc.serverId = [dicInside valueForKey:@"serverId"];
+    doc.serverId = [dicInside valueForKey:@"_id"];
+//    if (!doc.serverId || [doc.serverId isEqualToString:@""]) {
+//        doc.serverId = [dicInside valueForKey:@"serverId"];
+//    }
     doc.versionNo = [dicInside valueForKey:@"versionNo"];
 }
 
@@ -149,6 +152,8 @@
         user.sortOption = [d valueForKey:@"sortOption"];
         user.sourceLang = [d valueForKey:@"sourceLang"];
         user.targetLang = [d valueForKey:@"targetLang"];
+        NSLog(@"user.deviceInfoId: %@", user.deviceInfoId);
+        NSLog(@"user.objectID: %@", user.objectID);
         if (!user.deviceInfoId || [user.deviceInfoId isEqualToString:@""]) {
             user.deviceInfoId = [d valueForKey:@"_id"];
         }
