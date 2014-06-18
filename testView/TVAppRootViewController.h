@@ -11,9 +11,11 @@
 //#import "TVContentRootViewController.h"
 #import "TVLoginViewController.h"
 #import "KeychainItemWrapper.h"
+#import "MBProgressHUD.h"
 
 extern NSString *const tvEnglishFontName;
 extern NSString *const tvServerUrl;
+extern CGFloat const goldenRatio;
 //extern UIColor *const tvBackgroundColor;
 //extern UIColor *const tvBackgroundColorAlternative;
 //extern UIColor *const tvFontColor;
@@ -36,7 +38,11 @@ extern NSString *const tvServerUrl;
 @property (assign, nonatomic) BOOL requestReceivedResponse;
 @property (assign, nonatomic) BOOL willSendRequest;
 @property (assign, nonatomic) BOOL internetIsAccessible;
+// the number of requests undone
+@property (assign, nonatomic) NSInteger numberOfUserTriggeredRequests;
 
 @property (strong, nonatomic) KeychainItemWrapper *passItem;
+
+@property (strong, nonatomic) MBProgressHUD *indicator;
 
 @end

@@ -55,6 +55,8 @@
 		D0F668C7191E9E830091E801 /* TVTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D0F668BF191E9E830091E801 /* TVTableViewController.m */; };
 		EE1997AE1816F5A400B5A993 /* langListShort.txt in Resources */ = {isa = PBXBuildFile; fileRef = EE1997AD1816F5A400B5A993 /* langListShort.txt */; };
 		EE1997B01816F60000B5A993 /* langListLong.txt in Resources */ = {isa = PBXBuildFile; fileRef = EE1997AF1816F60000B5A993 /* langListLong.txt */; };
+		EEC26FB0195008C7002818A0 /* TVKeyboard.m in Sources */ = {isa = PBXBuildFile; fileRef = EEC26FAF195008C7002818A0 /* TVKeyboard.m */; };
+		EEC46F96194D64D4008BC18A /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = EEC46F95194D64D4008BC18A /* MBProgressHUD.m */; };
 		EEE3ED0D18110AFE004A232C /* TVAppRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEE3ED0C18110AFE004A232C /* TVAppRootViewController.m */; };
 		EEE4F8711812E869009939F1 /* TVLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEE4F8701812E869009939F1 /* TVLoginViewController.m */; };
 		EEFDD930180F09050058A366 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EEFDD92F180F09050058A366 /* Security.framework */; };
@@ -134,6 +136,10 @@
 		D0F668BF191E9E830091E801 /* TVTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVTableViewController.m; sourceTree = "<group>"; };
 		EE1997AD1816F5A400B5A993 /* langListShort.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = langListShort.txt; sourceTree = "<group>"; };
 		EE1997AF1816F60000B5A993 /* langListLong.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = langListLong.txt; sourceTree = "<group>"; };
+		EEC26FAE195008C7002818A0 /* TVKeyboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVKeyboard.h; sourceTree = "<group>"; };
+		EEC26FAF195008C7002818A0 /* TVKeyboard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVKeyboard.m; sourceTree = "<group>"; };
+		EEC46F94194D64D4008BC18A /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
+		EEC46F95194D64D4008BC18A /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		EEE3ED0B18110AFE004A232C /* TVAppRootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVAppRootViewController.h; sourceTree = "<group>"; };
 		EEE3ED0C18110AFE004A232C /* TVAppRootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVAppRootViewController.m; sourceTree = "<group>"; };
 		EEE4F86F1812E869009939F1 /* TVLoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVLoginViewController.h; sourceTree = "<group>"; };
@@ -227,6 +233,8 @@
 				D06A1A44179DC6A3003346F4 /* Supporting Files */,
 				D0AE0C5B1937756800514AD9 /* TVTestViewController.h */,
 				D0AE0C5C1937756800514AD9 /* TVTestViewController.m */,
+				EEC46F94194D64D4008BC18A /* MBProgressHUD.h */,
+				EEC46F95194D64D4008BC18A /* MBProgressHUD.m */,
 			);
 			path = testView;
 			sourceTree = "<group>";
@@ -314,6 +322,8 @@
 			children = (
 				D0957C8217DD85190054C117 /* TVView.h */,
 				D0957C8317DD85190054C117 /* TVView.m */,
+				EEC26FAE195008C7002818A0 /* TVKeyboard.h */,
+				EEC26FAF195008C7002818A0 /* TVKeyboard.m */,
 			);
 			name = Abstracted;
 			sourceTree = "<group>";
@@ -485,6 +495,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EEC26FB0195008C7002818A0 /* TVKeyboard.m in Sources */,
 				D09364E81818711A002424A2 /* TVLangPickTableViewController.m in Sources */,
 				D098EE7A192854760051B305 /* TVRequester.m in Sources */,
 				D0F668C6191E9E830091E801 /* TVTableViewCell.m in Sources */,
@@ -494,6 +505,7 @@
 				D096CE7C182F61A100D09446 /* TVTextField.m in Sources */,
 				D095FF15192C4F35000604A1 /* TVUser.m in Sources */,
 				D0957C8417DD85190054C117 /* TVView.m in Sources */,
+				EEC46F96194D64D4008BC18A /* MBProgressHUD.m in Sources */,
 				EEFDD933180F12CA0058A366 /* KeychainItemWrapper.m in Sources */,
 				D0F668C7191E9E830091E801 /* TVTableViewController.m in Sources */,
 				D09F1026192465AA00CDF21E /* NSObject+DataHandler.m in Sources */,

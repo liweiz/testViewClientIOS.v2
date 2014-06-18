@@ -11,9 +11,11 @@
 #import "NSObject+DataHandler.h"
 #import "NSObject+NetworkHandler.h"
 #import "TVTestViewController.h"
+#import "MBProgressHUD.h"
 
 NSString *const tvEnglishFontName = @"TimesNewRomanPSMT";
 NSString *const tvServerUrl = @"http://localhost:3000";
+CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
 //UIColor *const tvBackgroundColor = [UIColor colorWithRed:43/255.0f green:43/255.0f blue:42/255.0f alpha:1.0f];
 //UIColor *const tvBackgroundColorAlternative = [UIColor colorWithRed:148/255.0f green:180/255.0f blue:7/255.0f alpha:1.0f];
 //UIColor *const tvFontColor = [UIColor colorWithRed:246/255.0f green:247/255.0f blue:242/255.0f alpha:1.0f];
@@ -28,6 +30,8 @@ NSString *const tvServerUrl = @"http://localhost:3000";
 @implementation TVAppRootViewController
 
 @synthesize managedObjectContext, persistentStoreCoordinator, managedObjectModel, userFetchRequest, user, loginViewController, requestReceivedResponse, willSendRequest, passItem, appRect, internetIsAccessible;
+@synthesize indicator;
+@synthesize numberOfUserTriggeredRequests;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -43,8 +47,6 @@ NSString *const tvServerUrl = @"http://localhost:3000";
 {
     self.view = [[UIView alloc] initWithFrame:self.appRect];
     self.view.backgroundColor = [UIColor lightGrayColor];
-    
-    
 }
 
 - (void)viewDidLoad
@@ -53,6 +55,7 @@ NSString *const tvServerUrl = @"http://localhost:3000";
 	// Do any additional setup after loading the view.
     self.requestReceivedResponse = YES;
     self.willSendRequest = YES;
+    self.indicator = [[MBProgressHUD alloc] initWithView:self.view];
     [self loadController];
 }
 
@@ -96,6 +99,7 @@ NSString *const tvServerUrl = @"http://localhost:3000";
     self.loginViewController.managedObjectContext = self.managedObjectContext;
     self.loginViewController.managedObjectModel = self.managedObjectModel;
     self.loginViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+    self.loginViewController.indicator = self.indicator;
     
     [self addChildViewController:self.loginViewController];
     [self.view addSubview:self.loginViewController.view];

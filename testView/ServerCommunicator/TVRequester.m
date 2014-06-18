@@ -14,6 +14,7 @@
 #import "TVUser.h"
 #import "TVCard.h"
 #import "TVRequestId.h"
+#import "MBProgressHUD.h"
 
 @implementation TVRequester
 
@@ -39,14 +40,19 @@
 @synthesize model;
 @synthesize coordinator;
 
+@synthesize isUserTriggered;
+
 @synthesize record;
 @synthesize reqId;
+@synthesize indicator;
+@synthesize ctler;
 
 - (id)init
 {
     self = [super init];
     if (self) {
         // Custom initialization
+        self.ctler = (TVAppRootViewController *)[UIApplication sharedApplication].keyWindow.rootViewController;
     }
     return self;
 }
@@ -298,9 +304,23 @@
 
 - (void)checkServerAvailabilityToProceed
 {
+    if (self.isUserTriggered) {
+        self.ctler.numberOfUserTriggeredRequests = self.ctler.numberOfUserTriggeredRequests + 1;
+    }
     NSMutableURLRequest *testRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://www.google.com/"]];
+    // Start the indicator if it is not showing.
+    if (self.ctler.numberOfUserTriggeredRequests == 1) {
+        [self.indicator show:NO];
+    }
     [NSURLConnection sendAsynchronousRequest:testRequest queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
      {
+         if (self.ctler.numberOfUserTriggeredRequests <= 0) {
+             NSLog(@"number of requests in progress not right: %d", self.ctler.numberOfUserTriggeredRequests);
+         }
+         self.ctler.numberOfUserTriggeredRequests = self.ctler.numberOfUserTriggeredRequests - 1;
+         if (self.ctler.numberOfUserTriggeredRequests == 0) {
+             [self.indicator hide:NO];
+         }
          NSError *err;
          if ([(NSHTTPURLResponse *)response statusCode] == 200) {
              TVRequester *req = [[TVRequester alloc] init];
@@ -329,6 +349,10 @@
              err = [req proceedToRequest];
          } else {
              // For user triggered connecting attempt, show a notice to mention the unavailability of network.
+             NSLog(@"Network not available.");
+             if (!self.indicator.removeFromSuperViewOnHide) {
+                 [self.indicator hide:NO];
+             }
          }
      }];
 }
@@ -336,6 +360,9 @@
 // No batch operation so far. each time, we handle only a single step operation for one record only.
 - (NSError *)proceedToRequest
 {
+    if (self.isUserTriggered) {
+        self.ctler.numberOfUserTriggeredRequests = self.ctler.numberOfUserTriggeredRequests + 1;
+    }
     NSError *err;
     self.ctx = [self managedObjectContext];
     err = [self getObjInCtx];
@@ -343,8 +370,19 @@
         // Setup request and send
         NSMutableURLRequest *request = [self setupRequest];
         NSLog(@"3: %@, %@", request.URL.host, request.URL.path);
+        // Start the indicator if it is not showing.
+        if (self.indicator.removeFromSuperViewOnHide) {
+            [self.indicator show:NO];
+        }
         [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
          {
+             if (self.ctler.numberOfUserTriggeredRequests <= 0) {
+                 NSLog(@"number of requests in progress not right: %d", self.ctler.numberOfUserTriggeredRequests);
+             }
+             self.ctler.numberOfUserTriggeredRequests = self.ctler.numberOfUserTriggeredRequests - 1;
+             if (self.ctler.numberOfUserTriggeredRequests == 0) {
+                 [self.indicator hide:NO];
+             }
              NSLog(@"4");
              if ([(NSHTTPURLResponse *)response statusCode] == 200) {
                  self.record.lastUnsyncAction = [NSNumber numberWithInteger:TVDocNoAction];
@@ -467,12 +505,16 @@
         NSLog(@"2");
     }
     NSString *auth;
-    if (self.isBearer) {
-        auth = [self authenticationStringWithToken:self.accessToken];
+    if (self.requestType == TVEmailForPasswordResetting) {
+        // No need to set auth here
     } else {
-        auth = [self authenticationStringWithEmail:self.email password:self.password];
+        if (self.isBearer) {
+            auth = [self authenticationStringWithToken:self.accessToken];
+        } else {
+            auth = [self authenticationStringWithEmail:self.email password:self.password];
+        }
+        [request setValue:auth forHTTPHeaderField:@"Authorization"];
     }
-    [request setValue:auth forHTTPHeaderField:@"Authorization"];
     // Setup request "X-REMOLET-DEVICE-ID" in header
     [request setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forHTTPHeaderField:@"X-REMOLET-DEVICE-ID"];
     NSLog(@"X-REMOLET-DEVICE-ID: %@", [request valueForHTTPHeaderField:@"X-REMOLET-DEVICE-ID"]);
