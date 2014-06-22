@@ -10,10 +10,9 @@
 #import "TVAppRootViewController.h"
 #import "TVRequester.h"
 #import "NSObject+NetworkHandler.h"
-#import "MBProgressHUD.h"
 #import "TVKeyboard.h"
 #import "TVView.h"
-//#import "UIViewController+sharedMethods.h"
+
 
 @interface TVLoginViewController ()
 
@@ -32,7 +31,9 @@
 @synthesize inputWidth;
 @synthesize inputHeight;
 @synthesize smallFontSize;
+@synthesize warning;
 @synthesize emailInput, passwordInput;
+@synthesize forgotPasswordButton, forgotPasswordButtonTap;
 @synthesize signUpButton, signUpButtonTap;
 @synthesize signInButton, signInButtonTap;
 @synthesize switchToSignIn, switchToSignInTap;
@@ -43,7 +44,10 @@
 @synthesize appRect, animationSec;
 @synthesize keyboard;
 
-@synthesize termsBox, agreeToTermsTextBox, agreeToPrivacyTextBox, introTextBox, forgotPassword, isForSignUP, tapDetector, passItem, forgotPasswordTap;
+@synthesize forgotPassword, forgotPasswordTap;
+@synthesize backToSignIn, backToSignInTap;
+
+@synthesize termsBox, agreeToTermsTextBox, agreeToPrivacyTextBox, introTextBox, passItem;
 
 // 5 parts: intro/email/info/password/submit and 5 gaps. gaps adjacent to info only have 1/2 gap. gap is 1/3 of text box height. Take 320 * 480 as the standard rectangle at the center of a screen, pad the rest of screen when the screen is bigger.
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -76,21 +80,19 @@
     self.baseView = [[UIScrollView alloc] initWithFrame:self.appRect];
     self.baseView.contentSize = CGSizeMake(self.appRect.size.width, self.appRect.size.height * 2.0f);
     self.coverOnBaseView = [[TVView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.baseView.contentSize.width, self.baseView.contentSize.height)];
+    
     [self.baseView addSubview:self.coverOnBaseView];
     self.baseView.scrollEnabled = NO;
     self.baseView.showsHorizontalScrollIndicator = NO;
     self.baseView.showsVerticalScrollIndicator = NO;
     self.view = self.baseView;
     self.view.backgroundColor = [UIColor redColor];
-//    self.tapDetector = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissKeyboard)];
-//    [self.view addGestureRecognizer:self.tapDetector];
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.isForSignUP = NO;
     
     self.introTextBox = [[UILabel alloc] initWithFrame:CGRectMake(self.inputX, self.verticalPadding + self.gapHeight, self.inputWidth, self.introHeight)];
     self.introTextBox.backgroundColor = [UIColor greenColor];
@@ -118,33 +120,11 @@
     [self showForgotPassword];
     
     [self showSwitchToSignUp];
+    
+    [self listenToKeyboardEvent];
 }
 
-
-- (void)showSignUpButton
-{
-    if (self.signInButton) {
-        [UIView animateWithDuration:self.animationSec animations:^{
-            self.signInButton.alpha = 0.0f;
-        }];
-    }
-    if (!self.signUpButton) {
-        self.signUpButton = [[UILabel alloc] initWithFrame:CGRectMake(self.inputX, self.passwordInput.frame.origin.y + self.passwordInput.frame.size.height + self.gapHeight * 0.5f, self.inputWidth, self.inputHeight)];
-        [self.coverOnBaseView addSubview:self.signUpButton];
-        self.signUpButton.backgroundColor = [UIColor greenColor];
-        self.signUpButton.userInteractionEnabled = YES;
-        self.signUpButton.text = @"Sign Up";
-        self.signUpButton.textAlignment = NSTextAlignmentCenter;
-        self.signUpButtonTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(signUp)];
-        [self.signUpButton addGestureRecognizer:self.signUpButtonTap];
-    }
-    [self.coverOnBaseView bringSubviewToFront:self.signUpButton];
-    if (self.signUpButton.alpha == 0.0f) {
-        [UIView animateWithDuration:self.animationSec animations:^{
-            self.signUpButton.alpha = 1.0f;
-        }];
-    }
-}
+#pragma mark - show signIn
 
 - (void)showSignInButton
 {
@@ -160,7 +140,7 @@
         self.signInButton.userInteractionEnabled = YES;
         self.signInButton.text = @"Sign In";
         self.signInButton.textAlignment = NSTextAlignmentCenter;
-        self.signInButtonTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(signIn)];
+        self.signInButtonTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(validateAndSignIn)];
         [self.signInButton addGestureRecognizer:self.signInButtonTap];
     }
     [self.coverOnBaseView bringSubviewToFront:self.signInButton];
@@ -179,19 +159,111 @@
         }];
     }
     if (!self.forgotPassword) {
-        self.forgotPassword = [[UILabel alloc] initWithFrame:CGRectMake(self.inputX + self.inputWidth * 1.0f / 2.0f, self.signInButton.frame.origin.y + self.signInButton.frame.size.height + self.gapHeight, self.inputWidth * 1.0f / 2.0f, self.gapHeight * 1.3f)];
+        self.forgotPassword = [[UILabel alloc] initWithFrame:CGRectMake(self.inputX + (self.emailInput.frame.size.width - self.inputWidth * 1.0f / 2.0f) / 2.0f, self.signInButton.frame.origin.y + self.signInButton.frame.size.height + self.gapHeight, self.inputWidth * 1.0f / 2.0f, self.gapHeight * 1.3f)];
         [self.coverOnBaseView addSubview:self.forgotPassword];
         self.forgotPassword.font = [self.forgotPassword.font fontWithSize:self.emailInput.font.pointSize * 0.8f];
         self.forgotPassword.userInteractionEnabled = YES;
         self.forgotPassword.text = @"Forgot password?";
-        self.forgotPassword.textAlignment = NSTextAlignmentRight;
-        self.forgotPasswordTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(emailToResettingPassword)];
+        self.forgotPassword.textAlignment = NSTextAlignmentCenter;
+        self.forgotPasswordTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showForgotPasswordButton)];
         [self.forgotPassword addGestureRecognizer:self.forgotPasswordTap];
     }
     [self.coverOnBaseView bringSubviewToFront:self.forgotPassword];
     if (self.forgotPassword.alpha == 0.0f) {
         [UIView animateWithDuration:self.animationSec animations:^{
             self.forgotPassword.alpha = 1.0f;
+        }];
+    }
+}
+
+- (void)validateAndSignIn
+{
+    [self validateTextField];
+    if (self.warning.alpha == 0.0f) {
+        [self signIn];
+    }
+}
+
+- (void)signIn
+{
+    TVRequester *reqster = [[TVRequester alloc] init];
+    reqster.coordinator = self.persistentStoreCoordinator;
+    reqster.requestType = TVSignIn;
+    
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
+    NSPredicate *pUser = [NSPredicate predicateWithFormat:@"email like %@", self.emailInput.text];
+    [fetchRequest setPredicate:pUser];
+    NSArray *r = [self.managedObjectContext executeFetchRequest:fetchRequest error:nil];
+    if ([r count] > 0) {
+        reqster.objectIdArray = [NSMutableArray arrayWithCapacity:0];
+        [reqster.objectIdArray addObject:r[0]];
+    }
+    reqster.isUserTriggered = YES;
+    reqster.email = self.emailInput.text;
+    reqster.password = self.passwordInput.text;
+    reqster.isBearer = NO;
+    reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
+    reqster.method = @"POST";
+    reqster.contentType = @"application/json";
+    reqster.indicator = self.indicator;
+    [reqster checkServerAvailabilityToProceed];
+}
+
+- (void)showSwitchToSignUp
+{
+    if (self.switchToSignIn) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.switchToSignIn.alpha = 0.0f;
+        }];
+    }
+    if (!self.switchToSignUp) {
+        self.switchToSignUp = [[UILabel alloc] initWithFrame:CGRectMake(self.inputX, self.forgotPassword.frame.origin.y + self.forgotPassword.frame.size.height + self.gapHeight * 2.0f, self.inputWidth, self.gapHeight * 2.0f)];
+        [self.coverOnBaseView addSubview:self.switchToSignUp];
+        self.switchToSignUp.userInteractionEnabled = YES;
+        self.switchToSignUp.font = [self.switchToSignUp.font fontWithSize:self.emailInput.font.pointSize * 0.8f];
+        self.switchToSignUp.text = @"New member? Sign up.";
+        self.switchToSignUp.textAlignment = NSTextAlignmentCenter;
+        self.switchToSignUpTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(goToSignUp)];
+        [self.switchToSignUp addGestureRecognizer:self.switchToSignUpTap];
+    }
+    if (self.switchToSignUp.alpha == 0.0f) {
+        [self.coverOnBaseView bringSubviewToFront:self.switchToSignUp];
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.switchToSignUp.alpha = 1.0f;
+        }];
+    }
+}
+
+- (void)goToSignUp
+{
+    [self showTerms];
+    [self showSignUpButton];
+    [self showSwitchToSignIn];
+}
+
+#pragma mark - show signUp
+
+- (void)showSignUpButton
+{
+    if (self.signInButton) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.signInButton.alpha = 0.0f;
+        }];
+    }
+    if (!self.signUpButton) {
+        self.signUpButton = [[UILabel alloc] initWithFrame:CGRectMake(self.inputX, self.passwordInput.frame.origin.y + self.passwordInput.frame.size.height + self.gapHeight * 0.5f, self.inputWidth, self.inputHeight)];
+        [self.coverOnBaseView addSubview:self.signUpButton];
+        self.signUpButton.backgroundColor = [UIColor greenColor];
+        self.signUpButton.userInteractionEnabled = YES;
+        self.signUpButton.text = @"Sign Up";
+        self.signUpButton.textAlignment = NSTextAlignmentCenter;
+        self.signUpButtonTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(validateAndSignUp)];
+        [self.signUpButton addGestureRecognizer:self.signUpButtonTap];
+    }
+    [self.coverOnBaseView bringSubviewToFront:self.signUpButton];
+    if (self.signUpButton.alpha == 0.0f) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.signUpButton.alpha = 1.0f;
         }];
     }
 }
@@ -221,66 +293,6 @@
     }
 }
 
-- (void)emailToResettingPassword
-{
-    TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.coordinator = self.persistentStoreCoordinator;
-    reqster.requestType = TVEmailForPasswordResetting;
-    reqster.email = self.emailInput.text;
-    reqster.body = [self getJSONForgotPasswordWithEmail:reqster.email err:nil];
-    
-    reqster.method = @"POST";
-    reqster.contentType = @"application/json";
-    reqster.indicator = self.indicator;
-    [reqster checkServerAvailabilityToProceed];
-}
-
-- (void)termsDetail
-{
-    
-}
-
-- (void)signUp
-{
-    TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.coordinator = self.persistentStoreCoordinator;
-    reqster.requestType = TVSignUp;
-    reqster.email = self.emailInput.text;
-    reqster.password = self.passwordInput.text;
-    reqster.isBearer = NO;
-    reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
-    reqster.method = @"POST";
-    reqster.contentType = @"application/json";
-    reqster.indicator = self.indicator;
-    reqster.isUserTriggered = YES;
-    [reqster checkServerAvailabilityToProceed];
-}
-
-- (void)signIn
-{
-    TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.coordinator = self.persistentStoreCoordinator;
-    reqster.requestType = TVSignIn;
-    
-    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
-    NSPredicate *pUser = [NSPredicate predicateWithFormat:@"email like %@", self.emailInput.text];
-    [fetchRequest setPredicate:pUser];
-    NSArray *r = [self.managedObjectContext executeFetchRequest:fetchRequest error:nil];
-    if ([r count] > 0) {
-        reqster.objectIdArray = [NSMutableArray arrayWithCapacity:0];
-        [reqster.objectIdArray addObject:r[0]];
-    }
-    reqster.isUserTriggered = YES;
-    reqster.email = self.emailInput.text;
-    reqster.password = self.passwordInput.text;
-    reqster.isBearer = NO;
-    reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
-    reqster.method = @"POST";
-    reqster.contentType = @"application/json";
-    reqster.indicator = self.indicator;
-    [reqster checkServerAvailabilityToProceed];
-}
-
 - (void)showSwitchToSignIn
 {
     if (self.switchToSignUp) {
@@ -306,42 +318,33 @@
     }
 }
 
-- (void)showSwitchToSignUp
+- (void)validateAndSignUp
 {
-    if (self.switchToSignIn) {
-        [UIView animateWithDuration:self.animationSec animations:^{
-            self.switchToSignIn.alpha = 0.0f;
-        }];
-    }
-    if (!self.switchToSignUp) {
-        self.switchToSignUp = [[UILabel alloc] initWithFrame:CGRectMake(self.inputX, self.forgotPassword.frame.origin.y + self.forgotPassword.frame.size.height + self.gapHeight * 2.0f, self.inputWidth, self.gapHeight * 2.0f)];
-        [self.coverOnBaseView addSubview:self.switchToSignUp];
-        self.switchToSignUp.userInteractionEnabled = YES;
-        self.switchToSignUp.font = [self.switchToSignUp.font fontWithSize:self.emailInput.font.pointSize * 0.8f];
-        self.switchToSignUp.text = @"New member? Sign up.";
-        self.switchToSignUp.textAlignment = NSTextAlignmentCenter;
-        self.switchToSignUpTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(goToSignUp)];
-        [self.switchToSignUp addGestureRecognizer:self.switchToSignUpTap];
-    }
-    if (self.switchToSignUp.alpha == 0.0f) {
-        [self.coverOnBaseView bringSubviewToFront:self.switchToSignUp];
-        [UIView animateWithDuration:self.animationSec animations:^{
-            self.switchToSignUp.alpha = 1.0f;
-        }];
+    [self validateTextField];
+    if (self.warning.alpha == 0.0f) {
+        [self signUp];
     }
 }
 
-- (void)dismissKeyboard
+- (void)signUp
 {
-    [self.view endEditing:YES];
+    TVRequester *reqster = [[TVRequester alloc] init];
+    reqster.coordinator = self.persistentStoreCoordinator;
+    reqster.requestType = TVSignUp;
+    reqster.email = self.emailInput.text;
+    reqster.password = self.passwordInput.text;
+    reqster.isBearer = NO;
+    reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
+    reqster.method = @"POST";
+    reqster.contentType = @"application/json";
+    reqster.indicator = self.indicator;
+    reqster.isUserTriggered = YES;
+    [reqster checkServerAvailabilityToProceed];
 }
 
-- (void)goToSignUp
+- (void)termsDetail
 {
-    [self showTerms];
-    [self showSignUpButton];
-    [self showSwitchToSignIn];
-    self.isForSignUP = YES;
+    
 }
 
 - (void)goToSignIn
@@ -349,30 +352,209 @@
     [self showForgotPassword];
     [self showSignInButton];
     [self showSwitchToSignUp];
-    self.isForSignUP = NO;
 }
+
+#pragma mark - show forgotPassword
+
+- (void)showForgotPasswordButton
+{
+    if (self.passwordInput) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.passwordInput.alpha = 0.0f;
+        }];
+    }
+    if (self.signInButton) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.signInButton.alpha = 0.0f;
+        }];
+    }
+    if (self.forgotPassword) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.forgotPassword.alpha = 0.0f;
+        }];
+    }
+    if (self.switchToSignUp) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.switchToSignUp.alpha = 0.0f;
+        }];
+    }
+    if (!self.forgotPasswordButton) {
+        self.forgotPasswordButton = [[UILabel alloc] initWithFrame:self.passwordInput.frame];
+        [self.coverOnBaseView addSubview:self.forgotPasswordButton];
+        self.forgotPasswordButton.backgroundColor = [UIColor greenColor];
+        self.forgotPasswordButton.userInteractionEnabled = YES;
+        self.forgotPasswordButton.text = @"Send Email To Reset Password";
+        self.forgotPasswordButton.textAlignment = NSTextAlignmentCenter;
+        self.forgotPasswordButtonTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(emailToResettingPassword)];
+        [self.forgotPasswordButton addGestureRecognizer:self.forgotPasswordButtonTap];
+    }
+    [self.coverOnBaseView bringSubviewToFront:self.forgotPasswordButton];
+    if (self.forgotPasswordButton.alpha == 0.0f) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.forgotPasswordButton.alpha = 1.0f;
+        }];
+    }
+    
+    if (!self.backToSignIn) {
+        self.backToSignIn = [[UILabel alloc] initWithFrame:self.forgotPassword.frame];
+        [self.coverOnBaseView addSubview:self.backToSignIn];
+        self.backToSignIn.font = [self.forgotPassword.font fontWithSize:self.emailInput.font.pointSize * 0.8f];
+        self.backToSignIn.userInteractionEnabled = YES;
+        self.backToSignIn.text = @"Return To Sign In";
+        self.backToSignIn.textAlignment = NSTextAlignmentCenter;
+        self.backToSignInTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(returnFromPasswordResetting)];
+        [self.backToSignIn addGestureRecognizer:self.backToSignInTap];
+    }
+    [self.coverOnBaseView bringSubviewToFront:self.backToSignIn];
+    if (self.backToSignIn.alpha == 0.0f) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.backToSignIn.alpha = 1.0f;
+        }];
+    }
+
+}
+
+- (void)returnFromPasswordResetting
+{
+    if (self.forgotPasswordButton) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.forgotPasswordButton.alpha = 0.0f;
+        }];
+    }
+    if (self.backToSignIn) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.backToSignIn.alpha = 0.0f;
+        }];
+    }
+    [self.coverOnBaseView bringSubviewToFront:self.passwordInput];
+    if (self.passwordInput.alpha == 0.0f) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.passwordInput.alpha = 1.0f;
+        }];
+    }
+    [self.signInButton bringSubviewToFront:self.signInButton];
+    if (self.signInButton.alpha == 0.0f) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.signInButton.alpha = 1.0f;
+        }];
+    }
+    [self.forgotPassword bringSubviewToFront:self.forgotPassword];
+    if (self.forgotPassword.alpha == 0.0f) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.forgotPassword.alpha = 1.0f;
+        }];
+    }
+    [self.coverOnBaseView bringSubviewToFront:self.switchToSignUp];
+    if (self.switchToSignUp.alpha == 0.0f) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.switchToSignUp.alpha = 1.0f;
+        }];
+    }
+}
+
+- (void)emailToResettingPassword
+{
+    TVRequester *reqster = [[TVRequester alloc] init];
+    reqster.coordinator = self.persistentStoreCoordinator;
+    reqster.requestType = TVEmailForPasswordResetting;
+    reqster.email = self.emailInput.text;
+    reqster.body = [self getJSONForgotPasswordWithEmail:reqster.email err:nil];
+    
+    reqster.method = @"POST";
+    reqster.contentType = @"application/json";
+    reqster.indicator = self.indicator;
+    [reqster checkServerAvailabilityToProceed];
+}
+
+#pragma mark - keyboard
+
+- (void)listenToKeyboardEvent
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moveToTop) name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moveBack) name:UIKeyboardWillHideNotification object:nil];
+}
+
+- (void)moveToTop
+{
+    self.coverOnBaseView.touchToDismissKeyboardIsOn = YES;
+    [self.baseView setContentOffset:CGPointMake(0.0f, self.emailInput.frame.origin.y - self.gapHeight * 2.0f) animated:YES];
+}
+
+- (void)moveBack
+{
+    self.coverOnBaseView.touchToDismissKeyboardIsOn = NO;
+    [self.baseView setContentOffset:CGPointZero animated:YES];
+}
+
+#pragma mark - textField
+
+- (void)validateTextField
+{
+    // Validate email
+    if (self.emailInput.text.length == 0) {
+        [self showWarningWithText:@"Email should not be empty."];
+        return;
+    }
+    // Validate password
+    if (self.passwordInput.alpha == 1.0f) {
+        if (self.passwordInput.text.length == 0) {
+            [self showWarningWithText:@"Password should not be empty."];
+            return;
+        } else if (self.passwordInput.text.length < 6 || self.passwordInput.text.length > 20) {
+            // Password's length has to be no less than 6 and no more than 20.
+            [self showWarningWithText:@"Password's length has to be between 6 and 20."];
+            return;
+        }
+    }
+    if (self.warning.alpha == 1.0f) {
+        self.warning.alpha = 0.0f;
+    }
+}
+
+- (void)showWarningWithText:(NSString *)text
+{
+    if (!self.warning) {
+        self.warning = [[UILabel alloc] initWithFrame:CGRectMake(self.emailInput.frame.origin.x, self.emailInput.frame.origin.y - self.emailInput.frame.size.height * 0.5f, self.emailInput.frame.size.width, self.emailInput.frame.size.height * 0.5f)];
+        [self.coverOnBaseView addSubview:self.warning];
+        self.warning.textAlignment = NSTextAlignmentLeft;
+    }
+    self.warning.text = text;
+    if (self.warning.alpha == 0.0f) {
+        self.warning.alpha = 1.0f;
+        [self.coverOnBaseView bringSubviewToFront:self.warning];
+    }
+}
+
+- (void)hideWarning
+{
+    self.warning.text = @"";
+    if (self.warning.alpha == 1.0f) {
+        self.warning.alpha = 0.0f;
+    }
+}
+
+//- (void)dismissKeyboard
+//{
+//    [self.view endEditing:YES];
+//}
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
+{
+    return YES;
+}
+
+
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
     if ([textField isEqual:self.passwordInput]) {
         NSString *URLToGo;
-        if (self.isForSignUP == YES) {
-            // Sign up for new user, generate a request for registeration, if successful, get pass
-            URLToGo = @"";
-        } else {
-            // Login, generate a request to get pass
-            URLToGo = @"";
-        }
+        
 //        [self startRegistrationLoginWithEmail:self.emailInput.text password:self.passwordInput.text withURLString:URLToGo];
     } else {
         self.passwordInput.text = @"";
     }
     return YES;
-}
-
-- (void)textFieldDidEndEditing:(UITextField *)textField
-{
-    [self.view endEditing:YES];
 }
 
 - (void)didReceiveMemoryWarning

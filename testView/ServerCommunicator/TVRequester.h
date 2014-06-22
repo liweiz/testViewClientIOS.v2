@@ -9,8 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "NSObject+NetworkHandler.h"
 #import "TVRequestId.h"
-#import "MBProgressHUD.h"
 #import "TVAppRootViewController.h"
+#import "TVIndicator.h"
 
 @interface TVRequester : NSObject
 
@@ -41,7 +41,7 @@
 @property (strong, nonatomic) TVBase *record;
 @property (strong, nonatomic) TVRequestId *reqId;
 
-@property (strong, nonatomic) MBProgressHUD *indicator;
+@property (strong, nonatomic) TVIndicator *indicator;
 @property (strong, nonatomic) TVAppRootViewController *ctler;
 
 - (NSError *)proceedToRequest;

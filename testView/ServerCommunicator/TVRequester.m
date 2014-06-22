@@ -14,7 +14,6 @@
 #import "TVUser.h"
 #import "TVCard.h"
 #import "TVRequestId.h"
-#import "MBProgressHUD.h"
 
 @implementation TVRequester
 
@@ -57,7 +56,22 @@
     return self;
 }
 
-// Only§ successful request leads to response with
+# pragma mark - indicator on/off
+
+- (void)showIndicator
+{
+    self.indicator.hidden = NO;
+    [self.indicator.superview bringSubviewToFront:self.indicator];
+    [self.indicator.indicator startAnimating];
+}
+
+- (void)hideIndicator
+{
+    self.indicator.hidden = YES;
+    [self.indicator.indicator stopAnimating];
+}
+
+// Only successful request leads to response with
 - (NSError *)processResponseJSON:(NSMutableDictionary *)dict
 {
     BOOL toSave = NO;
@@ -310,7 +324,7 @@
     NSMutableURLRequest *testRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://www.google.com/"]];
     // Start the indicator if it is not showing.
     if (self.ctler.numberOfUserTriggeredRequests == 1) {
-        [self.indicator show:NO];
+        [self showIndicator];
     }
     [NSURLConnection sendAsynchronousRequest:testRequest queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
      {
@@ -319,7 +333,7 @@
          }
          self.ctler.numberOfUserTriggeredRequests = self.ctler.numberOfUserTriggeredRequests - 1;
          if (self.ctler.numberOfUserTriggeredRequests == 0) {
-             [self.indicator hide:NO];
+             [self hideIndicator];
          }
          NSError *err;
          if ([(NSHTTPURLResponse *)response statusCode] == 200) {
@@ -349,10 +363,10 @@
              err = [req proceedToRequest];
          } else {
              // For user triggered connecting attempt, show a notice to mention the unavailability of network.
-             NSLog(@"Network not available.");
-             if (!self.indicator.removeFromSuperViewOnHide) {
-                 [self.indicator hide:NO];
+             if (!self.indicator.indicator.isAnimating) {
+                 [self hideIndicator];
              }
+             [self.ctler showSysMsg:@"Network not available."];
          }
      }];
 }
@@ -369,21 +383,26 @@
     if (!err) {
         // Setup request and send
         NSMutableURLRequest *request = [self setupRequest];
-        NSLog(@"3: %@, %@", request.URL.host, request.URL.path);
         // Start the indicator if it is not showing.
-        if (self.indicator.removeFromSuperViewOnHide) {
-            [self.indicator show:NO];
+        if (self.indicator.indicator.isAnimating) {
+            [self hideIndicator];
         }
         [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
          {
+             NSLog(@"response code: %i", [(NSHTTPURLResponse *)response statusCode]);
+             
+             if (error.code == -1004) {
+                 // Error Domain=NSURLErrorDomain Code=-1004 "Could not connect to the server." https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Constants/Reference/reference.html
+                 [self.ctler showSysMsg:@"Communication not successful"];
+             }
+             
              if (self.ctler.numberOfUserTriggeredRequests <= 0) {
                  NSLog(@"number of requests in progress not right: %d", self.ctler.numberOfUserTriggeredRequests);
              }
              self.ctler.numberOfUserTriggeredRequests = self.ctler.numberOfUserTriggeredRequests - 1;
              if (self.ctler.numberOfUserTriggeredRequests == 0) {
-                 [self.indicator hide:NO];
+                 [self showIndicator];
              }
-             NSLog(@"4");
              if ([(NSHTTPURLResponse *)response statusCode] == 200) {
                  self.record.lastUnsyncAction = [NSNumber numberWithInteger:TVDocNoAction];
                  if (self.reqId) {
@@ -407,7 +426,6 @@
                  [self processResponseErrMsg:errMsg];
              }
          }];
-        NSLog(@"5");
     }
     return err;
 }
@@ -502,7 +520,6 @@
     }
     if (self.body) {
         [request setHTTPBody:self.body];
-        NSLog(@"2");
     }
     NSString *auth;
     if (self.requestType == TVEmailForPasswordResetting) {

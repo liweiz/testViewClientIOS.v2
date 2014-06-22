@@ -11,7 +11,8 @@
 #import "NSObject+DataHandler.h"
 #import "NSObject+NetworkHandler.h"
 #import "TVTestViewController.h"
-#import "MBProgressHUD.h"
+#import "UIViewController+InOutTransition.h"
+#import "TVLangPickViewController.h"
 
 NSString *const tvEnglishFontName = @"TimesNewRomanPSMT";
 NSString *const tvServerUrl = @"http://localhost:3000";
@@ -31,6 +32,7 @@ CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
 
 @synthesize managedObjectContext, persistentStoreCoordinator, managedObjectModel, userFetchRequest, user, loginViewController, requestReceivedResponse, willSendRequest, passItem, appRect, internetIsAccessible;
 @synthesize indicator;
+@synthesize sysMsg;
 @synthesize numberOfUserTriggeredRequests;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -55,8 +57,40 @@ CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
 	// Do any additional setup after loading the view.
     self.requestReceivedResponse = YES;
     self.willSendRequest = YES;
-    self.indicator = [[MBProgressHUD alloc] initWithView:self.view];
+    self.indicator = [[TVIndicator alloc] initWithFrame:self.appRect];
+    [self.view addSubview:self.indicator];
+    self.indicator.hidden = YES;
+    // sysMsg width: 80 height: 44
+    self.sysMsg = [[UILabel alloc] initWithFrame:CGRectMake((self.view.frame.size.width - 150.0f) * 0.5f, (self.view.frame.size.height - 44.0f) * 0.5f, 150.0f, 44.0f)];
+    [self.view addSubview:self.sysMsg];
+    self.sysMsg.adjustsFontSizeToFitWidth = YES;
+    self.sysMsg.numberOfLines = 2;
+    self.sysMsg.textAlignment = NSTextAlignmentCenter;
+    self.sysMsg.alpha = 0.0f;
+    self.sysMsg.textColor = [UIColor whiteColor];
+    self.sysMsg.backgroundColor = [UIColor greenColor];
     [self loadController];
+}
+
+- (void)showSysMsg:(NSString *)msg
+{
+    self.sysMsg.text = msg;
+    if (self.sysMsg.alpha == 0.0f) {
+        self.sysMsg.alpha = 0.6f;
+    }
+    [self.view bringSubviewToFront:self.sysMsg];
+    [UIView animateWithDuration:4.0f animations:^{
+        self.sysMsg.alpha = 0.0f;
+    }];
+}
+
+# pragma mark - view layers in/out
+
+- (void)tapInLangPicker
+{
+    if (self.) {
+        <#statements#>
+    }
 }
 
 - (void)loadController
@@ -72,25 +106,6 @@ CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
 //        need to clear each local users isLoggedIn flag
     }
 }
-
-//- (void)loginAsTest
-//{
-//    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
-//    request.predicate = [NSPredicate predicateWithFormat:@"isLoggedIn == YES"];
-//    NSArray *userArray = [self.managedObjectContext executeFetchRequest:request error:nil];
-//    if ([userArray isEqual: @[]]) {
-//        //create a test user by faking a response
-//        NSMutableDictionary *testResponse = [NSMutableDictionary dictionaryWithCapacity:1];
-//        [testResponse setValue:@"test@test.com" forKey:@"email"];
-//        NSNumber *isLoggedIn = [NSNumber numberWithBool:YES];
-//        [testResponse setValue:@"collectedAtDAlphabetA" forKey:@"sortOption"];
-//        [testResponse setValue:isLoggedIn forKey:@"isLoggedIn"];
-//        [testResponse setValue:@"Chinese Simplified" forKey:@"sourceLang"];
-//        [testResponse setValue:@"English" forKey:@"targetLang"];
-//        [self createRecord:[TVUser class] recordInResponse:testResponse inContext:self.managedObjectContext withNewCardController:nil withNonCardController:nil user:nil];
-//        [self proceedChangesInContext:self.managedObjectContext willSendRequest:NO];
-//    }
-//}
 
 - (void)loadLoginController
 {

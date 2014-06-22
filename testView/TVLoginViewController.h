@@ -8,9 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import "KeychainItemWrapper.h"
-#import "MBProgressHUD.h"
 #import "TVKeyboard.h"
 #import "TVView.h"
+#import "TVIndicator.h"
 
 @interface TVLoginViewController : UIViewController <UITextFieldDelegate, UITextInputTraits>
 
@@ -34,8 +34,13 @@
 
 @property (strong, nonatomic) TVView *coverOnBaseView;
 
+@property (strong, nonatomic) UILabel *warning;
+
 @property (strong, nonatomic) UITextField *emailInput;
 @property (strong, nonatomic) UITextField *passwordInput;
+
+@property (strong, nonatomic) UILabel *forgotPasswordButton;
+@property (strong, nonatomic) UITapGestureRecognizer *forgotPasswordButtonTap;
 
 @property (strong, nonatomic) UILabel *signUpButton;
 @property (strong, nonatomic) UITapGestureRecognizer *signUpButtonTap;
@@ -51,22 +56,22 @@
 
 @property (strong, nonatomic) UIView *termsBox;
 @property (strong, nonatomic) UILabel *agreeToTermsTextBox;
+
 @property (strong, nonatomic) UILabel *agreeToPrivacyTextBox;
 @property (strong, nonatomic) UILabel *introTextBox;
 
 @property (strong, nonatomic) UILabel *forgotPassword;
 @property (strong, nonatomic) UITapGestureRecognizer *forgotPasswordTap;
 
+@property (strong, nonatomic) UILabel *backToSignIn;
+@property (strong, nonatomic) UITapGestureRecognizer *backToSignInTap;
+
 @property (strong, nonatomic) UILabel *terms;
 @property (strong, nonatomic) UITapGestureRecognizer *termsTap;
 
-@property (assign, nonatomic) BOOL isForSignUP;
-
-@property (strong, nonatomic) UITapGestureRecognizer *tapDetector;
-
 @property (strong, nonatomic) KeychainItemWrapper *passItem;
 
-@property (strong, nonatomic) MBProgressHUD *indicator;
+@property (strong, nonatomic) TVIndicator *indicator;
 
 
 

@@ -10,10 +10,6 @@
 
 @interface TVView : UIView
 
-@property (assign, nonatomic) BOOL keyboardIsShown;
-@property (assign, nonatomic) BOOL keyboardIsForBottomInput;
-@property (assign, nonatomic) BOOL touchToDismissKeyboardIsOff;
-@property (assign, nonatomic) CGFloat keyboardAndExtraHeight;
-@property (assign, nonatomic) CGFloat viewOffsetY;
+@property (assign, nonatomic) BOOL touchToDismissKeyboardIsOn;
 
 @end

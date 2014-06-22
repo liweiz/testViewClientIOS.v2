@@ -8,10 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import "TVUser.h"
-//#import "TVContentRootViewController.h"
+#import "TVIndicator.h"
 #import "TVLoginViewController.h"
 #import "KeychainItemWrapper.h"
-#import "MBProgressHUD.h"
 
 extern NSString *const tvEnglishFontName;
 extern NSString *const tvServerUrl;
@@ -43,6 +42,9 @@ extern CGFloat const goldenRatio;
 
 @property (strong, nonatomic) KeychainItemWrapper *passItem;
 
-@property (strong, nonatomic) MBProgressHUD *indicator;
+@property (strong, nonatomic) TVIndicator *indicator;
+@property (strong, nonatomic) UILabel *sysMsg;
+
+- (void)showSysMsg:(NSString *)msg;
 
 @end

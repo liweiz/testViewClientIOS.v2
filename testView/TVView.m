@@ -10,12 +10,7 @@
 
 @implementation TVView
 
-@synthesize keyboardIsShown;
-@synthesize touchToDismissKeyboardIsOff;
-@synthesize keyboardIsForBottomInput;
-@synthesize keyboardAndExtraHeight;
-// When the view is larger than the height of its parent view, e.g., used with uiscrollview, need to take offset into account as well.
-@synthesize viewOffsetY;
+@synthesize touchToDismissKeyboardIsOn;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -26,14 +21,17 @@
     return self;
 }
 
+
+// Add all those views that are touched to dismiss keyboard to this view.
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
-    if (self.keyboardIsShown == YES && self.keyboardIsForBottomInput == YES && self.touchToDismissKeyboardIsOff == NO) {
-        if (point.y < self.frame.size.height - self.keyboardAndExtraHeight && point.y > self.viewOffsetY) {
+    UIView *x = [super hitTest:point withEvent:event];
+    if (self.touchToDismissKeyboardIsOn == YES) {
+        if (![x isKindOfClass:[UITextField class]]) {
             [self endEditing:YES];
         }
     }
-    return [super hitTest:point withEvent:event];
+    return x;
 }
 
 /*

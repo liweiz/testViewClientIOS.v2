@@ -11,7 +11,9 @@
 
 @implementation TVKeyboard
 
+// This is the base view to put the floating views on.
 @synthesize keyboardSlot;
+
 @synthesize tempSize;
 @synthesize delegate;
 @synthesize viewWithButtomFloating;
@@ -83,7 +85,7 @@
     textField.text = trimmedText;
 }
 
-#pragma mark - remove blank spaces at the beginning and end of any input
+// Remove blank spaces at the beginning and end of any input
 - (NSString *)trimInput:(NSString *)text
 {
     NSCharacterSet *whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
@@ -103,10 +105,10 @@
         // KeyboardSlot should move up from the bottom
         CGFloat newKeyboardSlotHeight = [UIScreen mainScreen].bounds.size.height - (kbOrigin.y - self.viewWithButtomFloating.frame.size.height);
         TVView *view = (TVView *)[UIApplication sharedApplication].keyWindow.rootViewController.view;
-        view.keyboardAndExtraHeight = newKeyboardSlotHeight;
-        view.keyboardIsForBottomInput = YES;
-        view.keyboardIsShown = YES;
-        view.touchToDismissKeyboardIsOff = NO;
+//        view.keyboardAndExtraHeight = newKeyboardSlotHeight;
+//        view.keyboardIsForBottomInput = YES;
+//        view.keyboardIsShown = YES;
+//        view.touchToDismissKeyboardIsOff = NO;
         self.keyboardSlot.frame = CGRectMake(0.0f, self.tempSize.height - newKeyboardSlotHeight, self.tempSize.width, self.tempSize.height - kbOrigin.y + 44.0f);
         self.viewWithButtomFloating.frame = CGRectMake(0.0f, self.keyboardSlot.frame.size.height - 44.0f, self.keyboardSlot.frame.size.width, 44.0f);
         [self.keyboardSlot.superview bringSubviewToFront:self.keyboardSlot];
@@ -118,8 +120,8 @@
 {
     [self.keyboardSlot setContentOffset:CGPointZero animated:YES];
     TVView *view = (TVView *)[UIApplication sharedApplication].keyWindow.rootViewController.view;
-    view.keyboardIsForBottomInput = NO;
-    view.keyboardIsShown = NO;
+//    view.keyboardIsForBottomInput = NO;
+//    view.keyboardIsShown = NO;
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
@@ -141,137 +143,6 @@
 {
     [self.viewToDismissKeyboard endEditing:YES];
     [self.keyboardSlot setContentOffset:CGPointZero animated:YES];
-}
-
-# pragma mark - Keyboard management
-
-- (void)keepKeyboard
-{
-    Boolean contextFirst = [self.myContextView isFirstResponder];
-    Boolean targetFirst = [self.myTargetView isFirstResponder];
-    Boolean translationFirst = [self.myTranslationView isFirstResponder];
-    Boolean detailFirst = [self.myDetailView isFirstResponder];
-    if (contextFirst || targetFirst || translationFirst || detailFirst) {
-        if (self.sectionNo == 1 && ![self.myContextView isFirstResponder]) {
-            [self.myContextView becomeFirstResponder];
-        }
-        if (self.sectionNo == 2 && ![self.myTargetView isFirstResponder]) {
-            [self.myTargetView becomeFirstResponder];
-        }
-        if (self.sectionNo == 3 && ![self.myTranslationView isFirstResponder]) {
-            [self.myTranslationView becomeFirstResponder];
-        }
-        if (self.sectionNo == 4 && ![self.myDetailView isFirstResponder]) {
-            [self.myDetailView becomeFirstResponder];
-        }
-    }
-}
-
-- (void)firstResponderMustAtTop
-{
-    // This senario only happens when user tap in a non current top input box.
-    if ([self.myContextView isFirstResponder]) {
-        if (self.sectionNo != 1) {
-            [self.myNewView setContentOffset:CGPointMake(0, self.stopCamContext) animated:YES];
-            self.sectionNo = 1;
-        }
-    }
-    if ([self.myTargetView isFirstResponder]) {
-        if (self.sectionNo != 2) {
-            [self.myNewView setContentOffset:CGPointMake(0, self.stopContextTarget) animated:YES];
-            self.sectionNo = 2;
-        }
-    }
-    if ([self.myTranslationView isFirstResponder]) {
-        if (self.sectionNo != 3) {
-            [self.myNewView setContentOffset:CGPointMake(0, self.stopTargetTranslation) animated:YES];
-            self.sectionNo = 3;
-        }
-    }
-    if ([self.myDetailView isFirstResponder]) {
-        if (self.sectionNo != 4) {
-            [self.myNewView setContentOffset:CGPointMake(0, self.stopTranslationDetail) animated:YES];
-            self.sectionNo = 4;
-        }
-    }
-    [self updateBitLeft];
-    if (self.bitLeft.hidden == YES) {
-        self.bitLeft.hidden = NO;
-    }
-    
-}
-
-- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
-{
-    NSInteger maxLength;
-    switch (self.sectionNo) {
-        case 1:
-            maxLength = 300;
-            break;
-        case 2:
-            maxLength = 30;
-            break;
-        case 3:
-            maxLength = 30;
-            break;
-        case 4:
-            maxLength = 600;
-            break;
-    }
-    NSUInteger newLength = (textView.text.length - range.length) + text.length;
-    if(newLength <= maxLength)
-    {
-        return YES;
-    } else {
-        NSUInteger emptySpace = maxLength - (textView.text.length - range.length);
-        textView.text = [[[textView.text substringToIndex:range.location]
-                          stringByAppendingString:[text substringToIndex:emptySpace]]
-                         stringByAppendingString:[textView.text substringFromIndex:(range.location + range.length)]];
-        return NO;
-    }
-}
-
-- (void)textViewDidBeginEditing:(UITextView *)textView
-{
-    self.editOn = YES;
-    if ([textView isEqual:self.myContextView]) {
-        self.contextEditOn = YES;
-    }
-    if ([textView isEqual:self.myDetailView]) {
-        self.detailEditOn = YES;
-    }
-    [self firstResponderMustAtTop];
-    if ([textView isEqual:self.myTargetView] || [textView isEqual:self.myTranslationView]) {
-        self.textBefore = textView.text;
-    }
-}
-
-- (void)textViewDidEndEditing:(UITextView *)textView
-{
-    self.editOn = NO;
-    if ([textView isEqual:self.myContextView]) {
-        self.contextEditOn = NO;
-    }
-    if ([textView isEqual:self.myDetailView]) {
-        self.detailEditOn = NO;
-    }
-    self.bitLeft.hidden = YES;
-    // Trim text first
-    NSString *trimmedText = [self trimInput:textView.text];
-    if ([trimmedText isEqual:self.myTargetView] || [textView isEqual:self.myTranslationView]) {
-        if ([textView.text isEqualToString:self.textBefore]) {
-            // No change
-        } else {
-            [self.tagsSelected removeAllObjects];
-        }
-        self.textBefore = nil;
-    }
-    textView.text = trimmedText;
-}
-
-- (void)textViewDidChange:(UITextView *)textView
-{
-    [self updateBitLeft];
 }
 
 //Keyboard position test:
