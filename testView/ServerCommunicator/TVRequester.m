@@ -289,23 +289,27 @@
     NSError *err;
     if (toSave) {
         [self.ctx save:&err];
-        [self printUser];
+//        [self printUser];
+        switch (self.requestType) {
+            case TVSignUp:
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"TVTapInLangPicker" object:self];
+        }
     }
     return err;
 }
 
-- (void)printUser
-{
-    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
-    NSPredicate *pUser = [NSPredicate predicateWithFormat:@"email like 'matt.z.lw@gmail.com'"];
-    [fetchRequest setPredicate:pUser];
-    NSArray *r = [self.managedObjectContext executeFetchRequest:fetchRequest error:nil];
-    if (r[0]) {
-        NSLog(@"[self.ctx objectWithID:k] count: %lu", (unsigned long)[r count]);
-        NSLog(@"[self.ctx objectWithID:k] serverId: %@", [r[0] serverId]);
-        NSLog(@"[self.ctx objectWithID:k]: %@", r[0]);
-    }
-}
+//- (void)printUser
+//{
+//    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
+//    NSPredicate *pUser = [NSPredicate predicateWithFormat:@"email like 'matt.z.lw@gmail.com'"];
+//    [fetchRequest setPredicate:pUser];
+//    NSArray *r = [self.managedObjectContext executeFetchRequest:fetchRequest error:nil];
+//    if (r[0]) {
+//        NSLog(@"[self.ctx objectWithID:k] count: %lu", (unsigned long)[r count]);
+//        NSLog(@"[self.ctx objectWithID:k] serverId: %@", [r[0] serverId]);
+//        NSLog(@"[self.ctx objectWithID:k]: %@", r[0]);
+//    }
+//}
 
 // Error in response is in text/plain
 - (NSString *)processResponseText:(NSURLResponse *)response data:(NSData *)data

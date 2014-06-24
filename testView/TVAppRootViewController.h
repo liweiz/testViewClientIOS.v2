@@ -11,6 +11,7 @@
 #import "TVIndicator.h"
 #import "TVLoginViewController.h"
 #import "KeychainItemWrapper.h"
+#import "TVLangPickViewController.h"
 
 extern NSString *const tvEnglishFontName;
 extern NSString *const tvServerUrl;
@@ -20,7 +21,6 @@ extern CGFloat const goldenRatio;
 //extern UIColor *const tvFontColor;
 //extern CGFloat *const tvFontSizeHeader;
 //extern CGFloat *const tvFontSizeContent;
-
 
 @interface TVAppRootViewController : UIViewController
 
@@ -32,6 +32,7 @@ extern CGFloat const goldenRatio;
 @property (strong, nonatomic) NSFetchRequest *userFetchRequest;
 @property (strong, nonatomic) TVUser *user;
 @property (strong, nonatomic) TVLoginViewController *loginViewController;
+@property (strong, nonatomic) TVLangPickViewController *langViewController;
 //@property (strong, nonatomic) TVContentRootViewController *contentViewController;
 
 @property (assign, nonatomic) BOOL requestReceivedResponse;

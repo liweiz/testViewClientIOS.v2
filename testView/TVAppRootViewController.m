@@ -34,6 +34,7 @@ CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
 @synthesize indicator;
 @synthesize sysMsg;
 @synthesize numberOfUserTriggeredRequests;
+@synthesize langViewController;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -70,6 +71,7 @@ CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
     self.sysMsg.textColor = [UIColor whiteColor];
     self.sysMsg.backgroundColor = [UIColor greenColor];
     [self loadController];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tapInLangPicker:) name:@"TVTapInLangPicker" object:nil];
 }
 
 - (void)showSysMsg:(NSString *)msg
@@ -86,11 +88,20 @@ CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
 
 # pragma mark - view layers in/out
 
-- (void)tapInLangPicker
+- (void)tapInLangPicker:(NSNotification *)note
 {
-    if (self.) {
-        <#statements#>
+    if (!self.langViewController) {
+        self.langViewController = [[TVLangPickViewController alloc] init];
     }
+    [self showViewBelow:self.langViewController.view viewBelowController:self.langViewController currentView:self.loginViewController.view baseView:self.view tapGesture:nil longPressGesture:nil point:self.loginViewController.transitionPointInRoot];
+}
+
+- (void)tapOutLangPicker
+{
+    if (!self.langViewController) {
+        self.langViewController = [[TVLangPickViewController alloc] init];
+    }
+//    self showViewAbove:self.langViewController.view viewAboveController:self.langViewController currentView:self.con baseView:<#(UIView *)#> tapGesture:<#(UITapGestureRecognizer *)#> pinchGesture:<#(UIPinchGestureRecognizer *)#>
 }
 
 - (void)loadController

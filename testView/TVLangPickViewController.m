@@ -28,16 +28,16 @@
 - (void)loadView
 {
     CGRect firstRect = [[UIScreen mainScreen] applicationFrame];
-    CGRect viewRect = CGRectMake(0.0f, self.originY, firstRect.size.width, 250.0);
+    CGRect viewRect = CGRectMake(0.0f, self.originY, firstRect.size.width, 250.0f);
     self.view = [[UIView alloc] initWithFrame:viewRect];
-    self.view.backgroundColor = [UIColor blackColor];
+    self.view.backgroundColor = [UIColor blueColor];
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.sourceLangViewIntro = [[UILabel alloc] initWithFrame:CGRectMake(15.0, 15.0, (self.view.frame.size.width - 15.0 * 2), 50.0)];
+    self.sourceLangViewIntro = [[UILabel alloc] initWithFrame:CGRectMake(15.0f, 15.0f, (self.view.frame.size.width - 15.0f * 2.0f), 44.0f)];
     
     self.sourceLangView = [[UILabel alloc] initWithFrame:CGRectMake(self.sourceLangViewIntro.frame.origin.x, self.sourceLangViewIntro.frame.origin.y + self.sourceLangViewIntro.frame.size.height, self.sourceLangViewIntro.frame.size.width, self.sourceLangViewIntro.frame.size.height)];
     self.sourceLangView.userInteractionEnabled = YES;

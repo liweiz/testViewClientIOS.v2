@@ -40,7 +40,7 @@
 @synthesize switchToSignUp, switchToSignUpTap;
 @synthesize terms, termsTap;
 @synthesize coverOnBaseView;
-
+@synthesize transitionPointInRoot;
 @synthesize appRect, animationSec;
 @synthesize keyboard;
 
@@ -186,6 +186,7 @@
 
 - (void)signIn
 {
+    self.transitionPointInRoot = [self.signInButtonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     TVRequester *reqster = [[TVRequester alloc] init];
     reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = TVSignIn;
@@ -328,6 +329,7 @@
 
 - (void)signUp
 {
+    self.transitionPointInRoot = [self.signUpButtonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     TVRequester *reqster = [[TVRequester alloc] init];
     reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = TVSignUp;

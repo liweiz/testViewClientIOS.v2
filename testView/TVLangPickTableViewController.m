@@ -54,6 +54,25 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - Load file from supporting files
+- (NSArray *)loadLangArray
+{
+    NSMutableArray *tempArray = [NSMutableArray arrayWithCapacity:1];
+    NSString * filePath = [[NSBundle mainBundle] pathForResource:@"langListLong" ofType:@"txt"];
+    if (filePath) {
+        NSString *contents = [NSString stringWithContentsOfFile:filePath encoding:NSUnicodeStringEncoding error:nil];
+        NSArray *stringArray = [contents componentsSeparatedByString:@"\r\n"];
+        for (NSString *obj in stringArray) {
+            if (![obj isEqualToString:@""]) {
+                NSString *newObj = [NSString localizedNameOfStringEncoding:NSUnicodeStringEncoding];
+                newObj = obj;
+                [tempArray addObject:newObj];
+            }
+        }
+    }
+    return tempArray;
+}
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView

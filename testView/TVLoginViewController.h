@@ -73,6 +73,6 @@
 
 @property (strong, nonatomic) TVIndicator *indicator;
 
-
+@property (assign, nonatomic) CGPoint transitionPointInRoot;
 
 @end
