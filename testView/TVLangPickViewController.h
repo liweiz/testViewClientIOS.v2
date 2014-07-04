@@ -8,12 +8,11 @@
 
 #import <UIKit/UIKit.h>
 #import "TVLangPickTableViewController.h"
-#import "TVUser.h"
+#import "TVLayerBaseViewController.h"
 
-@interface TVLangPickViewController : UIViewController <UITableViewDelegate>
+@interface TVLangPickViewController : TVLayerBaseViewController <UITableViewDelegate>
 
 @property (strong, nonatomic) TVLangPickTableViewController *langPickController;
-
 @property (strong, nonatomic) UILabel *sourceLangViewIntro;
 @property (strong, nonatomic) UILabel *targetLangViewIntro;
 @property (strong, nonatomic) UILabel *sourceLangView;
@@ -22,6 +21,5 @@
 @property (strong, nonatomic) UITapGestureRecognizer *targetLangTap;
 @property (assign, nonatomic) BOOL tableIsForSourceLang;
 @property (assign, nonatomic) CGFloat originY;
-@property (strong, nonatomic) TVUser *user;
 
 @end

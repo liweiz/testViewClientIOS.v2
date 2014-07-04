@@ -20,9 +20,6 @@
 
 @implementation TVLoginViewController
 
-@synthesize managedObjectContext;
-@synthesize managedObjectModel;
-@synthesize persistentStoreCoordinator;
 @synthesize introHeight;
 @synthesize gapHeight;
 @synthesize verticalPadding;
@@ -40,8 +37,7 @@
 @synthesize switchToSignUp, switchToSignUpTap;
 @synthesize terms, termsTap;
 @synthesize coverOnBaseView;
-@synthesize transitionPointInRoot;
-@synthesize appRect, animationSec;
+@synthesize animationSec;
 @synthesize keyboard;
 
 @synthesize forgotPassword, forgotPasswordTap;
@@ -188,6 +184,8 @@
 {
     self.transitionPointInRoot = [self.signInButtonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     TVRequester *reqster = [[TVRequester alloc] init];
+    reqster.transitionPointInRoot = self.transitionPointInRoot;
+    reqster.fromVewTag = self.view.tag;
     reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = TVSignIn;
     
@@ -331,6 +329,8 @@
 {
     self.transitionPointInRoot = [self.signUpButtonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     TVRequester *reqster = [[TVRequester alloc] init];
+    reqster.transitionPointInRoot = self.transitionPointInRoot;
+    reqster.fromVewTag = self.view.tag;
     reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = TVSignUp;
     reqster.email = self.emailInput.text;

@@ -37,6 +37,9 @@
 @property (strong, nonatomic) NSPersistentStoreCoordinator *coordinator;
 
 @property (assign, nonatomic) BOOL isUserTriggered;
+// Record the tag of the view that triggers the requester.
+@property (assign, nonatomic) NSInteger fromVewTag;
+@property (nonatomic, assign) CGPoint transitionPointInRoot;
 
 @property (strong, nonatomic) TVBase *record;
 @property (strong, nonatomic) TVRequestId *reqId;
@@ -46,6 +49,5 @@
 
 - (NSError *)proceedToRequest;
 - (void)checkServerAvailabilityToProceed;
-- (void)printUser;
 
 @end

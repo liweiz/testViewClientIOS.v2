@@ -13,6 +13,8 @@
 #import "TVTestViewController.h"
 #import "UIViewController+InOutTransition.h"
 #import "TVLangPickViewController.h"
+#import "TVActivationViewController.h"
+#import "TVLayerBaseViewController.h"
 
 NSString *const tvEnglishFontName = @"TimesNewRomanPSMT";
 NSString *const tvServerUrl = @"http://localhost:3000";
@@ -22,7 +24,10 @@ CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
 //UIColor *const tvFontColor = [UIColor colorWithRed:246/255.0f green:247/255.0f blue:242/255.0f alpha:1.0f];
 //CGFloat *const tvFontSizeHeader = 34.0f;
 //CGFloat *const tvFontSizeContent = 28.0f;
-
+NSString *const tvShowLogin = @"tvShowLogin";
+NSString *const tvShowActivation = @"tvShowActivation";
+NSString *const tvShowLangPick = @"tvShowLangPick";
+NSString *const tvShowContent = @"tvShowContent";
 
 @interface TVAppRootViewController ()
 
@@ -35,6 +40,9 @@ CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
 @synthesize sysMsg;
 @synthesize numberOfUserTriggeredRequests;
 @synthesize langViewController;
+@synthesize activationViewController;
+@synthesize ctlOnDuty;
+@synthesize transitionPointInRoot;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -71,7 +79,10 @@ CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
     self.sysMsg.textColor = [UIColor whiteColor];
     self.sysMsg.backgroundColor = [UIColor greenColor];
     [self loadController];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tapInLangPicker:) name:@"TVTapInLangPicker" object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLoginAbove:) name:tvShowLogin object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showActivationBelow:) name:tvShowActivation object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLangPick:) name:tvShowLangPick object:nil];
 }
 
 - (void)showSysMsg:(NSString *)msg
@@ -86,50 +97,155 @@ CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
     }];
 }
 
+- (void)sendActivationEmail:(BOOL)isUserTriggered
+{
+    TVRequester *r = [[TVRequester alloc] init];
+    r.coordinator = self.persistentStoreCoordinator;
+    r.requestType = TVEmailForActivation;
+    if (isUserTriggered) {
+        r.isUserTriggered = YES;
+    }
+    r.userId = self.user.serverId;
+    r.isBearer = YES;
+    r.method = @"GET";
+    r.accessToken = [self getAccessTokenForAccount:self.user.serverId];
+    [r checkServerAvailabilityToProceed];
+}
+
 # pragma mark - view layers in/out
 
-- (void)tapInLangPicker:(NSNotification *)note
+// view layers from upper to bottom: login/activation/langPicker/content
+// Compare main view layer index
+- (UIView *)getCurrentView:(NSInteger)tag
 {
-    if (!self.langViewController) {
-        self.langViewController = [[TVLangPickViewController alloc] init];
+    switch (tag) {
+        case 1001:
+            return self.loginViewController.view;
+        case 1002:
+            return self.activationViewController.view;
+        case 1003:
+            return self.langViewController.view;
+//        case TVContentCtl:
+//            return nil;
+        default:
+            return nil;
     }
-    [self showViewBelow:self.langViewController.view viewBelowController:self.langViewController currentView:self.loginViewController.view baseView:self.view tapGesture:nil longPressGesture:nil point:self.loginViewController.transitionPointInRoot];
 }
 
-- (void)tapOutLangPicker
+
+- (void)showLoginAbove:(NSNotification *)note
 {
-    if (!self.langViewController) {
-        self.langViewController = [[TVLangPickViewController alloc] init];
-    }
-//    self showViewAbove:self.langViewController.view viewAboveController:self.langViewController currentView:self.con baseView:<#(UIView *)#> tapGesture:<#(UITapGestureRecognizer *)#> pinchGesture:<#(UIPinchGestureRecognizer *)#>
+    TVRequester *r = note.object;
+    [self loadLoginCtl:NO];
+    [self showViewAbove:self.loginViewController.view currentView:[self getCurrentView:r.fromVewTag] baseView:self.view pointInBaseView:r.transitionPointInRoot];
 }
+
+- (void)showActivationBelow:(NSNotification *)note
+{
+    TVRequester *r = note.object;
+    [self loadActivationCtl:NO];
+    [self showViewBelow:self.activationViewController.view currentView:[self getCurrentView:r.fromVewTag] baseView:self.view pointInBaseView:r.transitionPointInRoot];
+}
+
+- (void)showLangPick:(NSNotification *)note
+{
+    TVRequester *r = note.object;
+    if (r.fromVewTag < 1003) {
+        [self showLangPickBelow:r];
+    } else {
+        [self showLangPickAbove:r];
+    }
+}
+
+- (void)showLangPickBelow:(TVRequester *)r
+{
+    [self loadLangPickCtl:NO];
+    [self showViewBelow:self.langViewController.view currentView:[self getCurrentView:r.fromVewTag] baseView:self.view pointInBaseView:r.transitionPointInRoot];
+}
+
+- (void)showLangPickAbove:(TVRequester *)r
+{
+    [self loadLangPickCtl:NO];
+    [self showViewAbove:self.langViewController.view currentView:[self getCurrentView:r.fromVewTag] baseView:self.view pointInBaseView:r.transitionPointInRoot];
+}
+
+# pragma mark - content viewController
 
 - (void)loadController
 {
     self.userFetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
+    // When sync with server, isLoggedIn is not processed on server. The response in turn is always true. So when user signs out, isLoggedIn is set to be false. Once user signs in it set to be the value in response, which is alwasy true.
     self.userFetchRequest.predicate = [NSPredicate predicateWithFormat:@"isLoggedIn == YES"];
     NSArray *userArray = [self.managedObjectContext executeFetchRequest:self.userFetchRequest error:nil];
     if ([userArray count] == 1) {
-        self.user = [userArray objectAtIndex:0];
-//        [self loadContentController];
+        self.user = userArray[0];
+        if (self.user.activated.intValue == 1) {
+//            [self loadContentController];
+        } else {
+            // Show activation view
+        }
     } else {
-        [self loadLoginController];
+        [self loadLoginCtl:YES];
 //        need to clear each local users isLoggedIn flag
     }
 }
 
-- (void)loadLoginController
+// isOnTop is only set to be YES when the controller is loaded directly after the app is launched.
+- (void)loadLoginCtl:(BOOL)isOnTop
 {
-    self.loginViewController = [[TVLoginViewController alloc] init];
-    self.loginViewController.appRect = self.appRect;
-    self.loginViewController.managedObjectContext = self.managedObjectContext;
-    self.loginViewController.managedObjectModel = self.managedObjectModel;
-    self.loginViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
-    self.loginViewController.indicator = self.indicator;
-    
-    [self addChildViewController:self.loginViewController];
-    [self.view addSubview:self.loginViewController.view];
-    [self.loginViewController didMoveToParentViewController:self];
+    if (!self.loginViewController) {
+        self.loginViewController = [[TVLoginViewController alloc] init];
+        self.loginViewController.appRect = self.appRect;
+        self.loginViewController.managedObjectContext = self.managedObjectContext;
+        self.loginViewController.managedObjectModel = self.managedObjectModel;
+        self.loginViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+        self.loginViewController.indicator = self.indicator;
+        [self addChildViewController:self.loginViewController];
+        [self.loginViewController didMoveToParentViewController:self];
+        self.loginViewController.view.tag = 1001;
+    }
+    if (isOnTop) {
+        // In other situations, subview is inserted by showView... method.
+        [self.view addSubview:self.loginViewController.view];
+    }
+    self.ctlOnDuty = TVLoginCtl;
+}
+
+- (void)loadActivationCtl:(BOOL)isOnTop
+{
+    if (!self.activationViewController) {
+        self.activationViewController = [[TVActivationViewController alloc] init];
+        self.activationViewController.appRect = self.appRect;
+        self.activationViewController.managedObjectContext = self.managedObjectContext;
+        self.activationViewController.managedObjectModel = self.managedObjectModel;
+        self.activationViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+        self.activationViewController.indicator = self.indicator;
+        [self addChildViewController:self.activationViewController];
+        [self.activationViewController didMoveToParentViewController:self];
+        self.activationViewController.view.tag = 1002;
+    }
+    if (isOnTop) {
+        [self.view addSubview:self.activationViewController.view];
+    }
+    self.ctlOnDuty = TVActivationCtl;
+}
+
+- (void)loadLangPickCtl:(BOOL)isOnTop
+{
+    if (!self.langViewController) {
+        self.langViewController = [[TVLangPickViewController alloc] init];
+        self.langViewController.appRect = self.appRect;
+        self.langViewController.managedObjectContext = self.managedObjectContext;
+        self.langViewController.managedObjectModel = self.managedObjectModel;
+        self.langViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+        [self addChildViewController:self.langViewController];
+        [self.langViewController didMoveToParentViewController:self];
+        self.langViewController.view.tag = 1003;
+    }
+    if (isOnTop) {
+        [self.view addSubview:self.langViewController.view];
+    }
+    self.ctlOnDuty = TVActivationCtl;
 }
 
 //- (void)loadContentController

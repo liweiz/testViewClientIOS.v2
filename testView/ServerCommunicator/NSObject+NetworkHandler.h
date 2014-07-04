@@ -13,6 +13,7 @@
 typedef NS_ENUM(NSInteger, TVRequestType) {
     TVSignUp,
     TVSignIn,
+    TVOneUser,
     TVForgotPassword, // send email request to server in the case that user only know email address, in which case the userId is not available.
     TVRenewTokens,
     TVNewDeviceInfo,

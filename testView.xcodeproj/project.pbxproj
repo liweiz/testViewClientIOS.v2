@@ -57,6 +57,8 @@
 		EE1997B01816F60000B5A993 /* langListLong.txt in Resources */ = {isa = PBXBuildFile; fileRef = EE1997AF1816F60000B5A993 /* langListLong.txt */; };
 		EEC26FB0195008C7002818A0 /* TVKeyboard.m in Sources */ = {isa = PBXBuildFile; fileRef = EEC26FAF195008C7002818A0 /* TVKeyboard.m */; };
 		EEDE2CD919560490003F0F99 /* TVIndicator.m in Sources */ = {isa = PBXBuildFile; fileRef = EEDE2CD819560490003F0F99 /* TVIndicator.m */; };
+		EEDE5DEF1963AE9200782C90 /* TVLayerBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEDE5DEE1963AE9200782C90 /* TVLayerBaseViewController.m */; };
+		EEE0CE79195B217B0061E7A5 /* TVActivationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEE0CE78195B217B0061E7A5 /* TVActivationViewController.m */; };
 		EEE0E0D119531EBE00560D95 /* UIViewController+InOutTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = EEE0E0D019531EBE00560D95 /* UIViewController+InOutTransition.m */; };
 		EEE3ED0D18110AFE004A232C /* TVAppRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEE3ED0C18110AFE004A232C /* TVAppRootViewController.m */; };
 		EEE4F8711812E869009939F1 /* TVLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEE4F8701812E869009939F1 /* TVLoginViewController.m */; };
@@ -141,6 +143,10 @@
 		EEC26FAF195008C7002818A0 /* TVKeyboard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVKeyboard.m; sourceTree = "<group>"; };
 		EEDE2CD719560490003F0F99 /* TVIndicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVIndicator.h; sourceTree = "<group>"; };
 		EEDE2CD819560490003F0F99 /* TVIndicator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVIndicator.m; sourceTree = "<group>"; };
+		EEDE5DED1963AE9200782C90 /* TVLayerBaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVLayerBaseViewController.h; sourceTree = "<group>"; };
+		EEDE5DEE1963AE9200782C90 /* TVLayerBaseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVLayerBaseViewController.m; sourceTree = "<group>"; };
+		EEE0CE77195B217B0061E7A5 /* TVActivationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVActivationViewController.h; sourceTree = "<group>"; };
+		EEE0CE78195B217B0061E7A5 /* TVActivationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVActivationViewController.m; sourceTree = "<group>"; };
 		EEE0E0CF19531EA400560D95 /* UIViewController+InOutTransition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+InOutTransition.h"; sourceTree = "<group>"; };
 		EEE0E0D019531EBE00560D95 /* UIViewController+InOutTransition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+InOutTransition.m"; sourceTree = "<group>"; };
 		EEE3ED0B18110AFE004A232C /* TVAppRootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVAppRootViewController.h; sourceTree = "<group>"; };
@@ -219,6 +225,8 @@
 		D06A1A43179DC6A3003346F4 /* testView */ = {
 			isa = PBXGroup;
 			children = (
+				EEDE5DEC1963AE5500782C90 /* LayerViewController */,
+				EEE0CE76195B213A0061E7A5 /* Activation */,
 				EEE0E0D2195327FB00560D95 /* Language Picker */,
 				EEE9C1B519520B810022D4C7 /* Login */,
 				D0F668AC191E9E830091E801 /* DataWorker */,
@@ -378,6 +386,24 @@
 			path = TableView;
 			sourceTree = "<group>";
 		};
+		EEDE5DEC1963AE5500782C90 /* LayerViewController */ = {
+			isa = PBXGroup;
+			children = (
+				EEDE5DED1963AE9200782C90 /* TVLayerBaseViewController.h */,
+				EEDE5DEE1963AE9200782C90 /* TVLayerBaseViewController.m */,
+			);
+			name = LayerViewController;
+			sourceTree = "<group>";
+		};
+		EEE0CE76195B213A0061E7A5 /* Activation */ = {
+			isa = PBXGroup;
+			children = (
+				EEE0CE77195B217B0061E7A5 /* TVActivationViewController.h */,
+				EEE0CE78195B217B0061E7A5 /* TVActivationViewController.m */,
+			);
+			name = Activation;
+			sourceTree = "<group>";
+		};
 		EEE0E0D2195327FB00560D95 /* Language Picker */ = {
 			isa = PBXGroup;
 			children = (
@@ -522,6 +548,7 @@
 				EEE0E0D119531EBE00560D95 /* UIViewController+InOutTransition.m in Sources */,
 				D0F668C6191E9E830091E801 /* TVTableViewCell.m in Sources */,
 				D098EE6B19282D1E0051B305 /* TVRequestId.m in Sources */,
+				EEE0CE79195B217B0061E7A5 /* TVActivationViewController.m in Sources */,
 				D0347975179EDD55006FFCF6 /* TVSearchBaseViewController.m in Sources */,
 				D09C923E1946DAD2003B6660 /* TVDataListener.m in Sources */,
 				D096CE7C182F61A100D09446 /* TVTextField.m in Sources */,
@@ -536,6 +563,7 @@
 				D096CE7F182F642D00D09446 /* TVRegularFont.m in Sources */,
 				D096CE79182F618500D09446 /* TVLabel.m in Sources */,
 				EEDE2CD919560490003F0F99 /* TVIndicator.m in Sources */,
+				EEDE5DEF1963AE9200782C90 /* TVLayerBaseViewController.m in Sources */,
 				EEE3ED0D18110AFE004A232C /* TVAppRootViewController.m in Sources */,
 				D0AE0C5D1937756800514AD9 /* TVTestViewController.m in Sources */,
 				D094BB0419476BBA00BE0E7B /* TVSignUpListener.m in Sources */,

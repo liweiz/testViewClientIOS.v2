@@ -232,7 +232,6 @@
 {
     TVRequester *reqster = [[TVRequester alloc] init];
     reqster.coordinator = self.persistentStoreCoordinator;
-    [reqster printUser];
 }
 
 - (void)createDeviceInfo

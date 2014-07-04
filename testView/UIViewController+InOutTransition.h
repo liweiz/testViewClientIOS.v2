@@ -12,8 +12,9 @@
 
 #pragma mark - present another view back and forth
 
-- (void)showViewBelow:(UIView *)viewBelow viewBelowController:(UIViewController *)controllerBelow currentView:(UIView *)currentView baseView:(UIView *)base tapGesture:(UITapGestureRecognizer *)tapGesture longPressGesture:(UILongPressGestureRecognizer *)longPressGesture point:(CGPoint)p;
-- (void)showViewAbove:(UIView *)viewAbove viewAboveController:(UIViewController *)controllerAbove currentView:(UIView *)currentView baseView:(UIView *)base tapGesture:(UITapGestureRecognizer *)tapGesture pinchGesture:(UIPinchGestureRecognizer *)pinchGesture point:(CGPoint)p;
+- (CGPoint)pointBy:(UIGestureRecognizer *)recognizer inView:(UIView *)view;
+- (void)showViewBelow:(UIView *)viewBelow currentView:(UIView *)currentView baseView:(UIView *)base pointInBaseView:(CGPoint)p;
+- (void)showViewAbove:(UIView *)viewAbove currentView:(UIView *)currentView baseView:(UIView *)base pointInBaseView:(CGPoint)p;
 - (void)comeThrough:(UIView *)view anchorPoint:(CGPoint)point;
 - (void)comeUp:(UIView *)view anchorPoint:(CGPoint)point;
 - (void)goThrough:(UIView *)view anchorPoint:(CGPoint)point;

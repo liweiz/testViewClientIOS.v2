@@ -12,80 +12,56 @@ CGFloat const animationDuration = 3.0f;
 
 @implementation UIViewController (InOutTransition)
 
+#pragma mark - transition point getter
+
+- (CGPoint)pointBy:(UIGestureRecognizer *)recognizer inView:(UIView *)view
+{
+    if ([recognizer isKindOfClass:[UITapGestureRecognizer class]]) {
+        return [recognizer locationInView:view];
+    } else if ([recognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
+        if (recognizer.state == UIGestureRecognizerStateBegan) {
+            return [recognizer locationInView:view];
+        }
+    } else if ([recognizer isKindOfClass:[UIPinchGestureRecognizer class]]) {
+        if (recognizer.state == UIGestureRecognizerStateBegan) {
+            // The last locations
+            CGPoint lastLocation0 = [recognizer locationOfTouch:0 inView:view];
+            CGPoint lastLocation1 = [recognizer locationOfTouch:1 inView:view];
+            return CGPointMake((lastLocation0.x + lastLocation1.x) / 2, (lastLocation0.y + lastLocation1.y) / 2);
+        }
+    }
+    // return a very big set of numbers to stand for an error.
+    return CGPointMake(1000000.0f, 1000000.0f);
+}
+
 #pragma mark - present another view back and forth
 
 // Tap could be the gesture for visiting or exiting a visual layer
 // LongPress is only for visiting the visual layer below
+// When point location can not be got by gestureRecognizer, such as aysnc process. In this case, we store the touch point when the touch happens and assign to the parameter p here.
 // For visiting a visual layer below
-- (void)showViewBelow:(UIView *)viewBelow viewBelowController:(UIViewController *)controllerBelow currentView:(UIView *)currentView baseView:(UIView *)base tapGesture:(UITapGestureRecognizer *)tapGesture longPressGesture:(UILongPressGestureRecognizer *)longPressGesture point:(CGPoint)p
+- (void)showViewBelow:(UIView *)viewBelow currentView:(UIView *)currentView baseView:(UIView *)base pointInBaseView:(CGPoint)p
 {
-    BOOL proceed;
     // If the view is inited with a viewController, please get the controller ready before executing this method
-    CGPoint positionPoint;
-    if (controllerBelow) {
-        [self addChildViewController:controllerBelow];
-        [controllerBelow didMoveToParentViewController:self];
-    }
-    if (tapGesture) {
-        positionPoint = [tapGesture locationInView:base];
-        proceed = YES;
-    }
-    if (longPressGesture && longPressGesture.state == UIGestureRecognizerStateBegan) {
-        positionPoint = [longPressGesture locationInView:base];
-        proceed = YES;
-    }
-    if (!tapGesture && !longPressGesture) {
-        // This is used when tap location can not be got by gestureRecognizer, such as aysnc process. In this case, we store the touch point when the touch happens and assign to the parameter p here.
-        positionPoint = p;
-        proceed = YES;
-    }
-    if (proceed) {
-        [currentView endEditing:YES];
-        
-        CGPoint anchorPoint = CGPointMake(positionPoint.x / base.frame.size.width, positionPoint.y / base.frame.size.height);
-        [self comeThrough:currentView anchorPoint:anchorPoint];
-        [base insertSubview:viewBelow belowSubview:currentView];
-        [self comeUp:viewBelow anchorPoint:anchorPoint];
-        currentView.userInteractionEnabled = NO;
-        viewBelow.userInteractionEnabled = YES;
-    }
+    [base endEditing:YES];
+    CGPoint anchorPoint = CGPointMake(p.x / base.frame.size.width, p.y / base.frame.size.height);
+    [self comeThrough:currentView anchorPoint:anchorPoint];
+    [base insertSubview:viewBelow belowSubview:currentView];
+    [self comeUp:viewBelow anchorPoint:anchorPoint];
+    currentView.userInteractionEnabled = NO;
+    viewBelow.userInteractionEnabled = YES;
 }
 
 // No longPress here. However, pinchGesture could be here for exiting the new visual layer
-- (void)showViewAbove:(UIView *)viewAbove viewAboveController:(UIViewController *)controllerAbove currentView:(UIView *)currentView baseView:(UIView *)base tapGesture:(UITapGestureRecognizer *)tapGesture pinchGesture:(UIPinchGestureRecognizer *)pinchGesture point:(CGPoint)p
+- (void)showViewAbove:(UIView *)viewAbove currentView:(UIView *)currentView baseView:(UIView *)base pointInBaseView:(CGPoint)p
 {
-    BOOL proceed;
-    CGPoint positionPoint;
-    if (tapGesture) {
-        positionPoint = [tapGesture locationInView:base];
-        proceed = YES;
-    }
-    if (pinchGesture && (pinchGesture.state == UIGestureRecognizerStateBegan)) {
-        if (pinchGesture.scale < 1.0) {
-            // The last locations
-            CGPoint lastLocation0 = [pinchGesture locationOfTouch:0 inView:base];
-            CGPoint lastLocation1 = [pinchGesture locationOfTouch:1 inView:base];
-            positionPoint = CGPointMake((lastLocation0.x + lastLocation1.x) / 2, (lastLocation0.y + lastLocation1.y) / 2);
-            proceed = YES;
-        }
-    }
-    if (!tapGesture && !pinchGesture) {
-        positionPoint = p;
-        proceed = YES;
-    }
-    if (proceed) {
-        if (controllerAbove) {
-            [self addChildViewController:controllerAbove];
-            [controllerAbove didMoveToParentViewController:self];
-        }
-        [currentView endEditing:YES];
-        CGPoint anchorPoint = CGPointMake(positionPoint.x / base.frame.size.width, positionPoint.y / base.frame.size.height);
-        [self goThrough:viewAbove anchorPoint:anchorPoint];
-        [base insertSubview:currentView belowSubview:viewAbove];
-        [self goDown:currentView anchorPoint:anchorPoint];
-        currentView.userInteractionEnabled = NO;
-        viewAbove.userInteractionEnabled = YES;
-    }
+    [base endEditing:YES];
+    CGPoint anchorPoint = CGPointMake(p.x / base.frame.size.width, p.y / base.frame.size.height);
+    [self goThrough:viewAbove anchorPoint:anchorPoint];
+    [base insertSubview:currentView belowSubview:viewAbove];
+    [self goDown:currentView anchorPoint:anchorPoint];
+    currentView.userInteractionEnabled = NO;
+    viewAbove.userInteractionEnabled = YES;
 }
 
 - (void)comeThrough:(UIView *)view anchorPoint:(CGPoint)point

@@ -12,6 +12,7 @@
 #import "TVLoginViewController.h"
 #import "KeychainItemWrapper.h"
 #import "TVLangPickViewController.h"
+#import "TVActivationViewController.h"
 
 extern NSString *const tvEnglishFontName;
 extern NSString *const tvServerUrl;
@@ -21,6 +22,17 @@ extern CGFloat const goldenRatio;
 //extern UIColor *const tvFontColor;
 //extern CGFloat *const tvFontSizeHeader;
 //extern CGFloat *const tvFontSizeContent;
+extern NSString *const tvShowLogin;
+extern NSString *const tvShowActivation;
+extern NSString *const tvShowLangPick;
+extern NSString *const tvShowContent;
+
+typedef NS_ENUM(NSInteger, TVCtl) {
+    TVLoginCtl,
+    TVActivationCtl,
+    TVLangPickCtl,
+    TVContentCtl
+};
 
 @interface TVAppRootViewController : UIViewController
 
@@ -32,6 +44,7 @@ extern CGFloat const goldenRatio;
 @property (strong, nonatomic) NSFetchRequest *userFetchRequest;
 @property (strong, nonatomic) TVUser *user;
 @property (strong, nonatomic) TVLoginViewController *loginViewController;
+@property (strong, nonatomic) TVActivationViewController *activationViewController;
 @property (strong, nonatomic) TVLangPickViewController *langViewController;
 //@property (strong, nonatomic) TVContentRootViewController *contentViewController;
 
@@ -45,7 +58,13 @@ extern CGFloat const goldenRatio;
 
 @property (strong, nonatomic) TVIndicator *indicator;
 @property (strong, nonatomic) UILabel *sysMsg;
+// Show the current viewController on duty
+@property (assign, nonatomic) TVCtl ctlOnDuty;
+
+@property (assign, nonatomic) CGPoint transitionPointInRoot;
 
 - (void)showSysMsg:(NSString *)msg;
+- (void)sendActivationEmail:(BOOL)isUserTriggered;
+
 
 @end

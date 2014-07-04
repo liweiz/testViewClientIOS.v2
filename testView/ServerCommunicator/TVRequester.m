@@ -40,6 +40,8 @@
 @synthesize coordinator;
 
 @synthesize isUserTriggered;
+@synthesize fromVewTag;
+@synthesize transitionPointInRoot;
 
 @synthesize record;
 @synthesize reqId;
@@ -290,12 +292,41 @@
     if (toSave) {
         [self.ctx save:&err];
 //        [self printUser];
-        switch (self.requestType) {
-            case TVSignUp:
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"TVTapInLangPicker" object:self];
-        }
+        [self actionAfterSaveToDB];
     }
     return err;
+}
+
+- (void)actionAfterSaveToDB
+{
+    switch (self.requestType) {
+        case TVSignUp:
+            if ([self getLatestUserInDB].activated) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowActivation object:self];
+            } else {
+                // Show view to ask user to activate
+            }
+            
+        case TVSignIn:
+            if ([self getLatestUserInDB].activated) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowActivation object:self];
+            } else {
+                // Show view to ask user to activate
+            };
+    }
+}
+
+- (TVUser *)getLatestUserInDB
+{
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
+    NSPredicate *pUser = [NSPredicate predicateWithFormat:@"email like %@", self.email];
+    [fetchRequest setPredicate:pUser];
+    NSArray *r = [self.managedObjectContext executeFetchRequest:fetchRequest error:nil];
+    if (r[0]) {
+        return r[0];
+    } else {
+        return nil;
+    }
 }
 
 //- (void)printUser
@@ -343,6 +374,8 @@
          if ([(NSHTTPURLResponse *)response statusCode] == 200) {
              TVRequester *req = [[TVRequester alloc] init];
              // Pass all properties
+             req.fromVewTag = self.fromVewTag;
+             req.transitionPointInRoot = self.transitionPointInRoot;
              req.urlBranch = self.urlBranch;
              req.contentType = self.contentType;
              req.method = self.method;
@@ -423,6 +456,8 @@
                      }
                  } else {
                      // Request has been successfully processed on server previously. Set related requestId to done.
+                     // Post notification to let others react.
+                     [[NSNotificationCenter defaultCenter] postNotificationName:@"TVRequestOKOnly" object:self];
                  }
              } else {
                  NSString *errMsg = [self processResponseText:response data:data];

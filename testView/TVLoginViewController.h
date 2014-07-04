@@ -10,11 +10,10 @@
 #import "KeychainItemWrapper.h"
 #import "TVKeyboard.h"
 #import "TVView.h"
-#import "TVIndicator.h"
+#import "TVLayerBaseViewController.h"
 
-@interface TVLoginViewController : UIViewController <UITextFieldDelegate, UITextInputTraits>
+@interface TVLoginViewController : TVLayerBaseViewController <UITextFieldDelegate, UITextInputTraits>
 
-@property (nonatomic, assign) CGRect appRect;
 @property (nonatomic, assign) CGFloat animationSec;
 @property (nonatomic, assign) CGFloat introHeight;
 @property (nonatomic, assign) CGFloat gapHeight;
@@ -24,10 +23,6 @@
 @property (nonatomic, assign) CGFloat inputX;
 @property (nonatomic, assign) CGFloat inputWidth;
 @property (nonatomic, assign) CGFloat inputHeight;
-
-@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
-@property (strong, nonatomic) NSManagedObjectModel *managedObjectModel;
-@property (strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
 @property (strong, nonatomic) TVKeyboard *keyboard;
 @property (strong, nonatomic) UIScrollView *baseView;
@@ -70,9 +65,5 @@
 @property (strong, nonatomic) UITapGestureRecognizer *termsTap;
 
 @property (strong, nonatomic) KeychainItemWrapper *passItem;
-
-@property (strong, nonatomic) TVIndicator *indicator;
-
-@property (assign, nonatomic) CGPoint transitionPointInRoot;
 
 @end
