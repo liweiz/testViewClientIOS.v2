@@ -45,6 +45,8 @@ typedef NS_ENUM(NSInteger, TVRequestType) {
 
 - (NSData *)getJSONDicParentId:(NSString *)pId lastId:(NSString *)lId sortOption:(NSString *)option ascending:(NSNumber *)x err:(NSError **)err;
 
+- (NSMutableArray *)getCardVerList:(NSString *)userId withCtx:(NSManagedObjectContext *)ctx;
+
 - (NSString *)encodeStringWithBase64:(NSString *)string;
 
 - (NSString *)authenticationStringWithEmail:(NSString *)email password:(NSString *)password;
@@ -52,5 +54,8 @@ typedef NS_ENUM(NSInteger, TVRequestType) {
 - (NSString *)authenticationStringWithToken:(NSString *)token;
 
 - (NSString *)getUrlBranchFor:(NSInteger)reqType userId:(NSString *)userId deviceInfoId:(NSString *)deviceInfoId cardId:(NSString *)cardId;
+
+- (TVRequestId *)analyzeOneUndone:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx error:(NSError **)err;
+- (NSData *)getBody:(NSString *)reqId forRecord:(TVBase *)b err:(NSError **)err;
 
 @end

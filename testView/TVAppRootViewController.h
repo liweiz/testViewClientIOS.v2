@@ -13,6 +13,7 @@
 #import "KeychainItemWrapper.h"
 #import "TVLangPickViewController.h"
 #import "TVActivationViewController.h"
+#import "TVCommunicator.h"
 
 extern NSString *const tvEnglishFontName;
 extern NSString *const tvServerUrl;
@@ -26,6 +27,11 @@ extern NSString *const tvShowLogin;
 extern NSString *const tvShowActivation;
 extern NSString *const tvShowLangPick;
 extern NSString *const tvShowContent;
+extern NSString *const tvShowAfterActivated;
+extern NSString *const tvPinchToShowAbove;
+extern NSString *const tvAddAndCheckReqNo;
+extern NSString *const tvMinusAndCheckReqNo;
+extern NSString *const tvUserChangedLocalDb;
 
 typedef NS_ENUM(NSInteger, TVCtl) {
     TVLoginCtl,
@@ -62,6 +68,9 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (assign, nonatomic) TVCtl ctlOnDuty;
 
 @property (assign, nonatomic) CGPoint transitionPointInRoot;
+
+@property (strong, nonatomic) NSOperationQueue *bWorker;
+@property (strong, nonatomic) TVCommunicator *com;
 
 - (void)showSysMsg:(NSString *)msg;
 - (void)sendActivationEmail:(BOOL)isUserTriggered;

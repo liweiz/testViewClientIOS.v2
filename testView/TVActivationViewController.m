@@ -91,9 +91,9 @@
 - (void)checkUserAgain
 {
     self.transitionPointInRoot = [self.connectBtnTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
-    // Get user
+    // Get user from server and check activation again
     TVRequester *r = [[TVRequester alloc] init];
-    r.transitionPointInRoot = CGPointMake(self.transitionPointInRoot.x, self.transitionPointInRoot.y);
+    r.transitionPointInRoot = self.transitionPointInRoot;
     r.fromVewTag = self.view.tag;
     r.coordinator = self.persistentStoreCoordinator;
     r.requestType = TVOneUser;

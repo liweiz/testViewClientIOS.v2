@@ -15,6 +15,7 @@
 #import "TVLangPickViewController.h"
 #import "TVActivationViewController.h"
 #import "TVLayerBaseViewController.h"
+#import "TVCommunicator.h"
 
 NSString *const tvEnglishFontName = @"TimesNewRomanPSMT";
 NSString *const tvServerUrl = @"http://localhost:3000";
@@ -28,6 +29,11 @@ NSString *const tvShowLogin = @"tvShowLogin";
 NSString *const tvShowActivation = @"tvShowActivation";
 NSString *const tvShowLangPick = @"tvShowLangPick";
 NSString *const tvShowContent = @"tvShowContent";
+NSString *const tvShowAfterActivated = @"tvShowAfterActivated";
+NSString *const tvPinchToShowAbove = @"tvPinchToShowAbove";
+NSString *const tvAddAndCheckReqNo = @"tvAddAndCheckReqNo";
+NSString *const tvMinusAndCheckReqNo = @"tvMinusAndCheckReqNo";
+NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
 
 @interface TVAppRootViewController ()
 
@@ -43,13 +49,17 @@ NSString *const tvShowContent = @"tvShowContent";
 @synthesize activationViewController;
 @synthesize ctlOnDuty;
 @synthesize transitionPointInRoot;
+@synthesize com;
+@synthesize bWorker;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        
+        self.bWorker = [[NSOperationQueue alloc] init];
+        self.com = [[TVCommunicator alloc] init];
+        self.com.bWorker = self.bWorker;
     }
     return self;
 }
@@ -78,12 +88,23 @@ NSString *const tvShowContent = @"tvShowContent";
     self.sysMsg.alpha = 0.0f;
     self.sysMsg.textColor = [UIColor whiteColor];
     self.sysMsg.backgroundColor = [UIColor greenColor];
+    
+    
+    
     [self loadController];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLoginAbove:) name:tvShowLogin object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showActivationBelow:) name:tvShowActivation object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLangPick:) name:tvShowLangPick object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLangPick:) name:tvPinchToShowAbove object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addAndCheckReqNo) name:tvAddAndCheckReqNo object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(minusAndCheckReqNo) name:tvMinusAndCheckReqNo object:nil];
 }
+
+// Data flow of login process
+// 1. sign up/in: get from "POST" user response, check activation status when updated user available.
+// 2. before being activated: show activation view, when local user is not activated, user has to manually press a button to get the updated user to recheck through "GET" user response.
+// 3. after being activated: get user settings and cards through sync cycle.
 
 - (void)showSysMsg:(NSString *)msg
 {
@@ -99,6 +120,9 @@ NSString *const tvShowContent = @"tvShowContent";
 
 - (void)sendActivationEmail:(BOOL)isUserTriggered
 {
+    if (!self.user) {
+        [self refreshUser];
+    }
     TVRequester *r = [[TVRequester alloc] init];
     r.coordinator = self.persistentStoreCoordinator;
     r.requestType = TVEmailForActivation;
@@ -108,8 +132,44 @@ NSString *const tvShowContent = @"tvShowContent";
     r.userId = self.user.serverId;
     r.isBearer = YES;
     r.method = @"GET";
+    r.indicator = self.indicator;
     r.accessToken = [self getAccessTokenForAccount:self.user.serverId];
     [r checkServerAvailabilityToProceed];
+}
+
+#pragma mark - indicator on/off
+
+- (void)addAndCheckReqNo
+{
+    self.numberOfUserTriggeredRequests = self.numberOfUserTriggeredRequests + 1;
+    if (self.indicator.hidden) {
+        [self showIndicator];
+    }
+}
+
+- (void)minusAndCheckReqNo
+{
+    self.numberOfUserTriggeredRequests = self.numberOfUserTriggeredRequests - 1;
+    if (!self.indicator.hidden && self.numberOfUserTriggeredRequests == 0) {
+        [self hideIndicator];
+    }
+}
+
+- (void)showIndicator
+{
+    if (self.indicator.hidden) {
+        self.indicator.hidden = NO;
+        [self.indicator.superview bringSubviewToFront:self.indicator];
+        [self.indicator.indicator startAnimating];
+    }
+}
+
+- (void)hideIndicator
+{
+    if (!self.indicator.hidden) {
+        self.indicator.hidden = YES;
+        [self.indicator.indicator stopAnimating];
+    }
 }
 
 # pragma mark - view layers in/out
@@ -132,7 +192,6 @@ NSString *const tvShowContent = @"tvShowContent";
     }
 }
 
-
 - (void)showLoginAbove:(NSNotification *)note
 {
     TVRequester *r = note.object;
@@ -145,6 +204,12 @@ NSString *const tvShowContent = @"tvShowContent";
     TVRequester *r = note.object;
     [self loadActivationCtl:NO];
     [self showViewBelow:self.activationViewController.view currentView:[self getCurrentView:r.fromVewTag] baseView:self.view pointInBaseView:r.transitionPointInRoot];
+}
+
+- (void)showAfterActivated:(NSNotification *)note
+{
+    TVRequester *r = note.object;
+    // If user
 }
 
 - (void)showLangPick:(NSNotification *)note
@@ -169,24 +234,66 @@ NSString *const tvShowContent = @"tvShowContent";
     [self showViewAbove:self.langViewController.view currentView:[self getCurrentView:r.fromVewTag] baseView:self.view pointInBaseView:r.transitionPointInRoot];
 }
 
+- (void)showContentBelow:(NSNotification *)note
+{
+    TVRequester *r = note.object;
+}
+
+- (void)pinchToShowAbove:(NSNotification *)note
+{
+    TVLayerBaseViewController *c = note.object;
+    if ([c isKindOfClass:[TVActivationViewController class]] || [c isKindOfClass:[TVLangPickViewController class]]) {
+        // 1. Gesture is from activationView
+        // 2. Gesture is from langPickView, the account must be activated, so the above view is loginView.
+        [self loadLoginCtl:NO];
+        [self showViewAbove:self.loginViewController.view currentView:c.view baseView:self.view pointInBaseView:c.transitionPointInRoot];
+        [self signOut];
+    }
+}
+
 # pragma mark - content viewController
 
 - (void)loadController
 {
-    self.userFetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
     // When sync with server, isLoggedIn is not processed on server. The response in turn is always true. So when user signs out, isLoggedIn is set to be false. Once user signs in it set to be the value in response, which is alwasy true.
-    self.userFetchRequest.predicate = [NSPredicate predicateWithFormat:@"isLoggedIn == YES"];
-    NSArray *userArray = [self.managedObjectContext executeFetchRequest:self.userFetchRequest error:nil];
-    if ([userArray count] == 1) {
-        self.user = userArray[0];
-        if (self.user.activated.intValue == 1) {
-//            [self loadContentController];
+    [self refreshUser];
+    if (self.user) {
+        if (self.user.activated.integerValue == 1) {
+            
         } else {
-            // Show activation view
+            [self loadActivationCtl:YES];
         }
     } else {
         [self loadLoginCtl:YES];
-//        need to clear each local users isLoggedIn flag
+    }
+}
+
+- (void)actionAfterActivationDone
+{
+    if ([self.user.sourceLang isEqualToString:@""]) {
+        // This indicates that there is no data on this device previously, the app is the first time to be installed here or it's a reinstall after previous deletion. Start a sync cycle to get all from server.
+        // Show langPicker and indicator since a request is sent anyway to get the deviceInfo status from server and user has to wait for the response.
+        // 1. If no response received, let user pick lang pair so that user can keep use the app.
+        // 2. If server side error, let user pick lang pair so that user can keep use the app.
+        // 3. If there is existing deviceInfo on server(either specific for this device or fetched as default, see more details in server files), sync data from server and show content right away.
+        // 4. If there is no existing deviceInfo on server, let user pick lang pair so that user can keep use the app.
+        // Show langPick first. At the mean time, send request show indicator accordingly.
+         [self loadLangPickCtl:YES];
+        // Prepare request
+        TVRequester *r = [[TVRequester alloc] init];
+        r.indicator = self.indicator;
+        // We need user wait for the result from server
+        r.isUserTriggered = YES;
+        r.coordinator = self.persistentStoreCoordinator;
+        r.requestType = TVSync;
+        r.isBearer = YES;
+        r.method = @"GET";
+        r.urlBranch = [self getUrlBranchFor:TVOneDeviceInfo userId:self.user.serverId deviceInfoId:nil cardId:nil];
+        NSMutableArray *m = [self getCardVerList:self.user.serverId withCtx:self.managedObjectContext];
+        r.body = [self getJSONSyncWithCardVerList:m err:nil];
+        [r checkServerAvailabilityToProceed];
+    } else {
+        // Show content
     }
 }
 
@@ -220,6 +327,7 @@ NSString *const tvShowContent = @"tvShowContent";
         self.activationViewController.managedObjectModel = self.managedObjectModel;
         self.activationViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
         self.activationViewController.indicator = self.indicator;
+        self.activationViewController.user = self.user;
         [self addChildViewController:self.activationViewController];
         [self.activationViewController didMoveToParentViewController:self];
         self.activationViewController.view.tag = 1002;
@@ -238,6 +346,7 @@ NSString *const tvShowContent = @"tvShowContent";
         self.langViewController.managedObjectContext = self.managedObjectContext;
         self.langViewController.managedObjectModel = self.managedObjectModel;
         self.langViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+        self.langViewController.user = self.user;
         [self addChildViewController:self.langViewController];
         [self.langViewController didMoveToParentViewController:self];
         self.langViewController.view.tag = 1003;
@@ -245,7 +354,7 @@ NSString *const tvShowContent = @"tvShowContent";
     if (isOnTop) {
         [self.view addSubview:self.langViewController.view];
     }
-    self.ctlOnDuty = TVActivationCtl;
+    self.ctlOnDuty = TVLangPickCtl;
 }
 
 //- (void)loadContentController
@@ -279,6 +388,42 @@ NSString *const tvShowContent = @"tvShowContent";
 //        }
 //    }
 //}
+
+#pragma mark - user management
+
+- (TVUser *)getLoggedInUser
+{
+    NSFetchRequest *fRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
+    NSArray *users = [self.managedObjectContext executeFetchRequest:fRequest error:nil];
+    if ([users count] != 0) {
+        for (TVUser *u in users) {
+            NSString *s = [self getRefreshTokenForAccount:u.serverId];
+            if (![s isEqualToString:@""]) {
+                return u;
+            }
+        }
+    }
+    return nil;
+}
+
+- (void)refreshUser
+{
+    if (!self.user) {
+        self.user = [self getLoggedInUser];
+    } else {
+        self.userFetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
+        self.userFetchRequest.predicate = [NSPredicate predicateWithFormat:@"serverId == %@", self.user.serverId];
+        self.user = [self.managedObjectContext executeFetchRequest:self.userFetchRequest error:nil][0];
+    }
+}
+
+- (void)signOut
+{
+    if (!self.user) {
+        [self refreshUser];
+    }
+    [self resetTokens:self.user.serverId];
+}
 
 - (void)didReceiveMemoryWarning
 {

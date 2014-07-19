@@ -21,11 +21,14 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 
 @interface NSObject (DataHandler)
 
+- (NSMutableArray *)getUndoneSet:(NSManagedObjectContext *)ctx user:(TVUser *)user;
+
 - (TVBase *)scanDBForUndone:(NSSet *)objSet;
 
 - (void)saveAccessToken:(NSString *)aToken refreshToken:(NSString *)rToken toAccount:(NSString *)email;
 - (NSString *)getAccessTokenForAccount:(NSString *)email;
 - (NSString *)getRefreshTokenForAccount:(NSString *)email;
+- (void)resetTokens:(NSString *)userId;
 
 - (void)setupNewDocBaseLocal:(TVBase *)doc;
 - (void)setupNewDocBaseServer:(TVBase *)doc fromRequest:(NSMutableDictionary *)dicInside;
@@ -38,6 +41,8 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 - (void)updateDocBaseServer:(TVBase *)doc withDic:(NSMutableDictionary *)dic;
 - (void)updateUser:(TVUser *)user withDic:(NSMutableDictionary *)dic;
 - (void)updateCard:(TVCard *)card withDic:(NSMutableDictionary *)dic;
+
+- (NSArray *)refreshCards:(NSString *)userId withCtx:(NSManagedObjectContext *)ctx;
 
 - (NSInteger)getRequestIdOperationVersion:(TVBase *)base;
 

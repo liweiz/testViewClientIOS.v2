@@ -7,6 +7,8 @@
 //
 
 #import "TVLayerBaseViewController.h"
+#import "TVAppRootViewController.h"
+#import "UIViewController+InOutTransition.h"
 
 @interface TVLayerBaseViewController ()
 
@@ -20,13 +22,14 @@
 @synthesize managedObjectContext;
 @synthesize managedObjectModel;
 @synthesize persistentStoreCoordinator;
-@synthesize user;
+@synthesize pinchToShow;
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        self.pinchToShow = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchAction)];
     }
     return self;
 }
@@ -35,6 +38,12 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+}
+
+- (void)pinchAction
+{
+    self.transitionPointInRoot = [self pointBy:self.pinchToShow inView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+    [[NSNotificationCenter defaultCenter] postNotificationName:tvPinchToShowAbove object:self];
 }
 
 - (void)didReceiveMemoryWarning

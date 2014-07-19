@@ -42,6 +42,7 @@
 @property (nonatomic, assign) CGPoint transitionPointInRoot;
 
 @property (strong, nonatomic) TVBase *record;
+@property (assign, nonatomic) BOOL reqIdNeeded;
 @property (strong, nonatomic) TVRequestId *reqId;
 
 @property (strong, nonatomic) TVIndicator *indicator;
