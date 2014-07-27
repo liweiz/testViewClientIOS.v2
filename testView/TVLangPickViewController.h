@@ -10,16 +10,18 @@
 #import "TVLangPickTableViewController.h"
 #import "TVLayerBaseViewController.h"
 
-@interface TVLangPickViewController : TVLayerBaseViewController <UITableViewDelegate>
+
+@interface TVLangPickViewController : TVLayerBaseViewController <UITableViewDelegate, UITextFieldDelegate>
 
 @property (strong, nonatomic) TVLangPickTableViewController *langPickController;
-@property (strong, nonatomic) UILabel *sourceLangViewIntro;
-@property (strong, nonatomic) UILabel *targetLangViewIntro;
-@property (strong, nonatomic) UILabel *sourceLangView;
-@property (strong, nonatomic) UILabel *targetLangView;
-@property (strong, nonatomic) UITapGestureRecognizer *sourceLangTap;
-@property (strong, nonatomic) UITapGestureRecognizer *targetLangTap;
+@property (strong, nonatomic) UITextField *lang;
+@property (strong, nonatomic) UILabel *button;
+@property (strong, nonatomic) UITapGestureRecognizer *buttonTap;
 @property (assign, nonatomic) BOOL tableIsForSourceLang;
 @property (assign, nonatomic) CGFloat originY;
+
+@property (strong, nonatomic) UILabel *warning;
+@property (strong, nonatomic) NSString *sourceLang;
+@property (strong, nonatomic) NSString *targetLang;
 
 @end

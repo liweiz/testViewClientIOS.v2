@@ -16,6 +16,8 @@
 @implementation TVLangPickTableViewController
 
 @synthesize langArray;
+@synthesize originY1;
+@synthesize originY2;
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
@@ -30,7 +32,7 @@
 - (void)loadView
 {
     CGRect firstRect = [[UIScreen mainScreen] applicationFrame];
-    CGRect viewRect = CGRectMake(0.0f, 0.0f, firstRect.size.width, firstRect.size.height);
+    CGRect viewRect = CGRectMake(0.0f, self.originY1, firstRect.size.width, self.originY2 - self.originY1);
     self.langArray = [self loadLangArray];
     self.tableView = [[UITableView alloc] initWithFrame:viewRect style:UITableViewStylePlain];
     self.tableView.dataSource = self;

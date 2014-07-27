@@ -27,6 +27,8 @@ typedef NS_ENUM(NSInteger, TVRequestType) {
 
 @interface NSObject (NetworkHandler)
 
+- (NSData *)getJSONSignUpWithSource:(NSString *)s target:(NSString *)t err:(NSError **)err;
+
 - (NSData *)getJSONSignUpOrInWithEmail:(NSString *)email password:(NSString *)password err:(NSError **)err;
 
 - (NSData *)getJSONForgotPasswordWithEmail:(NSString *)email err:(NSError **)err;

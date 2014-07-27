@@ -11,6 +11,7 @@
 #import "TVKeyboard.h"
 #import "TVView.h"
 #import "TVLayerBaseViewController.h"
+#import "TVRootViewCtlBox.h"
 
 @interface TVLoginViewController : TVLayerBaseViewController <UITextFieldDelegate, UITextInputTraits>
 
@@ -29,8 +30,6 @@
 
 @property (strong, nonatomic) TVView *coverOnBaseView;
 
-@property (strong, nonatomic) UILabel *warning;
-
 @property (strong, nonatomic) UITextField *emailInput;
 @property (strong, nonatomic) UITextField *passwordInput;
 
@@ -39,6 +38,9 @@
 
 @property (strong, nonatomic) UILabel *signUpButton;
 @property (strong, nonatomic) UITapGestureRecognizer *signUpButtonTap;
+
+@property (strong, nonatomic) UILabel *nextButton;
+@property (strong, nonatomic) UITapGestureRecognizer *nextButtonTap;
 
 @property (strong, nonatomic) UILabel *signInButton;
 @property (strong, nonatomic) UITapGestureRecognizer *signInButtonTap;
@@ -65,5 +67,6 @@
 @property (strong, nonatomic) UITapGestureRecognizer *termsTap;
 
 @property (strong, nonatomic) KeychainItemWrapper *passItem;
+@property (strong, nonatomic) TVRootViewCtlBox *box;
 
 @end

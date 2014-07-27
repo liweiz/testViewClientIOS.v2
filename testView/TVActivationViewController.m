@@ -90,10 +90,10 @@
 
 - (void)checkUserAgain
 {
-    self.transitionPointInRoot = [self.connectBtnTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+    self.box.transitionPointInRoot = [self.connectBtnTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     // Get user from server and check activation again
     TVRequester *r = [[TVRequester alloc] init];
-    r.transitionPointInRoot = self.transitionPointInRoot;
+    r.box = self.box;
     r.fromVewTag = self.view.tag;
     r.coordinator = self.persistentStoreCoordinator;
     r.requestType = TVOneUser;
@@ -102,12 +102,12 @@
     r.isBearer = YES;
     r.method = @"GET";
     r.accessToken = [self getAccessTokenForAccount:self.user.serverId];
-    [r checkServerAvailabilityToProceed];
+    [r checkServerAvailToProceed];
 }
 
 - (void)sendEmail
 {
-    self.transitionPointInRoot = [self.sendBtnTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+    self.box.transitionPointInRoot = [self.sendBtnTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     TVAppRootViewController *t = (TVAppRootViewController *)[[UIApplication sharedApplication] keyWindow].rootViewController;
     [t sendActivationEmail:YES];
 }
@@ -121,7 +121,8 @@
         // Check the user in local db to know the activation status
         [self.managedObjectContext refreshObject:self.user mergeChanges:NO];
         if (self.user.activated) {
-            [[NSNotificationCenter defaultCenter] postNotificationName:tvShowLangPick object:r];
+            
+//            [[NSNotificationCenter defaultCenter] postNotificationName: object:r];
         }
     }
 }
@@ -142,5 +143,10 @@
     // Pass the selected object to the new view controller.
 }
 */
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 
 @end

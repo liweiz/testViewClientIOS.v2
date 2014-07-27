@@ -16,6 +16,7 @@
 #import "TVActivationViewController.h"
 #import "TVLayerBaseViewController.h"
 #import "TVCommunicator.h"
+#import "TVRootViewCtlBox.h"
 
 NSString *const tvEnglishFontName = @"TimesNewRomanPSMT";
 NSString *const tvServerUrl = @"http://localhost:3000";
@@ -27,13 +28,18 @@ CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
 //CGFloat *const tvFontSizeContent = 28.0f;
 NSString *const tvShowLogin = @"tvShowLogin";
 NSString *const tvShowActivation = @"tvShowActivation";
-NSString *const tvShowLangPick = @"tvShowLangPick";
+NSString *const tvShowNative = @"tvShowLangPickNative";
+NSString *const tvShowTarget = @"tvShowLangPickTarget";
 NSString *const tvShowContent = @"tvShowContent";
 NSString *const tvShowAfterActivated = @"tvShowAfterActivated";
+
 NSString *const tvPinchToShowAbove = @"tvPinchToShowAbove";
 NSString *const tvAddAndCheckReqNo = @"tvAddAndCheckReqNo";
 NSString *const tvMinusAndCheckReqNo = @"tvMinusAndCheckReqNo";
 NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
+NSString *const tvUserSignUp = @"tvUserSignUp";
+
+NSString *const tvShowWarning = @"tvShowWarning";
 
 @interface TVAppRootViewController ()
 
@@ -44,13 +50,15 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
 @synthesize managedObjectContext, persistentStoreCoordinator, managedObjectModel, userFetchRequest, user, loginViewController, requestReceivedResponse, willSendRequest, passItem, appRect, internetIsAccessible;
 @synthesize indicator;
 @synthesize sysMsg;
-@synthesize numberOfUserTriggeredRequests;
-@synthesize langViewController;
+
+@synthesize nativeViewController;
+@synthesize targetViewController;
 @synthesize activationViewController;
-@synthesize ctlOnDuty;
-@synthesize transitionPointInRoot;
+
 @synthesize com;
 @synthesize bWorker;
+@synthesize box;
+@synthesize warning;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -58,8 +66,10 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
     if (self) {
         // Custom initialization
         self.bWorker = [[NSOperationQueue alloc] init];
+        self.box = [[TVRootViewCtlBox alloc] init];
         self.com = [[TVCommunicator alloc] init];
         self.com.bWorker = self.bWorker;
+        self.com.box = self.box;
     }
     return self;
 }
@@ -89,21 +99,28 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
     self.sysMsg.textColor = [UIColor whiteColor];
     self.sysMsg.backgroundColor = [UIColor greenColor];
     
-    
-    
     [self loadController];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLoginAbove:) name:tvShowLogin object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showActivationBelow:) name:tvShowActivation object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLangPick:) name:tvShowLangPick object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLangPick:) name:tvPinchToShowAbove object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showNativePickBelow:) name:tvShowNative object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTargetPickBelow:) name:tvShowTarget object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addAndCheckReqNo) name:tvAddAndCheckReqNo object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(minusAndCheckReqNo) name:tvMinusAndCheckReqNo object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showWarningWithText) name:tvShowWarning object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pinchToShowAbove:) name:tvPinchToShowAbove object:nil];
 }
 
-// Data flow of login process
-// 1. sign up/in: get from "POST" user response, check activation status when updated user available.
-// 2. before being activated: show activation view, when local user is not activated, user has to manually press a button to get the updated user to recheck through "GET" user response.
+/*
+ Data flow of login process:
+ Start with sign up/in by getting "user" from server with sign up/in request. If everything's ok, show content and start sync cycle in background.
+ This can be interrupted when:
+ 1. not activated according to local db: show activation view, user has to manually press a button to get the updated user to recheck through "GET" user response. This also indicates user does not have previous data on this device.
+ 2. no language pair set according to local db
+ In both 1 and 2, launch a user triggered sync cycle, which leads to the indicator to show up and user has to wait.
+ If no language pair returned from server, show lang pick view and use "POST" deivceInfo to create one on server.
+ */
+// 1. sign up/in: get from "POST" user response.  check activation status when updated user available.
+// 2. before being activated:
 // 3. after being activated: get user settings and cards through sync cycle.
 
 - (void)showSysMsg:(NSString *)msg
@@ -134,14 +151,14 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
     r.method = @"GET";
     r.indicator = self.indicator;
     r.accessToken = [self getAccessTokenForAccount:self.user.serverId];
-    [r checkServerAvailabilityToProceed];
+    [r checkServerAvailToProceed];
 }
 
 #pragma mark - indicator on/off
 
 - (void)addAndCheckReqNo
 {
-    self.numberOfUserTriggeredRequests = self.numberOfUserTriggeredRequests + 1;
+    self.box.numberOfUserTriggeredRequests = self.box.numberOfUserTriggeredRequests + 1;
     if (self.indicator.hidden) {
         [self showIndicator];
     }
@@ -149,8 +166,8 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
 
 - (void)minusAndCheckReqNo
 {
-    self.numberOfUserTriggeredRequests = self.numberOfUserTriggeredRequests - 1;
-    if (!self.indicator.hidden && self.numberOfUserTriggeredRequests == 0) {
+    self.box.numberOfUserTriggeredRequests = self.box.numberOfUserTriggeredRequests - 1;
+    if (!self.indicator.hidden && self.box.numberOfUserTriggeredRequests == 0) {
         [self hideIndicator];
     }
 }
@@ -184,7 +201,9 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
         case 1002:
             return self.activationViewController.view;
         case 1003:
-            return self.langViewController.view;
+            return self.nativeViewController.view;
+        case 1004:
+            return self.targetViewController.view;
 //        case TVContentCtl:
 //            return nil;
         default:
@@ -192,18 +211,11 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
     }
 }
 
-- (void)showLoginAbove:(NSNotification *)note
-{
-    TVRequester *r = note.object;
-    [self loadLoginCtl:NO];
-    [self showViewAbove:self.loginViewController.view currentView:[self getCurrentView:r.fromVewTag] baseView:self.view pointInBaseView:r.transitionPointInRoot];
-}
-
 - (void)showActivationBelow:(NSNotification *)note
 {
     TVRequester *r = note.object;
     [self loadActivationCtl:NO];
-    [self showViewBelow:self.activationViewController.view currentView:[self getCurrentView:r.fromVewTag] baseView:self.view pointInBaseView:r.transitionPointInRoot];
+    [self showViewBelow:self.activationViewController.view currentView:[self getCurrentView:r.fromVewTag] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
 }
 
 - (void)showAfterActivated:(NSNotification *)note
@@ -212,26 +224,25 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
     // If user
 }
 
-- (void)showLangPick:(NSNotification *)note
+- (void)showNativePickBelow:(NSNotification *)note
 {
-    TVRequester *r = note.object;
-    if (r.fromVewTag < 1003) {
-        [self showLangPickBelow:r];
-    } else {
-        [self showLangPickAbove:r];
-    }
+    TVLoginViewController *c = note.object;
+    [self loadNativePickCtl];
+    [self showViewBelow:self.nativeViewController.view currentView:[self getCurrentView:c.view.tag] baseView:self.view pointInBaseView:c.box.transitionPointInRoot];
 }
 
-- (void)showLangPickBelow:(TVRequester *)r
+- (void)showNativePickAbove:(NSNotification *)note
 {
-    [self loadLangPickCtl:NO];
-    [self showViewBelow:self.langViewController.view currentView:[self getCurrentView:r.fromVewTag] baseView:self.view pointInBaseView:r.transitionPointInRoot];
+    TVLangPickViewController *c = note.object;
+    [self loadNativePickCtl];
+    [self showViewAbove:self.nativeViewController.view currentView:[self getCurrentView:c.view.tag] baseView:self.view pointInBaseView:c.box.transitionPointInRoot];
 }
 
-- (void)showLangPickAbove:(TVRequester *)r
+- (void)showTargetPickBelow:(NSNotification *)note
 {
-    [self loadLangPickCtl:NO];
-    [self showViewAbove:self.langViewController.view currentView:[self getCurrentView:r.fromVewTag] baseView:self.view pointInBaseView:r.transitionPointInRoot];
+    TVLangPickViewController *c = note.object;
+    [self loadTargetPickCtl];
+    [self showViewBelow:self.targetViewController.view currentView:[self getCurrentView:c.view.tag] baseView:self.view pointInBaseView:c.box.transitionPointInRoot];
 }
 
 - (void)showContentBelow:(NSNotification *)note
@@ -242,12 +253,65 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
 - (void)pinchToShowAbove:(NSNotification *)note
 {
     TVLayerBaseViewController *c = note.object;
-    if ([c isKindOfClass:[TVActivationViewController class]] || [c isKindOfClass:[TVLangPickViewController class]]) {
-        // 1. Gesture is from activationView
-        // 2. Gesture is from langPickView, the account must be activated, so the above view is loginView.
-        [self loadLoginCtl:NO];
-        [self showViewAbove:self.loginViewController.view currentView:c.view baseView:self.view pointInBaseView:c.transitionPointInRoot];
-        [self signOut];
+    int n = c.view.tag;
+    if (n == 1002 || n == 1003) {
+        [self loadLoginCtl];
+        [self showViewAbove:self.loginViewController.view currentView:c.view baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+        if (n == 1002) {
+            [self signOut];
+        }
+    } else if (n == 1004) {
+        [self loadNativePickCtl];
+        [self showViewAbove:self.nativeViewController.view currentView:c.view baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+    }
+}
+
+- (void)animationDidStart:(CAAnimation *)anim
+{
+    
+}
+
+// viewController hierarchy
+// root/content/activation/login
+// login: target/native/signInOrUp
+// content 1 new card: compose/action
+// content 2 card list: list/menu
+// content 3 dic: context/contextList/detail/DetailList/translation/translationList/searchInput
+
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
+{
+    if (flag) {
+        NSString *name = [anim valueForKey:@"animationName"];
+        if ([name isEqualToString:@"comeThrough"]) {
+            switch ([self getCtlAbove]) {
+                case TVLoginCtl:
+                    self.loginViewController.view.hidden = YES;
+                    [self.loginViewController.view.layer removeAllAnimations];
+                    break;
+                case TVNativePickCtl:
+                    self.nativeViewController.view.hidden = YES;
+                    [self.nativeViewController.view.layer removeAllAnimations];
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+    }
+}
+
+- (TVCtl)getCtlAbove
+{
+    switch (self.box.ctlOnDuty) {
+        case TVNativePickCtl:
+            return TVLoginCtl;
+        case TVTargetPickCtl:
+            return TVNativePickCtl;
+        case TVActivationCtl:
+            return TVLoginCtl;
+        default:
+            // Return a very big number to indicate not exists.
+            return 100000;
     }
 }
 
@@ -264,7 +328,7 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
             [self loadActivationCtl:YES];
         }
     } else {
-        [self loadLoginCtl:YES];
+        [self loadLoginCtl];
     }
 }
 
@@ -278,7 +342,6 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
         // 3. If there is existing deviceInfo on server(either specific for this device or fetched as default, see more details in server files), sync data from server and show content right away.
         // 4. If there is no existing deviceInfo on server, let user pick lang pair so that user can keep use the app.
         // Show langPick first. At the mean time, send request show indicator accordingly.
-         [self loadLangPickCtl:YES];
         // Prepare request
         TVRequester *r = [[TVRequester alloc] init];
         r.indicator = self.indicator;
@@ -291,14 +354,13 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
         r.urlBranch = [self getUrlBranchFor:TVOneDeviceInfo userId:self.user.serverId deviceInfoId:nil cardId:nil];
         NSMutableArray *m = [self getCardVerList:self.user.serverId withCtx:self.managedObjectContext];
         r.body = [self getJSONSyncWithCardVerList:m err:nil];
-        [r checkServerAvailabilityToProceed];
+        [r checkServerAvailToProceed];
     } else {
         // Show content
     }
 }
 
-// isOnTop is only set to be YES when the controller is loaded directly after the app is launched.
-- (void)loadLoginCtl:(BOOL)isOnTop
+- (void)loadLoginCtl
 {
     if (!self.loginViewController) {
         self.loginViewController = [[TVLoginViewController alloc] init];
@@ -306,17 +368,55 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
         self.loginViewController.managedObjectContext = self.managedObjectContext;
         self.loginViewController.managedObjectModel = self.managedObjectModel;
         self.loginViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+        self.loginViewController.box = self.box;
         self.loginViewController.indicator = self.indicator;
         [self addChildViewController:self.loginViewController];
+        [self.view addSubview:self.loginViewController.view];
         [self.loginViewController didMoveToParentViewController:self];
         self.loginViewController.view.tag = 1001;
     }
-    if (isOnTop) {
-        // In other situations, subview is inserted by showView... method.
-        [self.view addSubview:self.loginViewController.view];
-    }
-    self.ctlOnDuty = TVLoginCtl;
+    self.loginViewController.view.hidden = NO;
+    self.box.ctlOnDuty = TVLoginCtl;
 }
+
+- (void)loadNativePickCtl
+{
+    if (!self.nativeViewController) {
+        self.nativeViewController = [[TVLangPickViewController alloc] init];
+        self.nativeViewController.tableIsForSourceLang = YES;
+        self.nativeViewController.appRect = self.appRect;
+        self.nativeViewController.managedObjectContext = self.managedObjectContext;
+        self.nativeViewController.managedObjectModel = self.managedObjectModel;
+        self.nativeViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+        self.nativeViewController.box = self.box;
+        self.nativeViewController.user = self.user;
+        [self addChildViewController:self.nativeViewController];
+        [self.view addSubview:self.nativeViewController.view];
+        [self.nativeViewController didMoveToParentViewController:self];
+    }
+    self.nativeViewController.view.hidden = NO;
+    self.box.ctlOnDuty = TVNativePickCtl;
+}
+
+- (void)loadTargetPickCtl
+{
+    if (!self.targetViewController) {
+        self.targetViewController = [[TVLangPickViewController alloc] init];
+        self.targetViewController.tableIsForSourceLang = NO;
+        self.targetViewController.appRect = self.appRect;
+        self.targetViewController.managedObjectContext = self.managedObjectContext;
+        self.targetViewController.managedObjectModel = self.managedObjectModel;
+        self.targetViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+        self.targetViewController.box = self.box;
+        self.targetViewController.user = self.user;
+        [self addChildViewController:self.targetViewController];
+        [self.view addSubview:self.targetViewController.view];
+        [self.targetViewController didMoveToParentViewController:self];
+    }
+    self.targetViewController.view.hidden = NO;
+    self.box.ctlOnDuty = TVTargetPickCtl;
+}
+
 
 - (void)loadActivationCtl:(BOOL)isOnTop
 {
@@ -335,26 +435,8 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
     if (isOnTop) {
         [self.view addSubview:self.activationViewController.view];
     }
-    self.ctlOnDuty = TVActivationCtl;
-}
-
-- (void)loadLangPickCtl:(BOOL)isOnTop
-{
-    if (!self.langViewController) {
-        self.langViewController = [[TVLangPickViewController alloc] init];
-        self.langViewController.appRect = self.appRect;
-        self.langViewController.managedObjectContext = self.managedObjectContext;
-        self.langViewController.managedObjectModel = self.managedObjectModel;
-        self.langViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
-        self.langViewController.user = self.user;
-        [self addChildViewController:self.langViewController];
-        [self.langViewController didMoveToParentViewController:self];
-        self.langViewController.view.tag = 1003;
-    }
-    if (isOnTop) {
-        [self.view addSubview:self.langViewController.view];
-    }
-    self.ctlOnDuty = TVLangPickCtl;
+    self.activationViewController.view.hidden = NO;
+    self.box.ctlOnDuty = TVActivationCtl;
 }
 
 //- (void)loadContentController
@@ -388,6 +470,35 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
 //        }
 //    }
 //}
+
+#pragma mark - warning display
+
+- (void)showWarningWithText
+{
+    if (!self.warning) {
+        self.warning = [[UILabel alloc] initWithFrame:CGRectMake((self.view.frame.size.width - 220.0f) * 0.5f, (self.view.frame.size.height - 90.0f) * 0.5f, 220.0f, 90.0f)];
+        [self.view addSubview:self.warning];
+        self.warning.textAlignment = NSTextAlignmentLeft;
+    }
+    self.warning.text = self.box.warning;
+    if (self.warning.alpha == 0.0f) {
+        self.warning.alpha = 1.0f;
+        [self.view bringSubviewToFront:self.warning];
+    }
+    [UIView animateWithDuration:4 animations:^{
+        self.warning.alpha = 0.0f;
+    } completion:^(BOOL finished){
+        self.box.warning = @"";
+    }];
+}
+
+- (void)hideWarning
+{
+    self.warning.text = @"";
+    if (self.warning.alpha == 1.0f) {
+        self.warning.alpha = 0.0f;
+    }
+}
 
 #pragma mark - user management
 
@@ -429,6 +540,11 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 @end

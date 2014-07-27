@@ -45,8 +45,11 @@ CGFloat const animationDuration = 3.0f;
     // If the view is inited with a viewController, please get the controller ready before executing this method
     [base endEditing:YES];
     CGPoint anchorPoint = CGPointMake(p.x / base.frame.size.width, p.y / base.frame.size.height);
-    [self comeThrough:currentView anchorPoint:anchorPoint];
     [base insertSubview:viewBelow belowSubview:currentView];
+    if (viewBelow.hidden == YES) {
+        viewBelow.hidden = NO;
+    }
+    [self comeThrough:currentView anchorPoint:anchorPoint];
     [self comeUp:viewBelow anchorPoint:anchorPoint];
     currentView.userInteractionEnabled = NO;
     viewBelow.userInteractionEnabled = YES;
@@ -57,8 +60,12 @@ CGFloat const animationDuration = 3.0f;
 {
     [base endEditing:YES];
     CGPoint anchorPoint = CGPointMake(p.x / base.frame.size.width, p.y / base.frame.size.height);
-    [self goThrough:viewAbove anchorPoint:anchorPoint];
+    viewAbove.hidden = NO;
     [base insertSubview:currentView belowSubview:viewAbove];
+    if (viewAbove.hidden == YES) {
+        viewAbove.hidden = NO;
+    }
+    [self goThrough:viewAbove anchorPoint:anchorPoint];
     [self goDown:currentView anchorPoint:anchorPoint];
     currentView.userInteractionEnabled = NO;
     viewAbove.userInteractionEnabled = YES;
@@ -94,7 +101,6 @@ CGFloat const animationDuration = 3.0f;
     [comeThrough setValue:@"comeThrough" forKey:@"animationName"];
     
     [view.layer addAnimation:comeThrough forKey:@"comeThrough"];
-    
 }
 
 - (void)comeUp:(UIView *)view anchorPoint:(CGPoint)point
@@ -113,6 +119,8 @@ CGFloat const animationDuration = 3.0f;
     comeUp.animations = [NSArray arrayWithObjects:becomeLarger, becomeOpaque, nil];
     comeUp.duration = animationDuration;
     comeUp.delegate = self;
+//    comeUp.fillMode = kCAFillModeForwards;
+//    comeUp.removedOnCompletion = NO;
     
     // Get the anchorPoint and positionPoint before animating
     CGPoint lastAnchorPoint = view.layer.anchorPoint;
@@ -124,7 +132,6 @@ CGFloat const animationDuration = 3.0f;
     [comeUp setValue:@"comeUp" forKey:@"animationName"];
     
     [view.layer addAnimation:comeUp forKey:@"comeUp"];
-    
 }
 
 - (void)goThrough:(UIView *)view anchorPoint:(CGPoint)point
@@ -143,8 +150,8 @@ CGFloat const animationDuration = 3.0f;
     goThrough.animations = [NSArray arrayWithObjects:becomeSmall, becomeOpaque, nil];
     goThrough.duration = animationDuration;
     goThrough.delegate = self;
-    goThrough.fillMode = kCAFillModeForwards;
-    goThrough.removedOnCompletion = NO;
+//    goThrough.fillMode = kCAFillModeForwards;
+//    goThrough.removedOnCompletion = NO;
     
     // Get the anchorPoint and positionPoint before animating
     CGPoint lastAnchorPoint = view.layer.anchorPoint;
@@ -156,7 +163,6 @@ CGFloat const animationDuration = 3.0f;
     [goThrough setValue:@"goThrough" forKey:@"animationName"];
     
     [view.layer addAnimation:goThrough forKey:@"goThrough"];
-    
 }
 
 - (void)goDown:(UIView *)view anchorPoint:(CGPoint)point
@@ -165,18 +171,17 @@ CGFloat const animationDuration = 3.0f;
     becomeTransparent.fromValue = [NSNumber numberWithFloat:1.0];
     becomeTransparent.toValue = [NSNumber numberWithFloat:0.0];
     becomeTransparent.duration = animationDuration;
-    //self.becomeTransparent.removedOnCompletion = NO;
     
     CABasicAnimation *becomeSmaller = [CABasicAnimation animationWithKeyPath:@"transform"];
     becomeSmaller.fromValue = [NSValue valueWithCATransform3D:CATransform3DIdentity];
     becomeSmaller.toValue = [NSValue valueWithCATransform3D:CATransform3DMakeScale(0.4, 0.4, 1)];;
     becomeSmaller.duration = animationDuration;
-    //self.becomeSmaller.removedOnCompletion = NO;
     
     CAAnimationGroup *goDown = [CAAnimationGroup animation];
     goDown.animations = [NSArray arrayWithObjects:becomeSmaller, becomeTransparent, nil];
     goDown.duration = animationDuration;
     goDown.delegate = self;
+    goDown.removedOnCompletion = NO;
     
     // Get the anchorPoint and positionPoint before animating
     CGPoint lastAnchorPoint = view.layer.anchorPoint;
@@ -188,7 +193,6 @@ CGFloat const animationDuration = 3.0f;
     [goDown setValue:@"goDown" forKey:@"animationName"];
     
     [view.layer addAnimation:goDown forKey:@"goDown"];
-    
 }
 
 @end

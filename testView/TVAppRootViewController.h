@@ -14,6 +14,7 @@
 #import "TVLangPickViewController.h"
 #import "TVActivationViewController.h"
 #import "TVCommunicator.h"
+#import "TVRootViewCtlBox.h"
 
 extern NSString *const tvEnglishFontName;
 extern NSString *const tvServerUrl;
@@ -23,22 +24,17 @@ extern CGFloat const goldenRatio;
 //extern UIColor *const tvFontColor;
 //extern CGFloat *const tvFontSizeHeader;
 //extern CGFloat *const tvFontSizeContent;
-extern NSString *const tvShowLogin;
+extern NSString *const tvShowNative;
+extern NSString *const tvShowTarget;
 extern NSString *const tvShowActivation;
-extern NSString *const tvShowLangPick;
 extern NSString *const tvShowContent;
 extern NSString *const tvShowAfterActivated;
 extern NSString *const tvPinchToShowAbove;
 extern NSString *const tvAddAndCheckReqNo;
 extern NSString *const tvMinusAndCheckReqNo;
 extern NSString *const tvUserChangedLocalDb;
-
-typedef NS_ENUM(NSInteger, TVCtl) {
-    TVLoginCtl,
-    TVActivationCtl,
-    TVLangPickCtl,
-    TVContentCtl
-};
+extern NSString *const tvUserSignUp;
+extern NSString *const tvShowWarning;
 
 @interface TVAppRootViewController : UIViewController
 
@@ -51,26 +47,25 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (strong, nonatomic) TVUser *user;
 @property (strong, nonatomic) TVLoginViewController *loginViewController;
 @property (strong, nonatomic) TVActivationViewController *activationViewController;
-@property (strong, nonatomic) TVLangPickViewController *langViewController;
+@property (strong, nonatomic) TVLangPickViewController *nativeViewController;
+@property (strong, nonatomic) TVLangPickViewController *targetViewController;
 //@property (strong, nonatomic) TVContentRootViewController *contentViewController;
 
 @property (assign, nonatomic) BOOL requestReceivedResponse;
 @property (assign, nonatomic) BOOL willSendRequest;
 @property (assign, nonatomic) BOOL internetIsAccessible;
-// the number of requests undone
-@property (assign, nonatomic) NSInteger numberOfUserTriggeredRequests;
+
 
 @property (strong, nonatomic) KeychainItemWrapper *passItem;
 
 @property (strong, nonatomic) TVIndicator *indicator;
 @property (strong, nonatomic) UILabel *sysMsg;
-// Show the current viewController on duty
-@property (assign, nonatomic) TVCtl ctlOnDuty;
-
-@property (assign, nonatomic) CGPoint transitionPointInRoot;
 
 @property (strong, nonatomic) NSOperationQueue *bWorker;
 @property (strong, nonatomic) TVCommunicator *com;
+
+@property (strong, nonatomic) TVRootViewCtlBox *box;
+@property (strong, nonatomic) UILabel *warning;
 
 - (void)showSysMsg:(NSString *)msg;
 - (void)sendActivationEmail:(BOOL)isUserTriggered;

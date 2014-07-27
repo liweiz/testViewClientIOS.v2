@@ -53,8 +53,10 @@
 		D0F668C7191E9E830091E801 /* TVTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D0F668BF191E9E830091E801 /* TVTableViewController.m */; };
 		EE1997AE1816F5A400B5A993 /* langListShort.txt in Resources */ = {isa = PBXBuildFile; fileRef = EE1997AD1816F5A400B5A993 /* langListShort.txt */; };
 		EE1997B01816F60000B5A993 /* langListLong.txt in Resources */ = {isa = PBXBuildFile; fileRef = EE1997AF1816F60000B5A993 /* langListLong.txt */; };
+		EE5F3B5D197E2F890031749E /* TVRootViewCtlBox.m in Sources */ = {isa = PBXBuildFile; fileRef = EE5F3B5C197E2F890031749E /* TVRootViewCtlBox.m */; };
 		EEC26FB0195008C7002818A0 /* TVKeyboard.m in Sources */ = {isa = PBXBuildFile; fileRef = EEC26FAF195008C7002818A0 /* TVKeyboard.m */; };
 		EED69AB21974723700C32292 /* TVCommunicator.m in Sources */ = {isa = PBXBuildFile; fileRef = EED69AB11974723700C32292 /* TVCommunicator.m */; };
+		EED79249197DCBBC00ECFE60 /* TVCommunicator.m in Sources */ = {isa = PBXBuildFile; fileRef = EED69AB11974723700C32292 /* TVCommunicator.m */; };
 		EEDE2CD919560490003F0F99 /* TVIndicator.m in Sources */ = {isa = PBXBuildFile; fileRef = EEDE2CD819560490003F0F99 /* TVIndicator.m */; };
 		EEDE5DEF1963AE9200782C90 /* TVLayerBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEDE5DEE1963AE9200782C90 /* TVLayerBaseViewController.m */; };
 		EEE0CE79195B217B0061E7A5 /* TVActivationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEE0CE78195B217B0061E7A5 /* TVActivationViewController.m */; };
@@ -134,6 +136,8 @@
 		D0F668BF191E9E830091E801 /* TVTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVTableViewController.m; sourceTree = "<group>"; };
 		EE1997AD1816F5A400B5A993 /* langListShort.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = langListShort.txt; sourceTree = "<group>"; };
 		EE1997AF1816F60000B5A993 /* langListLong.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = langListLong.txt; sourceTree = "<group>"; };
+		EE5F3B5B197E2F890031749E /* TVRootViewCtlBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVRootViewCtlBox.h; sourceTree = "<group>"; };
+		EE5F3B5C197E2F890031749E /* TVRootViewCtlBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVRootViewCtlBox.m; sourceTree = "<group>"; };
 		EEC26FAE195008C7002818A0 /* TVKeyboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVKeyboard.h; sourceTree = "<group>"; };
 		EEC26FAF195008C7002818A0 /* TVKeyboard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVKeyboard.m; sourceTree = "<group>"; };
 		EED69AB01974723700C32292 /* TVCommunicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVCommunicator.h; sourceTree = "<group>"; };
@@ -232,8 +236,7 @@
 				D0F668BB191E9E830091E801 /* TableView */,
 				D06A1A4C179DC6A3003346F4 /* TVAppDelegate.h */,
 				D06A1A4D179DC6A3003346F4 /* TVAppDelegate.m */,
-				EEE3ED0B18110AFE004A232C /* TVAppRootViewController.h */,
-				EEE3ED0C18110AFE004A232C /* TVAppRootViewController.m */,
+				EE7703A7198546650054D741 /* Root */,
 				D096CE7E182F642D00D09446 /* TVRegularFont.m */,
 				D096CE76182F616200D09446 /* Appearance */,
 				D0980D7C1819A248000F7DC7 /* ComponentsForRoot */,
@@ -371,6 +374,17 @@
 				D0F668BF191E9E830091E801 /* TVTableViewController.m */,
 			);
 			path = TableView;
+			sourceTree = "<group>";
+		};
+		EE7703A7198546650054D741 /* Root */ = {
+			isa = PBXGroup;
+			children = (
+				EEE3ED0B18110AFE004A232C /* TVAppRootViewController.h */,
+				EEE3ED0C18110AFE004A232C /* TVAppRootViewController.m */,
+				EE5F3B5B197E2F890031749E /* TVRootViewCtlBox.h */,
+				EE5F3B5C197E2F890031749E /* TVRootViewCtlBox.m */,
+			);
+			name = Root;
 			sourceTree = "<group>";
 		};
 		EEDE5DEC1963AE5500782C90 /* LayerViewController */ = {
@@ -537,6 +551,7 @@
 				D098EE6B19282D1E0051B305 /* TVRequestId.m in Sources */,
 				EEE0CE79195B217B0061E7A5 /* TVActivationViewController.m in Sources */,
 				D0347975179EDD55006FFCF6 /* TVSearchBaseViewController.m in Sources */,
+				EE5F3B5D197E2F890031749E /* TVRootViewCtlBox.m in Sources */,
 				D096CE7C182F61A100D09446 /* TVTextField.m in Sources */,
 				D095FF15192C4F35000604A1 /* TVUser.m in Sources */,
 				D0957C8417DD85190054C117 /* TVView.m in Sources */,
@@ -575,6 +590,7 @@
 				D0A0AFA41932CBC000C6E11E /* TVRequesterTestCase.m in Sources */,
 				D0A0AFA81932CBFA00C6E11E /* TVBase.m in Sources */,
 				D0A0AFAA1932CBFF00C6E11E /* TVUser.m in Sources */,
+				EED79249197DCBBC00ECFE60 /* TVCommunicator.m in Sources */,
 				D06A1A67179DC6A4003346F4 /* testViewTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

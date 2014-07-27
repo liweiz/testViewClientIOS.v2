@@ -9,8 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "NSObject+NetworkHandler.h"
 #import "TVRequestId.h"
-#import "TVAppRootViewController.h"
 #import "TVIndicator.h"
+#import "TVRootViewCtlBox.h"
 
 @interface TVRequester : NSObject
 
@@ -39,16 +39,15 @@
 @property (assign, nonatomic) BOOL isUserTriggered;
 // Record the tag of the view that triggers the requester.
 @property (assign, nonatomic) NSInteger fromVewTag;
-@property (nonatomic, assign) CGPoint transitionPointInRoot;
 
 @property (strong, nonatomic) TVBase *record;
 @property (assign, nonatomic) BOOL reqIdNeeded;
 @property (strong, nonatomic) TVRequestId *reqId;
 
 @property (strong, nonatomic) TVIndicator *indicator;
-@property (strong, nonatomic) TVAppRootViewController *ctler;
+@property (strong, nonatomic) TVRootViewCtlBox *box;
 
 - (NSError *)proceedToRequest;
-- (void)checkServerAvailabilityToProceed;
+- (void)checkServerAvailToProceed;
 
 @end

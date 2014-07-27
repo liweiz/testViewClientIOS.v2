@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "TVLayerBaseViewController.h"
+#import "TVRootViewCtlBox.h"
 
 @interface TVActivationViewController : TVLayerBaseViewController
 

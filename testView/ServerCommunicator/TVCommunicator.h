@@ -10,7 +10,7 @@
 #import "TVRequester.h"
 #import "TVUser.h"
 #import "TVIndicator.h"
-#import "TVAppRootViewController.h"
+#import "TVRootViewCtlBox.h"
 
 @interface TVCommunicator : NSObject
 
@@ -20,8 +20,6 @@
 
 @property (strong, nonatomic) NSArray *sortDescriptors;
 @property (strong, nonatomic) NSPredicate *predicate;
-@property (strong, nonatomic) TVRequester *requester;
-@property (strong, nonatomic) NSOperationQueue *backgroundWorker;
 
 @property (strong, nonatomic) TVUser *user;
 
@@ -35,8 +33,9 @@
 @property (strong, nonatomic) NSString *deviceUuid;
 @property (strong, nonatomic) NSString *cardId;
 
-@property (strong, nonatomic) TVAppRootViewController *ctler;
 @property (strong, nonatomic) NSOperationQueue *bWorker;
 @property (assign, nonatomic) BOOL isUserTriggered;
+
+@property (strong, nonatomic) TVRootViewCtlBox *box;
 
 @end

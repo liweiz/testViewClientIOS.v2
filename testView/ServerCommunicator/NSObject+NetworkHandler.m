@@ -17,6 +17,15 @@
 
 #pragma mark - prepare JSON for requests
 
+- (NSData *)getJSONSignUpWithSource:(NSString *)s target:(NSString *)t err:(NSError **)err
+{
+    NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:1];
+    [dict setValue:s forKey:@"sourceLang"];
+    [dict setValue:t forKey:@"targetLang"];
+    [dict setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forKey:@"deviceUUID"];
+    return [NSJSONSerialization dataWithJSONObject:dict options:NSJSONWritingPrettyPrinted error:err];
+}
+
 - (NSData *)getJSONSignUpOrInWithEmail:(NSString *)email password:(NSString *)password err:(NSError **)err
 {
     NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:1];
@@ -230,6 +239,7 @@
             } else {
                 // 3. requestID in hasReqID and last one undone
                 // Send request again.
+                rId = x;
             }
         }
     } else {

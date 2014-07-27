@@ -9,12 +9,12 @@
 #import <UIKit/UIKit.h>
 #import "TVUser.h"
 #import "TVIndicator.h"
+#import "TVRootViewCtlBox.h"
 
 @interface TVLayerBaseViewController : UIViewController
 
 @property (nonatomic, assign) CGRect appRect;
 @property (strong, nonatomic) TVIndicator *indicator;
-@property (nonatomic, assign) CGPoint transitionPointInRoot;
 @property (strong, nonatomic) TVUser *user;
 
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
@@ -22,5 +22,6 @@
 @property (strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
 @property (strong, nonatomic) UIPinchGestureRecognizer *pinchToShow;
+@property (strong, nonatomic) TVRootViewCtlBox *box;
 
 @end

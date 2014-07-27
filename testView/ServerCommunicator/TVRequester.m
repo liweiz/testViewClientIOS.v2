@@ -41,21 +41,18 @@
 
 @synthesize isUserTriggered;
 @synthesize fromVewTag;
-@synthesize transitionPointInRoot;
 
 @synthesize record;
 @synthesize reqIdNeeded;
 @synthesize reqId;
 @synthesize indicator;
-// RootViewController
-@synthesize ctler;
+@synthesize box;
 
 - (id)init
 {
     self = [super init];
     if (self) {
         // Custom initialization
-        self.ctler = (TVAppRootViewController *)[UIApplication sharedApplication].keyWindow.rootViewController;
     }
     return self;
 }
@@ -323,18 +320,18 @@
                 // Show view to ask user to activate
                 [[NSNotificationCenter defaultCenter] postNotificationName:tvShowActivation object:self];
             };
-        case TVOneUser:
-            if (self.ctler.ctlOnDuty == TVActivationCtl) {
-                if ([self getLatestUserInDB].activated.integerValue == 1) {
-                    [[NSNotificationCenter defaultCenter] postNotificationName:tvShowLangPick object:self];
-                } else {
-                    // Show message that user is still not activated
-                }
-            };
-        case TVSync:
-            if (self.ctler.ctlOnDuty == TVLangPickCtl) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowAfterActivated object:self];
-            };
+//        case TVOneUser:
+//            if (self.box.ctlOnDuty == TVActivationCtl) {
+//                if ([self getLatestUserInDB].activated.integerValue == 1) {
+//                    [[NSNotificationCenter defaultCenter] postNotificationName:tvShowLangPick object:self];
+//                } else {
+//                    // Show message that user is still not activated
+//                }
+//            };
+//        case TVSync:
+//            if (self.box.ctlOnDuty == TVLangPickCtl) {
+//                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowAfterActivated object:self];
+//            };
     }
 }
 
@@ -381,15 +378,15 @@
     NSMutableURLRequest *testRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://www.google.com/"]];
     [NSURLConnection sendAsynchronousRequest:testRequest queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
      {
-         if (self.ctler.numberOfUserTriggeredRequests <= 0) {
-             NSLog(@"number of requests in progress not right: %d", self.ctler.numberOfUserTriggeredRequests);
+         if (self.box.numberOfUserTriggeredRequests <= 0) {
+             NSLog(@"number of requests in progress not right: %d", box.numberOfUserTriggeredRequests);
          }
          NSError *err;
          if ([(NSHTTPURLResponse *)response statusCode] == 200) {
              TVRequester *req = [[TVRequester alloc] init];
              // Pass all properties
              req.fromVewTag = self.fromVewTag;
-             req.transitionPointInRoot = self.transitionPointInRoot;
+             req.box = self.box;
              req.urlBranch = self.urlBranch;
              req.contentType = self.contentType;
              req.method = self.method;
@@ -417,7 +414,7 @@
 //             if (!self.indicator.indicator.isAnimating) {
 //                 [self hideIndicator];
 //             }
-             [self.ctler showSysMsg:@"Network not available."];
+//             [ctler showSysMsg:@"Network not available."];
          }
          if (self.isUserTriggered) {
              [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
@@ -429,7 +426,7 @@
 - (NSError *)proceedToRequest
 {
     if (self.isUserTriggered) {
-        self.ctler.numberOfUserTriggeredRequests = self.ctler.numberOfUserTriggeredRequests + 1;
+        self.box.numberOfUserTriggeredRequests = self.box.numberOfUserTriggeredRequests + 1;
     }
     NSError *err;
     self.ctx = [self managedObjectContext];
@@ -447,10 +444,10 @@
              
              if (error.code == -1004) {
                  // Error Domain=NSURLErrorDomain Code=-1004 "Could not connect to the server." https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Constants/Reference/reference.html
-                 [self.ctler showSysMsg:@"Communication not successful"];
+//                 [ctler showSysMsg:@"Communication not successful"];
              }
-             if (self.ctler.numberOfUserTriggeredRequests <= 0) {
-                 NSLog(@"number of requests in progress not right: %d", self.ctler.numberOfUserTriggeredRequests);
+             if (self.box.numberOfUserTriggeredRequests <= 0) {
+                 NSLog(@"number of requests in progress not right: %d", self.box.numberOfUserTriggeredRequests);
              }
              if ([(NSHTTPURLResponse *)response statusCode] == 200) {
                  self.record.lastUnsyncAction = [NSNumber numberWithInteger:TVDocNoAction];
@@ -514,8 +511,8 @@
     } else if ([errMsg isEqualToString:@"No deviceInfo found for this account, please create one on device first."]) {
         // Sync
         // Launch setting interface for user
-        self.transitionPointInRoot = CGPointMake(self.ctler.view.frame.size.width * 0.5f, self.ctler.view.frame.size.height * 0.5f);
-        [[NSNotificationCenter defaultCenter] postNotificationName:tvShowLangPick object:self];
+//        self.transitionPointInRoot = CGPointMake(ctler.view.frame.size.width * 0.5f, ctler.view.frame.size.height * 0.5f);
+//        [[NSNotificationCenter defaultCenter] postNotificationName:tvShowLangPick object:self];
     } else if ([errMsg isEqualToString:@"Request not recognized."]) {
         // Invalid request type, sign in required
     } else if ([errMsg rangeOfString:@"Structure for response not able to be set:"].location != NSNotFound) {

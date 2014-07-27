@@ -7,6 +7,7 @@
 //
 
 #import "TVLangPickViewController.h"
+#import "TVAppRootViewController.h"
 
 @interface TVLangPickViewController ()
 
@@ -14,7 +15,15 @@
 
 @implementation TVLangPickViewController
 
-@synthesize sourceLangViewIntro, sourceLangView, sourceLangTap, targetLangViewIntro, targetLangView, targetLangTap, tableIsForSourceLang, langPickController, originY;
+@synthesize lang;
+@synthesize button;
+@synthesize buttonTap;
+@synthesize tableIsForSourceLang;
+@synthesize langPickController;
+@synthesize originY;
+@synthesize warning;
+@synthesize sourceLang;
+@synthesize targetLang;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -28,7 +37,7 @@
 - (void)loadView
 {
     CGRect firstRect = [[UIScreen mainScreen] applicationFrame];
-    CGRect viewRect = CGRectMake(0.0f, self.originY, firstRect.size.width, 250.0f);
+    CGRect viewRect = CGRectMake(0.0f, self.originY, firstRect.size.width, firstRect.size.height);
     self.view = [[UIView alloc] initWithFrame:viewRect];
     self.view.backgroundColor = [UIColor blueColor];
 }
@@ -37,72 +46,98 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.sourceLangViewIntro = [[UILabel alloc] initWithFrame:CGRectMake(15.0f, 15.0f, (self.view.frame.size.width - 15.0f * 2.0f), 44.0f)];
+    self.langPickController = [[TVLangPickTableViewController alloc] init];
+    self.lang = [[UITextField alloc] initWithFrame:CGRectMake(15.0f, 15.0f, (self.view.frame.size.width - 15.0f * 2.0f), 44.0f)];
     
-    self.sourceLangView = [[UILabel alloc] initWithFrame:CGRectMake(self.sourceLangViewIntro.frame.origin.x, self.sourceLangViewIntro.frame.origin.y + self.sourceLangViewIntro.frame.size.height, self.sourceLangViewIntro.frame.size.width, self.sourceLangViewIntro.frame.size.height)];
-    self.sourceLangView.userInteractionEnabled = YES;
-    self.sourceLangTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(getSourceLangTable)];
-    [self.sourceLangView addGestureRecognizer:self.sourceLangTap];
-    
-    self.targetLangViewIntro = [[UILabel alloc] initWithFrame:CGRectMake(self.sourceLangView.frame.origin.x, self.sourceLangView.frame.origin.y + self.sourceLangView.frame.size.height, self.sourceLangView.frame.size.width, self.sourceLangView.frame.size.height)];
-    
-    self.targetLangView = [[UILabel alloc] initWithFrame:CGRectMake(self.targetLangViewIntro.frame.origin.x, self.targetLangViewIntro.frame.origin.y + self.targetLangViewIntro.frame.size.height, self.targetLangViewIntro.frame.size.width, self.targetLangViewIntro.frame.size.height)];
-    self.targetLangView.userInteractionEnabled = YES;
-    self.targetLangTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(getTargetLangTable)];
-    [self.targetLangView addGestureRecognizer:self.targetLangTap];
-    
-    self.sourceLangViewIntro.backgroundColor = [UIColor grayColor];
-    self.sourceLangView.backgroundColor = [UIColor whiteColor];
-    self.targetLangViewIntro.backgroundColor = [UIColor grayColor];
-    self.targetLangView.backgroundColor = [UIColor whiteColor];
-    self.sourceLangViewIntro.text = @"Source";
-    self.targetLangViewIntro.text = @"Target";
-    
-    [self.view addSubview:self.sourceLangViewIntro];
-    [self.view addSubview:self.sourceLangView];
-    [self.view addSubview:self.targetLangViewIntro];
-    [self.view addSubview:self.targetLangView];
-}
-
-- (void)getSourceLangTable
-{
-    self.tableIsForSourceLang = YES;
-    [self getLangTable];
-}
-
-- (void)getTargetLangTable
-{
-    self.tableIsForSourceLang = NO;
-    [self getLangTable];
-}
-
-- (void)getLangTable
-{
-    if (!self.langPickController) {
-        self.langPickController = [[TVLangPickTableViewController alloc] init];
-        self.langPickController.tableView.delegate = self;
+    self.lang.clearButtonMode = UITextFieldViewModeAlways;
+    self.lang.delegate = self;
+    [self.view addSubview:self.lang];
+    self.langPickController.originY1 = self.lang.frame.origin.y + self.lang.frame.size.height;
+    self.button = [[UILabel alloc] initWithFrame:CGRectMake(self.lang.frame.origin.x, self.view.frame.size.height - self.lang.frame.size.height, self.lang.frame.size.width, self.lang.frame.size.height)];
+    [self.view addSubview:self.button];
+    self.button.backgroundColor = [UIColor greenColor];
+    self.button.userInteractionEnabled = YES;
+    self.button.textAlignment = NSTextAlignmentCenter;
+    [self.view addSubview:self.button];
+    self.buttonTap = [[UITapGestureRecognizer alloc] init];
+    [self.button addGestureRecognizer:self.buttonTap];
+    self.langPickController.originY2 = self.button.frame.origin.y;
+    if (self.tableIsForSourceLang) {
+        self.lang.placeholder = @"Your native language is?";
+        self.button.text = @"Next";
+        [self.buttonTap addTarget:self action:@selector(validateToTargetLang)];
+        self.view.tag = 1003;
+    } else {
+        self.lang.placeholder = @"Language to learn?";
+        self.button.text = @"Sign Up";
+        [self.buttonTap addTarget:self action:@selector(validateAndSignUp)];
+        self.view.tag = 1004;
     }
-    [self presentViewController:self.langPickController animated:YES completion:nil];
-//    [self addChildViewController:self.langPickController];
-//    [self.view addSubview:self.langPickController.tableView];
-//    [self.langPickController didMoveToParentViewController:self];
+    self.langPickController.tableView.delegate = self;
+    [self addChildViewController:self.langPickController];
+    [self.view addSubview:self.langPickController.view];
+    [self. langPickController didMoveToParentViewController:self];
 }
 
-- (void)dismissLangTable
+- (void)validateToTargetLang
 {
-    [self.langPickController dismissViewControllerAnimated:YES completion:nil];
+    if ([self validateTextField]) {
+        [self nextToTargetLang];
+    }
 }
+
+- (void)nextToTargetLang
+{
+    self.box.transitionPointInRoot = [self.buttonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+    self.box.sourceLang = self.lang.text;
+    [[NSNotificationCenter defaultCenter] postNotificationName:tvShowTarget object:self];
+}
+
+- (void)validateAndSignUp
+{
+    if ([self validateTextField]) {
+        [self signUp];
+    }
+}
+
+- (BOOL)validateTextField
+{
+    BOOL isMatched = NO;
+    for (NSString *aLang in self.langPickController.langArray) {
+        if ([aLang isEqualToString:self.lang.text]) {
+            isMatched = YES;
+            break;
+        }
+    }
+    if (!isMatched) {
+        self.box.warning = @"Please select a language.";
+        [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
+        return NO;
+    }
+    return YES;
+}
+
+- (void)signUp
+{
+    self.box.transitionPointInRoot = [self.buttonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+    self.box.targetLang = self.lang.text;
+    [[NSNotificationCenter defaultCenter] postNotificationName:tvUserSignUp object:self];
+}
+
+// User is not allowed to edit directly.
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
+{
+    return NO;
+}
+
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (self.tableIsForSourceLang == YES) {
-        self.sourceLangView.text = [self.langPickController.langArray objectAtIndex:indexPath.row];
-        self.user.sourceLang = self.sourceLangView.text;
+        self.lang.text = [self.langPickController.langArray objectAtIndex:indexPath.row];
     } else {
-        self.targetLangView.text = [self.langPickController.langArray objectAtIndex:indexPath.row];
-        self.user.targetLang = self.targetLangView.text;
+        self.lang.text = [self.langPickController.langArray objectAtIndex:indexPath.row];
     }
-    [self dismissLangTable];
 }
 
 - (void)didReceiveMemoryWarning

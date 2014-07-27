@@ -18,11 +18,11 @@
 
 @synthesize appRect;
 @synthesize indicator;
-@synthesize transitionPointInRoot;
 @synthesize managedObjectContext;
 @synthesize managedObjectModel;
 @synthesize persistentStoreCoordinator;
 @synthesize pinchToShow;
+@synthesize box;
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -38,18 +38,29 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    [self.view addGestureRecognizer:self.pinchToShow];
 }
 
 - (void)pinchAction
 {
-    self.transitionPointInRoot = [self pointBy:self.pinchToShow inView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
-    [[NSNotificationCenter defaultCenter] postNotificationName:tvPinchToShowAbove object:self];
+    // Avoid pinchGesture triggered multiple times by limiting its action only when gesture just begins to be recognized.
+    if (self.pinchToShow.state == UIGestureRecognizerStateBegan) {
+        self.box.transitionPointInRoot = [self pointBy:self.pinchToShow inView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+        [[NSNotificationCenter defaultCenter] postNotificationName:tvPinchToShowAbove object:self];
+    }
+    
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+    
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 /*

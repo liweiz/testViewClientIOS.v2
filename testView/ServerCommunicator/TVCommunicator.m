@@ -19,7 +19,6 @@
 
 @synthesize ctx, managedObjectModel, persistentStoreCoordinator;
 
-@synthesize requester, backgroundWorker;
 @synthesize user;
 @synthesize unsynced;
 @synthesize requestType;
@@ -28,9 +27,9 @@
 @synthesize deviceUuid;
 @synthesize cardId;
 @synthesize indicator;
-@synthesize ctler;
 @synthesize isUserTriggered;
 @synthesize bWorker;
+@synthesize box;
 
 // There should be only one
 
@@ -92,6 +91,7 @@
         TVRequestId *rId = [self analyzeOneUndone:b inCtx:self.ctx error:nil];
         if (rId) {
             TVRequester *req = [[TVRequester alloc] init];
+            req.box = self.box;
             req.indicator = self.indicator;
             req.isUserTriggered = itIsUserTriggered;
             req.coordinator = self.persistentStoreCoordinator;
@@ -134,6 +134,7 @@
     if ([self.unsynced count] == 0) {
         // Sync
         TVRequester *req = [[TVRequester alloc] init];
+        req.box = self.box;
         req.indicator = self.indicator;
         req.isUserTriggered = itIsUserTriggered;
         req.coordinator = self.persistentStoreCoordinator;
@@ -167,6 +168,11 @@
     }
     // Sync
     [self checkServerAvailToSyncInBack:NO];
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 @end

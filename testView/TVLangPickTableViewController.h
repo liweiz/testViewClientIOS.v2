@@ -11,5 +11,7 @@
 @interface TVLangPickTableViewController : UITableViewController
 
 @property (strong, nonatomic) NSArray *langArray;
+@property (assign, nonatomic) CGFloat originY1;
+@property (assign, nonatomic) CGFloat originY2;
 
 @end

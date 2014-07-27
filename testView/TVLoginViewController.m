@@ -28,7 +28,7 @@
 @synthesize inputWidth;
 @synthesize inputHeight;
 @synthesize smallFontSize;
-@synthesize warning;
+
 @synthesize emailInput, passwordInput;
 @synthesize forgotPasswordButton, forgotPasswordButtonTap;
 @synthesize signUpButton, signUpButtonTap;
@@ -44,6 +44,7 @@
 @synthesize backToSignIn, backToSignInTap;
 
 @synthesize termsBox, agreeToTermsTextBox, agreeToPrivacyTextBox, introTextBox, passItem;
+@synthesize box;
 
 // 5 parts: intro/email/info/password/submit and 5 gaps. gaps adjacent to info only have 1/2 gap. gap is 1/3 of text box height. Take 320 * 480 as the standard rectangle at the center of a screen, pad the rest of screen when the screen is bigger.
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -51,6 +52,7 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(signUp) name:tvUserSignUp object:nil];
     }
     return self;
 }
@@ -174,17 +176,16 @@
 
 - (void)validateAndSignIn
 {
-    [self validateTextField];
-    if (self.warning.alpha == 0.0f) {
+    if ([self validateTextField]) {
         [self signIn];
     }
 }
 
 - (void)signIn
 {
-    self.transitionPointInRoot = [self.signInButtonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+    self.box.transitionPointInRoot = [self.signInButtonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.transitionPointInRoot = self.transitionPointInRoot;
+    reqster.box = self.box;
     reqster.fromVewTag = self.view.tag;
     reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = TVSignIn;
@@ -205,7 +206,7 @@
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
     reqster.indicator = self.indicator;
-    [reqster checkServerAvailabilityToProceed];
+    [reqster checkServerAvailToProceed];
 }
 
 - (void)showSwitchToSignUp
@@ -236,33 +237,33 @@
 - (void)goToSignUp
 {
     [self showTerms];
-    [self showSignUpButton];
+    [self showNextButton];
     [self showSwitchToSignIn];
 }
 
 #pragma mark - show signUp
 
-- (void)showSignUpButton
+- (void)showNextButton
 {
-    if (self.signInButton) {
+    if (self.nextButton) {
         [UIView animateWithDuration:self.animationSec animations:^{
-            self.signInButton.alpha = 0.0f;
+            self.nextButton.alpha = 0.0f;
         }];
     }
-    if (!self.signUpButton) {
-        self.signUpButton = [[UILabel alloc] initWithFrame:CGRectMake(self.inputX, self.passwordInput.frame.origin.y + self.passwordInput.frame.size.height + self.gapHeight * 0.5f, self.inputWidth, self.inputHeight)];
-        [self.coverOnBaseView addSubview:self.signUpButton];
-        self.signUpButton.backgroundColor = [UIColor greenColor];
-        self.signUpButton.userInteractionEnabled = YES;
-        self.signUpButton.text = @"Sign Up";
-        self.signUpButton.textAlignment = NSTextAlignmentCenter;
-        self.signUpButtonTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(validateAndSignUp)];
-        [self.signUpButton addGestureRecognizer:self.signUpButtonTap];
+    if (!self.nextButton) {
+        self.nextButton = [[UILabel alloc] initWithFrame:CGRectMake(self.inputX, self.passwordInput.frame.origin.y + self.passwordInput.frame.size.height + self.gapHeight * 0.5f, self.inputWidth, self.inputHeight)];
+        [self.coverOnBaseView addSubview:self.nextButton];
+        self.nextButton.backgroundColor = [UIColor greenColor];
+        self.nextButton.userInteractionEnabled = YES;
+        self.nextButton.text = @"Next";
+        self.nextButton.textAlignment = NSTextAlignmentCenter;
+        self.nextButtonTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(validateToNativeLang)];
+        [self.nextButton addGestureRecognizer:self.nextButtonTap];
     }
-    [self.coverOnBaseView bringSubviewToFront:self.signUpButton];
-    if (self.signUpButton.alpha == 0.0f) {
+    [self.coverOnBaseView bringSubviewToFront:self.nextButton];
+    if (self.nextButton.alpha == 0.0f) {
         [UIView animateWithDuration:self.animationSec animations:^{
-            self.signUpButton.alpha = 1.0f;
+            self.nextButton.alpha = 1.0f;
         }];
     }
 }
@@ -317,36 +318,40 @@
     }
 }
 
-- (void)validateAndSignUp
+- (void)validateToNativeLang
 {
-    [self validateTextField];
-    if (self.warning.alpha == 0.0f) {
-        [self signUp];
-    }
+    if ([self validateTextField]) {
+        [self nextToNativeLang];
+    };
+}
+
+- (void)nextToNativeLang
+{
+    self.box.transitionPointInRoot = [self.nextButtonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+    [[NSNotificationCenter defaultCenter] postNotificationName:tvShowNative object:self];
+}
+
+- (void)termsDetail
+{
+    
 }
 
 - (void)signUp
 {
-    self.transitionPointInRoot = [self.signUpButtonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.transitionPointInRoot = self.transitionPointInRoot;
+    reqster.box = self.box;
     reqster.fromVewTag = self.view.tag;
     reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = TVSignUp;
     reqster.email = self.emailInput.text;
     reqster.password = self.passwordInput.text;
     reqster.isBearer = NO;
-    reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
+    reqster.body = [self getJSONSignUpWithSource:self.box.sourceLang target:self.box.targetLang err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
     reqster.indicator = self.indicator;
     reqster.isUserTriggered = YES;
-    [reqster checkServerAvailabilityToProceed];
-}
-
-- (void)termsDetail
-{
-    
+    [reqster checkServerAvailToProceed];
 }
 
 - (void)goToSignIn
@@ -465,7 +470,7 @@
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
     reqster.indicator = self.indicator;
-    [reqster checkServerAvailabilityToProceed];
+    [reqster checkServerAvailToProceed];
 }
 
 #pragma mark - keyboard
@@ -490,50 +495,31 @@
 
 #pragma mark - textField
 
-- (void)validateTextField
+- (BOOL)validateTextField
 {
     // Validate email
     if (self.emailInput.text.length == 0) {
-        [self showWarningWithText:@"Email should not be empty."];
-        return;
+        self.box.warning = @"Email should not be empty.";
+        [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
+        return NO;
     }
     // Validate password
     if (self.passwordInput.alpha == 1.0f) {
         if (self.passwordInput.text.length == 0) {
-            [self showWarningWithText:@"Password should not be empty."];
-            return;
+            self.box.warning = @"Password should not be empty.";
+            [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
+            return NO;
         } else if (self.passwordInput.text.length < 6 || self.passwordInput.text.length > 20) {
             // Password's length has to be no less than 6 and no more than 20.
-            [self showWarningWithText:@"Password's length has to be between 6 and 20."];
-            return;
+            self.box.warning = @"Password's length has to be between 6 and 20.";
+            [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
+            return NO;
         }
     }
-    if (self.warning.alpha == 1.0f) {
-        self.warning.alpha = 0.0f;
-    }
+    return YES;
 }
 
-- (void)showWarningWithText:(NSString *)text
-{
-    if (!self.warning) {
-        self.warning = [[UILabel alloc] initWithFrame:CGRectMake(self.emailInput.frame.origin.x, self.emailInput.frame.origin.y - self.emailInput.frame.size.height * 0.5f, self.emailInput.frame.size.width, self.emailInput.frame.size.height * 0.5f)];
-        [self.coverOnBaseView addSubview:self.warning];
-        self.warning.textAlignment = NSTextAlignmentLeft;
-    }
-    self.warning.text = text;
-    if (self.warning.alpha == 0.0f) {
-        self.warning.alpha = 1.0f;
-        [self.coverOnBaseView bringSubviewToFront:self.warning];
-    }
-}
 
-- (void)hideWarning
-{
-    self.warning.text = @"";
-    if (self.warning.alpha == 1.0f) {
-        self.warning.alpha = 0.0f;
-    }
-}
 
 //- (void)dismissKeyboard
 //{
@@ -563,6 +549,11 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 @end
