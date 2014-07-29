@@ -17,7 +17,6 @@
 @dynamic email;
 @dynamic isLoggedIn;
 @dynamic rememberMe;
-@dynamic sortOption;
 @dynamic sourceLang;
 @dynamic targetLang;
 @dynamic deviceInfoId;

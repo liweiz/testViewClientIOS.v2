@@ -22,8 +22,6 @@
 @synthesize langPickController;
 @synthesize originY;
 @synthesize warning;
-@synthesize sourceLang;
-@synthesize targetLang;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -48,7 +46,6 @@
 	// Do any additional setup after loading the view.
     self.langPickController = [[TVLangPickTableViewController alloc] init];
     self.lang = [[UITextField alloc] initWithFrame:CGRectMake(15.0f, 15.0f, (self.view.frame.size.width - 15.0f * 2.0f), 44.0f)];
-    
     self.lang.clearButtonMode = UITextFieldViewModeAlways;
     self.lang.delegate = self;
     [self.view addSubview:self.lang];
@@ -76,7 +73,7 @@
     self.langPickController.tableView.delegate = self;
     [self addChildViewController:self.langPickController];
     [self.view addSubview:self.langPickController.view];
-    [self. langPickController didMoveToParentViewController:self];
+    [self.langPickController didMoveToParentViewController:self];
 }
 
 - (void)validateToTargetLang
@@ -89,7 +86,9 @@
 - (void)nextToTargetLang
 {
     self.box.transitionPointInRoot = [self.buttonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
-    self.box.sourceLang = self.lang.text;
+    NSLog(@"text: %@", self.lang.text);
+    [self.box.sourceLang setString:self.lang.text];
+    NSLog(@"text1: %@", self.box.sourceLang);
     [[NSNotificationCenter defaultCenter] postNotificationName:tvShowTarget object:self];
 }
 
@@ -98,6 +97,17 @@
     if ([self validateTextField]) {
         [self signUp];
     }
+}
+
+- (void)signUp
+{
+    self.box.transitionPointInRoot = [self.buttonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+    NSLog(@"text: %@", self.lang.text);
+    NSLog(@"text0: %@", self.box.targetLang);
+    [self.box.targetLang setString:self.lang.text];
+    NSLog(@"text1: %@", self.box.sourceLang);
+    NSLog(@"text2: %@", self.box.targetLang);
+    [[NSNotificationCenter defaultCenter] postNotificationName:tvUserSignUp object:self];
 }
 
 - (BOOL)validateTextField
@@ -110,18 +120,11 @@
         }
     }
     if (!isMatched) {
-        self.box.warning = @"Please select a language.";
+        [self.box.warning setString:@"Please select a language."];
         [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
         return NO;
     }
     return YES;
-}
-
-- (void)signUp
-{
-    self.box.transitionPointInRoot = [self.buttonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
-    self.box.targetLang = self.lang.text;
-    [[NSNotificationCenter defaultCenter] postNotificationName:tvUserSignUp object:self];
 }
 
 // User is not allowed to edit directly.
@@ -130,14 +133,13 @@
     return NO;
 }
 
-
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (self.tableIsForSourceLang == YES) {
-        self.lang.text = [self.langPickController.langArray objectAtIndex:indexPath.row];
-    } else {
-        self.lang.text = [self.langPickController.langArray objectAtIndex:indexPath.row];
-    }
+    NSLog(@"text21: %@", self.box.sourceLang);
+    NSLog(@"text22: %@", self.box.targetLang);
+    self.lang.text = [self.langPickController.langArray objectAtIndex:indexPath.row];
+    NSLog(@"text31: %@", self.box.sourceLang);
+    NSLog(@"text32: %@", self.box.targetLang);
 }
 
 - (void)didReceiveMemoryWarning

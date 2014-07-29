@@ -24,8 +24,8 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 // Number of requests undone
 @property (assign, nonatomic) NSInteger numberOfUserTriggeredRequests;
 @property (assign, nonatomic) CGPoint transitionPointInRoot;
-@property (assign, nonatomic) NSString *sourceLang;
-@property (assign, nonatomic) NSString *targetLang;
-@property (assign, nonatomic) NSString *warning;
+@property (strong, nonatomic) NSMutableString *sourceLang;
+@property (strong, nonatomic) NSMutableString *targetLang;
+@property (strong, nonatomic) NSMutableString *warning;
 
 @end

@@ -21,7 +21,5 @@
 @property (assign, nonatomic) CGFloat originY;
 
 @property (strong, nonatomic) UILabel *warning;
-@property (strong, nonatomic) NSString *sourceLang;
-@property (strong, nonatomic) NSString *targetLang;
 
 @end

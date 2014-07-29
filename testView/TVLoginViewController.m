@@ -346,6 +346,16 @@
     reqster.email = self.emailInput.text;
     reqster.password = self.passwordInput.text;
     reqster.isBearer = NO;
+    if (self.box) {
+        NSLog(@"YES");
+        if (self.box.sourceLang) {
+            NSLog(@"YES");
+        } else {
+            NSLog(@"NO");
+        }
+    }
+    NSLog(@"sLang: %@", self.box.sourceLang);
+    NSLog(@"tLang: %@", self.box.targetLang);
     reqster.body = [self getJSONSignUpWithSource:self.box.sourceLang target:self.box.targetLang err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";

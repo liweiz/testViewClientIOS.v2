@@ -239,14 +239,12 @@
     [self setUserId];
     self.user.sourceLang = sourceLang;
     self.user.targetLang = targetLang;
-    self.user.sortOption = sortOption1;
     [self.managedObjectContext save:nil];
 }
 
 - (void)changeDeviceInfo
 {
     [self setUserId];
-    self.user.sortOption = sortOption2;
     [self.managedObjectContext save:nil];
 }
 

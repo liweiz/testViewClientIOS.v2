@@ -65,25 +65,24 @@
     doc.versionNo = [dicInside valueForKey:@"versionNo"];
 }
 
-// A new user must be from server. the info user inputs is not stored as local record in db but send to server and create a record based on the response from server.
+// A new user must be from server. The info user inputs is not stored as local record in db but send to server and create a record based on the response from server.
 - (void)setupNewUserServer:(TVUser *)user withDic:(NSMutableDictionary *)dic
 {
     if ([dic valueForKey:@"user"]) {
         NSMutableDictionary *u = [dic valueForKey:@"user"];
         user.activated = [u valueForKey:@"activated"];
         user.email = [u valueForKey:@"email"];
+        user.sourceLang = [u valueForKey:@"sourceLang"];
+        user.targetLang = [u valueForKey:@"targetLang"];
     }
-    if ([dic valueForKey:@"deviceInfo"]) {
-        NSMutableDictionary *d = [dic valueForKey:@"user"];
-        if (!user.deviceUUID) {
-            user.deviceUUID = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
-        }
-        user.isLoggedIn = [d valueForKey:@"isLoggedIn"];
-        user.rememberMe = [d valueForKey:@"rememberMe"];
-        user.sortOption = [d valueForKey:@"sortOption"];
-        user.sourceLang = [d valueForKey:@"sourceLang"];
-        user.targetLang = [d valueForKey:@"targetLang"];
-    }
+//    if ([dic valueForKey:@"deviceInfo"]) {
+//        NSMutableDictionary *d = [dic valueForKey:@"user"];
+//        if (!user.deviceUUID) {
+//            user.deviceUUID = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
+//        }
+//        user.isLoggedIn = [d valueForKey:@"isLoggedIn"];
+//        user.rememberMe = [d valueForKey:@"rememberMe"];
+//    }
 }
 
 - (void)setupNewCard:(TVCard *)card withDic:(NSMutableDictionary *)dic
@@ -102,7 +101,7 @@
 {
     doc.editAction = [NSNumber numberWithInteger:a];
     doc.requestId = [[NSUUID UUID] UUIDString];
-    doc.done = NO;
+    doc.done = [NSNumber numberWithBool:NO];
     doc.createdAtLocal = [NSDate date];
     doc.lastModifiedAtLocal = [NSDate date];
     doc.operationVersion = [NSNumber numberWithInteger:[self getRequestIdOperationVersion:base]];
@@ -144,8 +143,6 @@
     if ([dic valueForKey:@"deviceInfo"]) {
         NSMutableDictionary *d = [dic valueForKey:@"deviceInfo"];
 //        user.deviceUUID = [d valueForKey:@"deviceUUID"];
-        user.sortOption = [d valueForKey:@"sortOption"];
-        user.sourceLang = [d valueForKey:@"sourceLang"];
         user.targetLang = [d valueForKey:@"targetLang"];
         NSLog(@"user.deviceInfoId: %@", user.deviceInfoId);
         NSLog(@"user.objectID: %@", user.objectID);

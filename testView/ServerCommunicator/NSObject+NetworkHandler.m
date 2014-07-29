@@ -72,7 +72,7 @@
     [dict setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forKey:@"deviceUUID"];
     [dictDeviceInfo setValue:user.sourceLang forKey:@"sourceLang"];
     [dictDeviceInfo setValue:user.targetLang forKey:@"targetLang"];
-    [dictDeviceInfo setValue:user.sortOption forKey:@"sortOption"];
+//    [dictDeviceInfo setValue:user.sortOption forKey:@"sortOption"];
     [dictDeviceInfo setValue:user.isLoggedIn forKey:@"isLoggedIn"];
     [dictDeviceInfo setValue:user.rememberMe forKey:@"rememberMe"];
     [dictDeviceInfo setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forKey:@"deviceUUID"];

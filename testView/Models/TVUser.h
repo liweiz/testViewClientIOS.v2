@@ -19,7 +19,6 @@
 @property (nonatomic, retain) NSString * email;
 @property (nonatomic, retain) NSNumber * isLoggedIn;
 @property (nonatomic, retain) NSNumber * rememberMe;
-@property (nonatomic, retain) NSString * sortOption;
 @property (nonatomic, retain) NSString * sourceLang;
 @property (nonatomic, retain) NSString * targetLang;
 @property (nonatomic, retain) NSString * deviceInfoId;

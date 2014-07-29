@@ -23,6 +23,9 @@
     if (self) {
         self.ctlOnDuty = TVNoCtl;
         self.numberOfUserTriggeredRequests = 0;
+        self.warning = [[NSMutableString alloc] init];
+        self.sourceLang = [[NSMutableString alloc] init];
+        self.targetLang = [[NSMutableString alloc] init];
     }
     return self;
 }
