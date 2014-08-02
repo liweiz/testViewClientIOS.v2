@@ -20,9 +20,6 @@
 
 // First find undone records one by one, and after all are clear, send sync request. The process can be disrupted at any time when local db changes.
 
-
-
-
 // Get all unsync records for further process
 - (NSMutableArray *)getUndoneSet:(NSManagedObjectContext *)ctx user:(TVUser *)user
 {

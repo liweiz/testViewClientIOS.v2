@@ -28,4 +28,11 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (strong, nonatomic) NSMutableString *targetLang;
 @property (strong, nonatomic) NSMutableString *warning;
 
+@property (assign, nonatomic) CGRect appRect;
+@property (assign, nonatomic) CGFloat originX;
+@property (assign, nonatomic) CGFloat labelWidth;
+@property (assign, nonatomic) CGFloat gapY;
+
+- (void)setupBox;
+
 @end

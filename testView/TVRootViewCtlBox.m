@@ -17,6 +17,11 @@
 @synthesize targetLang;
 @synthesize warning;
 
+@synthesize appRect;
+@synthesize originX;
+@synthesize labelWidth;
+@synthesize gapY;
+
 - (id)init
 {
     self = [super init];
@@ -28,6 +33,13 @@
         self.targetLang = [[NSMutableString alloc] init];
     }
     return self;
+}
+
+- (void)setupBox
+{
+    self.originX = self.appRect.size.width * 0.05f;
+    self.labelWidth = self.appRect.size.width * 0.9f;
+    self.gapY = 5.0f;
 }
 
 @end

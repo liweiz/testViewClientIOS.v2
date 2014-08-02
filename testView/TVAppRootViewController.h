@@ -15,15 +15,17 @@
 #import "TVActivationViewController.h"
 #import "TVCommunicator.h"
 #import "TVRootViewCtlBox.h"
+#import "TVContentRootViewController.h"
 
 extern NSString *const tvEnglishFontName;
 extern NSString *const tvServerUrl;
 extern CGFloat const goldenRatio;
+extern CGFloat const tvRowHeight;
 //extern UIColor *const tvBackgroundColor;
 //extern UIColor *const tvBackgroundColorAlternative;
 //extern UIColor *const tvFontColor;
-//extern CGFloat *const tvFontSizeHeader;
-//extern CGFloat *const tvFontSizeContent;
+extern CGFloat const tvFontSizeLarge;
+extern CGFloat const tvFontSizeRegular;
 extern NSString *const tvShowNative;
 extern NSString *const tvShowTarget;
 extern NSString *const tvShowActivation;
@@ -35,6 +37,9 @@ extern NSString *const tvMinusAndCheckReqNo;
 extern NSString *const tvUserChangedLocalDb;
 extern NSString *const tvUserSignUp;
 extern NSString *const tvShowWarning;
+extern NSString *const tvSaveAsNew;
+extern NSString *const tvSaveAsUpdate;
+extern NSString *const tvDismissSaveViewOnly;
 
 @interface TVAppRootViewController : UIViewController
 
@@ -49,7 +54,7 @@ extern NSString *const tvShowWarning;
 @property (strong, nonatomic) TVActivationViewController *activationViewController;
 @property (strong, nonatomic) TVLangPickViewController *nativeViewController;
 @property (strong, nonatomic) TVLangPickViewController *targetViewController;
-//@property (strong, nonatomic) TVContentRootViewController *contentViewController;
+@property (strong, nonatomic) TVContentRootViewController *contentViewController;
 
 @property (assign, nonatomic) BOOL requestReceivedResponse;
 @property (assign, nonatomic) BOOL willSendRequest;

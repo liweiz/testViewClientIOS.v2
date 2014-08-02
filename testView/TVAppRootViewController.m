@@ -21,11 +21,12 @@
 NSString *const tvEnglishFontName = @"TimesNewRomanPSMT";
 NSString *const tvServerUrl = @"http://localhost:3000";
 CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
+CGFloat const tvRowHeight = 50.0f;
 //UIColor *const tvBackgroundColor = [UIColor colorWithRed:43/255.0f green:43/255.0f blue:42/255.0f alpha:1.0f];
 //UIColor *const tvBackgroundColorAlternative = [UIColor colorWithRed:148/255.0f green:180/255.0f blue:7/255.0f alpha:1.0f];
 //UIColor *const tvFontColor = [UIColor colorWithRed:246/255.0f green:247/255.0f blue:242/255.0f alpha:1.0f];
-//CGFloat *const tvFontSizeHeader = 34.0f;
-//CGFloat *const tvFontSizeContent = 28.0f;
+CGFloat const tvFontSizeLarge = 23.0f;
+CGFloat const tvFontSizeRegular = 17.0f;
 NSString *const tvShowLogin = @"tvShowLogin";
 NSString *const tvShowActivation = @"tvShowActivation";
 NSString *const tvShowNative = @"tvShowLangPickNative";
@@ -40,6 +41,10 @@ NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
 NSString *const tvUserSignUp = @"tvUserSignUp";
 
 NSString *const tvShowWarning = @"tvShowWarning";
+
+NSString *const tvSaveAsNew = @"tvSaveAsNew";
+NSString *const tvSaveAsUpdate = @"tvSaveAsUpdate";
+NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
 
 @interface TVAppRootViewController ()
 
@@ -84,6 +89,9 @@ NSString *const tvShowWarning = @"tvShowWarning";
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
+    self.box.appRect = self.appRect;
+    [self.box setupBox];
+    
     self.requestReceivedResponse = YES;
     self.willSendRequest = YES;
     self.indicator = [[TVIndicator alloc] initWithFrame:self.appRect];
@@ -99,7 +107,8 @@ NSString *const tvShowWarning = @"tvShowWarning";
     self.sysMsg.textColor = [UIColor whiteColor];
     self.sysMsg.backgroundColor = [UIColor greenColor];
     
-    [self loadController];
+//    [self loadController];
+    [self loadContentCtl];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showActivationBelow:) name:tvShowActivation object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showNativePickBelow:) name:tvShowNative object:nil];
@@ -439,21 +448,22 @@ NSString *const tvShowWarning = @"tvShowWarning";
     self.box.ctlOnDuty = TVActivationCtl;
 }
 
-//- (void)loadContentController
-//{
+- (void)loadContentCtl
+{
 //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(startSync:) name:NSManagedObjectContextDidSaveNotification object:nil];
-//    self.contentViewController = [[TVContentRootViewController alloc] init];
-//    
-//    self.contentViewController.managedObjectContext = self.managedObjectContext;
-//    self.contentViewController.managedObjectModel = self.managedObjectModel;
-//    self.contentViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
-//    
-//    self.contentViewController.user = self.user;
-//    
-//    [self addChildViewController:self.contentViewController];
-//    [self.view addSubview:self.contentViewController.view];
-//    [self.contentViewController didMoveToParentViewController:self];
-//}
+    self.contentViewController = [[TVContentRootViewController alloc] init];
+    
+    self.contentViewController.managedObjectContext = self.managedObjectContext;
+    self.contentViewController.managedObjectModel = self.managedObjectModel;
+    self.contentViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+    
+    self.contentViewController.user = self.user;
+    self.contentViewController.box = self.box;
+    
+    [self addChildViewController:self.contentViewController];
+    [self.view addSubview:self.contentViewController.view];
+    [self.contentViewController didMoveToParentViewController:self];
+}
 
 //- (void)startSync:(NSNotification *)didSaveNotification
 //{

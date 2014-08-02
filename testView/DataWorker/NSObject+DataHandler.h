@@ -23,8 +23,6 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 
 - (NSMutableArray *)getUndoneSet:(NSManagedObjectContext *)ctx user:(TVUser *)user;
 
-- (TVBase *)scanDBForUndone:(NSSet *)objSet;
-
 - (void)saveAccessToken:(NSString *)aToken refreshToken:(NSString *)rToken toAccount:(NSString *)email;
 - (NSString *)getAccessTokenForAccount:(NSString *)email;
 - (NSString *)getRefreshTokenForAccount:(NSString *)email;
