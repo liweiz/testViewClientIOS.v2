@@ -33,7 +33,7 @@
 }
 */
 
-# pragma mark - Paging-like vertical scrolling
+# pragma mark - Pagination-like vertical scrolling
 
 /*
  two senarioes:
@@ -96,7 +96,7 @@
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
-    [self keepKeyboard];
+    [self switchCorrespondingTextView];
 }
 
 /*
@@ -216,7 +216,7 @@
 
 # pragma mark - Keyboard management
 
-- (void)keepKeyboard
+- (void)switchCorrespondingTextView
 {
     // Assume each section is corresponding to a textField.
     for (UITextField *t in self.textFields) {

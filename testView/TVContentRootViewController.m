@@ -253,7 +253,7 @@
         // Reset sectionNo to 1
         // Show context at top with keyboard when arriving at New
         self.myNewBaseViewController.myNewView.contentOffset = CGPointMake(0.0f, 0.0f);
-        self.myNewBaseViewController.sectionNo = 1;
+        self.myNewBaseViewController.myNewView.sectionNo = 0;
         if (self.newViewPosition == 1) {
             [self.myNewBaseViewController.myContextView becomeFirstResponder];
         }

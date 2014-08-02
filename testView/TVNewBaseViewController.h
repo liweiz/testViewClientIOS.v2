@@ -35,13 +35,6 @@
 @property (assign, nonatomic) CGFloat startPosition;
 @property (assign, nonatomic) CGFloat targetPosition;
 
-@property (assign, nonatomic) NSInteger sectionNo;
-@property (assign, nonatomic) Boolean editOn;
-@property (assign, nonatomic) Boolean contextEditOn;
-@property (assign, nonatomic) Boolean targetEditOn;
-@property (assign, nonatomic) Boolean translationEditOn;
-@property (assign, nonatomic) Boolean detailEditOn;
-
 @property (assign, nonatomic) CGFloat dragStartPoint;
 
 // temp pre-filled fields' content
@@ -51,8 +44,6 @@
 @property (strong, nonatomic) NSMutableString *tempDetail;
 
 @property (strong, nonatomic) TVCard *cardToUpdate;
-
-@property (strong, nonatomic) NSArray *sectionList;
 
 // This is for showing the left characters available for inputting 
 @property (strong, nonatomic) UILabel *bitLeft;

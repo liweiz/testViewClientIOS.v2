@@ -10,7 +10,7 @@
 #import "TVAppRootViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "UIViewController+sharedMethods.h"
-
+#import "TVView.h"
 
 @interface TVNewBaseViewController ()
 
@@ -22,11 +22,11 @@
 @synthesize managedObjectModel;
 @synthesize persistentStoreCoordinator;
 
-@synthesize myContextView, myDetailView, myNewView, myTargetView, myTranslationView, editOn, sectionList, contextEditOn, targetEditOn, translationEditOn, detailEditOn;
+@synthesize myContextView, myDetailView, myNewView, myTargetView, myTranslationView;
 
 @synthesize box;
 
-@synthesize stopContextTarget, stopTargetTranslation, stopTranslationDetail, startPosition, targetPosition, sectionNo, dragStartPoint;
+@synthesize stopContextTarget, stopTargetTranslation, stopTranslationDetail, startPosition, targetPosition, dragStartPoint;
 
 @synthesize tempContext, tempTarget, tempTranslation, tempDetail, textBefore;
 
@@ -56,7 +56,9 @@
     self.myNewView.alwaysBounceVertical = NO;
 
     //self.myNewView.decelerationRate =  UIScrollViewDecelerationRateFast;
-    self.view = [[UIView alloc] initWithFrame:viewRect];
+    TVView *theView = [[TVView alloc] initWithFrame:viewRect];
+    theView.touchToDismissKeyboardIsOn = YES;
+    self.view = theView;
     self.view.backgroundColor = [UIColor yellowColor];
     self.view.clipsToBounds = YES;
 }
@@ -144,6 +146,8 @@
     return  YES;
 }
 
+#pragma mark - Bit left
+
 - (void)updateBitLeft
 {
     NSString *string = [NSString stringWithFormat:@"%i", [self lengthLeft]];
@@ -154,70 +158,78 @@
 {
     NSInteger length;
     NSInteger left;
-    switch (self.sectionNo) {
-        case 1:
+    switch (self.myNewView.sectionNo) {
+        case 0:
             // For context
             length = [self.myContextView.text length];
             left = 300 - length;
             return left;
-        case 2:
+        case 1:
             // For target
             length = [self.myTargetView.text length];
             left = 30 - length;
             return left;
-        case 3:
+        case 2:
             // For translation
             length = [self.myTranslationView.text length];
             left = 30 - length;
             return left;
-        case 4:
+        case 3:
             // For detail
             length = [self.myDetailView.text length];
             left = 600 - length;
             return left;
     }
+    // Return a large number to indicate an error.
     left = 10000;
     return left;
 }
 
-- (void)firstResponderMustAtTop
+#pragma mark - textViewDelegate
+
+- (NSInteger)getSectionNo:(UITextView *)textView
 {
-    // This senario only happens when user tap in a non current top input box.
-    if ([self.myContextView isFirstResponder]) {
-        if (self.sectionNo != 0) {
-            [self.myNewView setContentOffset:CGPointMake(0.0f, 0.0f) animated:YES];
-            self.sectionNo = 0;
-        }
+    return [self.myNewView.textFields indexOfObject:textView];
+}
+
+- (void)textViewDidBeginEditing:(UITextView *)textView
+{
+    // Make sure textView in editing is on top of the screen.
+    // This senario only happens when user taps in a non current top input box.
+    NSInteger n = [self getSectionNo:textView];
+    if (self.myNewView.sectionNo != n) {
+        self.myNewView.sectionNo = n;
     }
-    if ([self.myTargetView isFirstResponder]) {
-        if (self.sectionNo != 1) {
-            [self.myNewView setContentOffset:CGPointMake(0.0f, self.stopContextTarget) animated:YES];
-            self.sectionNo = 1;
-        }
+    if (self.myNewView.contentOffset.y != [self.myNewView getUpperStop:[self getSectionNo:textView]]) {
+        [self.myNewView setContentOffset:CGPointMake(0.0f, [self.myNewView getUpperStop:n]) animated:YES];
     }
-    if ([self.myTranslationView isFirstResponder]) {
-        if (self.sectionNo != 2) {
-            [self.myNewView setContentOffset:CGPointMake(0.0f, self.stopTargetTranslation) animated:YES];
-            self.sectionNo = 2;
-        }
-    }
-    if ([self.myDetailView isFirstResponder]) {
-        if (self.sectionNo != 3) {
-            [self.myNewView setContentOffset:CGPointMake(0.0f, self.stopTranslationDetail) animated:YES];
-            self.sectionNo = 3;
-        }
-    }
+    [self.textBefore setString:textView.text];
     [self updateBitLeft];
     if (self.bitLeft.hidden == YES) {
         self.bitLeft.hidden = NO;
     }
-    
+}
+
+- (void)textViewDidEndEditing:(UITextView *)textView
+{
+    self.bitLeft.hidden = YES;
+    // Trim text first
+    NSString *trimmedText = [self trimInput:textView.text];
+    if ([trimmedText isEqual:self.myTargetView] || [textView isEqual:self.myTranslationView]) {
+        if ([textView.text isEqualToString:self.textBefore]) {
+            // No change
+        } else {
+            
+        }
+        self.textBefore = nil;
+    }
+    textView.text = trimmedText;
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
     NSInteger maxLength;
-    switch (self.sectionNo) {
+    switch (self.myNewView.sectionNo) {
         case 0:
             maxLength = 300;
             break;
@@ -244,50 +256,18 @@
     }
 }
 
-- (void)textViewDidBeginEditing:(UITextView *)textView
-{
-    self.editOn = YES;
-    if ([textView isEqual:self.myContextView]) {
-        self.contextEditOn = YES;
-    }
-    if ([textView isEqual:self.myDetailView]) {
-        self.detailEditOn = YES;
-    }
-    [self firstResponderMustAtTop];
-    if ([textView isEqual:self.myTargetView] || [textView isEqual:self.myTranslationView]) {
-        [self.textBefore setString:textView.text];
-    }
-}
-
-- (void)textViewDidEndEditing:(UITextView *)textView
-{
-    self.editOn = NO;
-    if ([textView isEqual:self.myContextView]) {
-        self.contextEditOn = NO;
-    }
-    if ([textView isEqual:self.myDetailView]) {
-        self.detailEditOn = NO;
-    }
-    self.bitLeft.hidden = YES;
-    // Trim text first
-    NSString *trimmedText = [self trimInput:textView.text];
-    if ([trimmedText isEqual:self.myTargetView] || [textView isEqual:self.myTranslationView]) {
-        if ([textView.text isEqualToString:self.textBefore]) {
-            // No change
-        } else {
-            
-        }
-        self.textBefore = nil;
-    }
-    textView.text = trimmedText;
-}
-
 - (void)textViewDidChange:(UITextView *)textView
 {
     [self updateBitLeft];
 }
 
-
+#pragma mark - remove blank spaces at the beginning and end of any input
+- (NSString *)trimInput:(NSString *)text
+{
+    NSCharacterSet *whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+    NSString *trimmed = [text stringByTrimmingCharactersInSet:whitespace];
+    return trimmed;
+}
 
 - (void)didReceiveMemoryWarning
 {
