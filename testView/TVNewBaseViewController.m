@@ -9,8 +9,10 @@
 #import "TVNewBaseViewController.h"
 #import "TVAppRootViewController.h"
 #import <QuartzCore/QuartzCore.h>
-#import "UIViewController+sharedMethods.h"
+#import "UIViewController+InOutTransition.h"
 #import "TVView.h"
+#import "TVSaveViewController.h"
+#import "TVLayerBaseViewController.h"
 
 @interface TVNewBaseViewController ()
 
@@ -18,16 +20,11 @@
 
 @implementation TVNewBaseViewController
 
-@synthesize managedObjectContext;
-@synthesize managedObjectModel;
-@synthesize persistentStoreCoordinator;
-
 @synthesize myContextView, myDetailView, myNewView, myTargetView, myTranslationView;
-
-@synthesize box;
+@synthesize createNewOnly;
 
 @synthesize stopContextTarget, stopTargetTranslation, stopTranslationDetail, startPosition, targetPosition, dragStartPoint;
-
+@synthesize saveViewCtl;
 @synthesize tempContext, tempTarget, tempTranslation, tempDetail, textBefore;
 
 @synthesize beginTime, timeOffset, repeatCount, repeatDuration, duration, speed, autoreverses, fillMode, bitLeft, cardToUpdate;
@@ -58,9 +55,12 @@
     //self.myNewView.decelerationRate =  UIScrollViewDecelerationRateFast;
     TVView *theView = [[TVView alloc] initWithFrame:viewRect];
     theView.touchToDismissKeyboardIsOn = YES;
+    theView.touchToDismissViewIsOn = NO;
     self.view = theView;
     self.view.backgroundColor = [UIColor yellowColor];
     self.view.clipsToBounds = YES;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getSaveView) name:tvPinchToShowSave object:nil];
 }
 
 - (void)viewDidLoad
@@ -144,6 +144,26 @@
         return NO;
     }
     return  YES;
+}
+
+#pragma mark - SaveView
+
+- (void)getSaveView
+{
+    [self launchSaveView:self.createNewOnly];
+}
+
+- (void)launchSaveView:(BOOL)toCreateNewOnly
+{
+    if (!self.saveViewCtl) {
+        self.saveViewCtl = [[TVSaveViewController alloc] init];
+        [self addChildViewController:self.saveViewCtl];
+        [self.saveViewCtl didMoveToParentViewController:self];
+        [self.view addSubview:self.saveViewCtl.view];
+    }
+    self.saveViewCtl.createNewOnly = toCreateNewOnly;
+    [self.saveViewCtl checkIfUpdateBtnNeeded];
+    [self showViewAbove:self.saveViewCtl.view currentView:self.view baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
 }
 
 #pragma mark - Bit left

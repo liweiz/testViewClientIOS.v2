@@ -11,6 +11,8 @@
 @implementation TVView
 
 @synthesize touchToDismissKeyboardIsOn;
+@synthesize touchToDismissViewIsOn;
+@synthesize parentCtl;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -29,6 +31,10 @@
     if (self.touchToDismissKeyboardIsOn == YES) {
         if (![x isKindOfClass:[UITextField class]]) {
             [self endEditing:YES];
+        }
+    } else if (self.touchToDismissViewIsOn) {
+        if (!([x isKindOfClass:[UILabel class]] || x.userInteractionEnabled == YES)) {
+            // Dismiss view
         }
     }
     return x;

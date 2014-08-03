@@ -42,8 +42,8 @@ NSString *const tvUserSignUp = @"tvUserSignUp";
 
 NSString *const tvShowWarning = @"tvShowWarning";
 
-NSString *const tvSaveAsNew = @"tvSaveAsNew";
-NSString *const tvSaveAsUpdate = @"tvSaveAsUpdate";
+NSString *const tvPinchToShowSave = @"tvPinchToShowSave";
+
 NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
 
 @interface TVAppRootViewController ()
@@ -372,8 +372,7 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
 - (void)loadLoginCtl
 {
     if (!self.loginViewController) {
-        self.loginViewController = [[TVLoginViewController alloc] init];
-        self.loginViewController.appRect = self.appRect;
+        self.loginViewController = [[TVLoginViewController alloc] initWithNibName:nil bundle:nil];
         self.loginViewController.managedObjectContext = self.managedObjectContext;
         self.loginViewController.managedObjectModel = self.managedObjectModel;
         self.loginViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
@@ -391,9 +390,9 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
 - (void)loadNativePickCtl
 {
     if (!self.nativeViewController) {
-        self.nativeViewController = [[TVLangPickViewController alloc] init];
+        self.nativeViewController = [[TVLangPickViewController alloc] initWithNibName:nil bundle:nil];
         self.nativeViewController.tableIsForSourceLang = YES;
-        self.nativeViewController.appRect = self.appRect;
+
         self.nativeViewController.managedObjectContext = self.managedObjectContext;
         self.nativeViewController.managedObjectModel = self.managedObjectModel;
         self.nativeViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
@@ -410,9 +409,8 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
 - (void)loadTargetPickCtl
 {
     if (!self.targetViewController) {
-        self.targetViewController = [[TVLangPickViewController alloc] init];
+        self.targetViewController = [[TVLangPickViewController alloc] initWithNibName:nil bundle:nil];
         self.targetViewController.tableIsForSourceLang = NO;
-        self.targetViewController.appRect = self.appRect;
         self.targetViewController.managedObjectContext = self.managedObjectContext;
         self.targetViewController.managedObjectModel = self.managedObjectModel;
         self.targetViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
@@ -430,8 +428,7 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
 - (void)loadActivationCtl:(BOOL)isOnTop
 {
     if (!self.activationViewController) {
-        self.activationViewController = [[TVActivationViewController alloc] init];
-        self.activationViewController.appRect = self.appRect;
+        self.activationViewController = [[TVActivationViewController alloc] initWithNibName:nil bundle:nil];
         self.activationViewController.managedObjectContext = self.managedObjectContext;
         self.activationViewController.managedObjectModel = self.managedObjectModel;
         self.activationViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
@@ -451,7 +448,7 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
 - (void)loadContentCtl
 {
 //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(startSync:) name:NSManagedObjectContextDidSaveNotification object:nil];
-    self.contentViewController = [[TVContentRootViewController alloc] init];
+    self.contentViewController = [[TVContentRootViewController alloc] initWithNibName:nil bundle:nil];
     
     self.contentViewController.managedObjectContext = self.managedObjectContext;
     self.contentViewController.managedObjectModel = self.managedObjectModel;

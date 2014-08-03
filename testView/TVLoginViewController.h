@@ -67,6 +67,5 @@
 @property (strong, nonatomic) UITapGestureRecognizer *termsTap;
 
 @property (strong, nonatomic) KeychainItemWrapper *passItem;
-@property (strong, nonatomic) TVRootViewCtlBox *box;
 
 @end

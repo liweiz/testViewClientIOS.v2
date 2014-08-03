@@ -44,7 +44,6 @@
 @synthesize backToSignIn, backToSignInTap;
 
 @synthesize termsBox, agreeToTermsTextBox, agreeToPrivacyTextBox, introTextBox, passItem;
-@synthesize box;
 
 // 5 parts: intro/email/info/password/submit and 5 gaps. gaps adjacent to info only have 1/2 gap. gap is 1/3 of text box height. Take 320 * 480 as the standard rectangle at the center of a screen, pad the rest of screen when the screen is bigger.
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -53,6 +52,7 @@
     if (self) {
         // Custom initialization
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(signUp) name:tvUserSignUp object:nil];
+        self.actionNo = TVPinchRoot;
     }
     return self;
 }
@@ -62,21 +62,21 @@
     self.animationSec = 0.1f;
     self.gapHeight = 460.0f * goldenRatio / (1.0f + 0.5f + 0.5f + 1.0f + 3.0f * 3.0f + 1.3f + 2.0f + 2.0f + 1.0f);
     self.introHeight = 460.0f * (1.0f - goldenRatio) - self.gapHeight * 1.5f;
-    if (self.appRect.size.height > 460.0f) {
-        self.verticalPadding = (self.appRect.size.height - 460.0f) / 2.0f;
+    if (self.box.appRect.size.height > 460.0f) {
+        self.verticalPadding = (self.box.appRect.size.height - 460.0f) / 2.0f;
     } else {
         self.verticalPadding = 0.0f;
     }
-    if (self.appRect.size.width > 320.0f) {
-        self.horizontalPadding = (self.appRect.size.width - 320.0f) / 2.0f;
+    if (self.box.appRect.size.width > 320.0f) {
+        self.horizontalPadding = (self.box.appRect.size.width - 320.0f) / 2.0f;
     } else {
         self.horizontalPadding = 0.0f;
     }
     self.inputX = self.horizontalPadding + 20.0f;
     self.inputWidth = 320.0f - 20.0f * 2.0f;
     self.inputHeight = self.gapHeight * 3.0f;
-    self.baseView = [[UIScrollView alloc] initWithFrame:self.appRect];
-    self.baseView.contentSize = CGSizeMake(self.appRect.size.width, self.appRect.size.height * 2.0f);
+    self.baseView = [[UIScrollView alloc] initWithFrame:self.box.appRect];
+    self.baseView.contentSize = CGSizeMake(self.box.appRect.size.width, self.box.appRect.size.height * 2.0f);
     self.coverOnBaseView = [[TVView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.baseView.contentSize.width, self.baseView.contentSize.height)];
     
     [self.baseView addSubview:self.coverOnBaseView];

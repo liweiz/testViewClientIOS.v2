@@ -9,13 +9,10 @@
 #import <UIKit/UIKit.h>
 #import "TVCard.h"
 #import "TVScrollViewVertical.h"
-#import "TVRootViewCtlBox.h"
+#import "TVLayerBaseViewController.h"
+#import "TVSaveViewController.h"
 
-@interface TVNewBaseViewController : UIViewController <UIScrollViewDelegate, UITextViewDelegate, CAMediaTiming>
-
-@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
-@property (strong, nonatomic) NSManagedObjectModel *managedObjectModel;
-@property (strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+@interface TVNewBaseViewController : TVLayerBaseViewController <UIScrollViewDelegate, UITextViewDelegate, CAMediaTiming>
 
 @property (strong, nonatomic) TVScrollViewVertical *myNewView;
 @property (strong, nonatomic) UITextView *myContextView;
@@ -23,7 +20,8 @@
 @property (strong, nonatomic) UITextView *myTranslationView;
 @property (strong, nonatomic) UITextView *myDetailView;
 
-@property (strong, nonatomic) TVRootViewCtlBox *box;
+@property (strong, nonatomic) TVSaveViewController *saveViewCtl;
+@property (assign, nonatomic) BOOL createNewOnly;
 
 // stop points for vertical scrolling
 //@property (assign, nonatomic) CGFloat stopCamContext;

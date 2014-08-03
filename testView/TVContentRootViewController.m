@@ -33,10 +33,11 @@
 @synthesize myNewBaseViewController;
 @synthesize scanForNew, scanForChange, draftDirectory, draftPath, fileManager, lastSavedDraft, newDraftThisTime, draftAutoSaveTimer, userFetchedResultsController;
 
-- (id)init
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
-    self = [super init];
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
+        // Custom initialization
         self.newViewPosition = 0;
         self.cardsViewPosition = 1;
         self.searchViewPosition = 2;
@@ -83,7 +84,7 @@
 //    [self.myCardsBaseViewController didMoveToParentViewController:self];
     
     // Add new view
-    self.myNewBaseViewController = [[TVNewBaseViewController alloc] init];
+    self.myNewBaseViewController = [[TVNewBaseViewController alloc] initWithNibName:nil bundle:nil];
     self.myNewBaseViewController.managedObjectContext = self.managedObjectContext;
     self.myNewBaseViewController.managedObjectModel = self.managedObjectModel;
     self.myNewBaseViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;

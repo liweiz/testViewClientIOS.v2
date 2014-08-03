@@ -30,7 +30,7 @@
     [self.window makeKeyAndVisible];
 
     // set TVRootViewController as rootViewController
-    TVAppRootViewController *tempViewController = [[TVAppRootViewController alloc] init];
+    TVAppRootViewController *tempViewController = [[TVAppRootViewController alloc] initWithNibName:nil bundle:nil];
     tempViewController.managedObjectContext = self.managedObjectContext;
     tempViewController.managedObjectModel = self.managedObjectModel;
     tempViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;

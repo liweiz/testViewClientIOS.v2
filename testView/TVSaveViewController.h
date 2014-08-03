@@ -8,17 +8,16 @@
 
 #import "TVLayerBaseViewController.h"
 #import "TVRootViewCtlBox.h"
-#import "TVNewBaseViewController.h"
 
-@interface TVSaveViewController : TVLayerBaseViewController
-
-@property (nonatomic, assign) CGRect appRect;
+@interface TVSaveViewController : UIViewController
 
 @property (strong, nonatomic) TVRootViewCtlBox *box;
 @property (strong, nonatomic) UILabel *saveAsNewBtn;
 @property (strong, nonatomic) UITapGestureRecognizer *saveAsNewTap;
 @property (strong, nonatomic) UILabel *updateBtn;
 @property (strong, nonatomic) UITapGestureRecognizer *updateTap;
-@property (strong, nonatomic) UITapGestureRecognizer *cancelTap;
+@property (assign, nonatomic) BOOL createNewOnly;
+
+- (void)checkIfUpdateBtnNeeded;
 
 @end

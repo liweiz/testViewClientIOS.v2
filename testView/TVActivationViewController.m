@@ -11,6 +11,7 @@
 #import "NSObject+DataHandler.h"
 #import "TVRequester.h"
 #import "TVAppRootViewController.h"
+#import "TVLayerBaseViewController.h"
 
 @interface TVActivationViewController ()
 
@@ -38,13 +39,14 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        self.actionNo = TVPinchRoot;
     }
     return self;
 }
 
 - (void)loadView
 {
-    self.view = [[UIView alloc] initWithFrame:self.appRect];
+    self.view = [[UIView alloc] initWithFrame:self.box.appRect];
     self.view.backgroundColor = [UIColor whiteColor];
 }
 
@@ -58,7 +60,7 @@
     topIntroHeight = (460.0f - btnHeight) * 0.5f - gap * 2.0f;
     bottomIntroHeight = (460.0f - btnHeight) * 0.5f - gap * 3.0f - btnHeight;
     
-    self.connectBtn = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, (self.appRect.size.height - btnHeight) * 0.5f, self.appRect.size.width - 20.0f * 2.0f, btnHeight)];
+    self.connectBtn = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, (self.box.appRect.size.height - btnHeight) * 0.5f, self.box.appRect.size.width - 20.0f * 2.0f, btnHeight)];
     [self.view addSubview:self.connectBtn];
     self.connectBtn.backgroundColor = [UIColor greenColor];
     self.connectBtn.userInteractionEnabled = YES;

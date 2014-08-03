@@ -11,5 +11,7 @@
 @interface TVView : UIView
 
 @property (assign, nonatomic) BOOL touchToDismissKeyboardIsOn;
+@property (assign, nonatomic) BOOL touchToDismissViewIsOn;
+@property (weak, nonatomic) UIViewController *parentCtl;
 
 @end

@@ -11,9 +11,14 @@
 #import "TVIndicator.h"
 #import "TVRootViewCtlBox.h"
 
+typedef NS_ENUM(NSInteger, TVPinchAction) {
+    TVPinchNoAction,
+    TVPinchRoot,
+    TVPinchToSave
+};
+
 @interface TVLayerBaseViewController : UIViewController
 
-@property (nonatomic, assign) CGRect appRect;
 @property (strong, nonatomic) TVIndicator *indicator;
 @property (strong, nonatomic) TVUser *user;
 
@@ -23,5 +28,7 @@
 
 @property (strong, nonatomic) UIPinchGestureRecognizer *pinchToShow;
 @property (strong, nonatomic) TVRootViewCtlBox *box;
+
+@property (assign, nonatomic) TVPinchAction actionNo;
 
 @end

@@ -8,6 +8,7 @@
 
 #import "TVSaveViewController.h"
 #import "TVAppRootViewController.h"
+#import "TVView.h"
 
 @interface TVSaveViewController ()
 
@@ -15,17 +16,30 @@
 
 @implementation TVSaveViewController
 
-@synthesize appRect;
 @synthesize box;
 @synthesize saveAsNewBtn;
 @synthesize saveAsNewTap;
 @synthesize updateBtn;
 @synthesize updateTap;
+@synthesize createNewOnly;
+
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
 
 - (void)loadView
 {
     //self.myNewView.decelerationRate =  UIScrollViewDecelerationRateFast;
-    self.view = [[UIView alloc] initWithFrame:self.appRect];
+    TVView *theView = [[TVView alloc] initWithFrame:self.box.appRect];
+    theView.touchToDismissKeyboardIsOn = NO;
+    theView.touchToDismissViewIsOn = YES;
+    theView.parentCtl = self;
+    self.view = theView;
     self.view.backgroundColor = [UIColor whiteColor];
     self.view.clipsToBounds = YES;
 }
@@ -46,28 +60,37 @@
     self.saveAsNewTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(saveAsNew)];
     [self.saveAsNewBtn addGestureRecognizer:self.saveAsNewTap];
     
-    self.updateBtn = [[UILabel alloc] initWithFrame:CGRectMake(self.box.originX, self.saveAsNewBtn.frame.origin.y + self.saveAsNewBtn.frame.size.height + 10.0f, self.box.labelWidth, tvRowHeight)];
-    self.updateBtn.userInteractionEnabled = YES;
-    self.updateBtn.text = @"Update";
-    self.updateBtn.textAlignment = NSTextAlignmentCenter;
-    self.updateBtn.backgroundColor = [UIColor greenColor];
-    self.updateBtn.hidden = YES;
-    [self.view addSubview:self.updateBtn];
-    self.updateTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(saveAsUpdate)];
-    [self.updateBtn addGestureRecognizer:self.updateTap];
-    
-    self.cancelTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissView)];
-    [self.view addGestureRecognizer:self.cancelTap];
+    [self checkIfUpdateBtnNeeded];
+}
+
+- (void)checkIfUpdateBtnNeeded
+{
+    if (self.createNewOnly == YES) {
+        self.updateBtn.hidden = YES;
+    } else {
+        if (!self.updateBtn) {
+            self.updateBtn = [[UILabel alloc] initWithFrame:CGRectMake(self.box.originX, self.saveAsNewBtn.frame.origin.y + self.saveAsNewBtn.frame.size.height + 10.0f, self.box.labelWidth, tvRowHeight)];
+            self.updateBtn.userInteractionEnabled = YES;
+            self.updateBtn.text = @"Update";
+            self.updateBtn.textAlignment = NSTextAlignmentCenter;
+            self.updateBtn.backgroundColor = [UIColor greenColor];
+            self.updateBtn.hidden = YES;
+            [self.view addSubview:self.updateBtn];
+            self.updateTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(saveAsUpdate)];
+            [self.updateBtn addGestureRecognizer:self.updateTap];
+        }
+        self.updateBtn.hidden = NO;
+    }
 }
 
 - (void)saveAsNew
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:tvSaveAsNew object:self];
+//    [[NSNotificationCenter defaultCenter] postNotificationName:tvSaveAsNew object:self];
 }
 
 - (void)saveAsUpdate
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:tvSaveAsUpdate object:self];
+//    [[NSNotificationCenter defaultCenter] postNotificationName:tvSaveAsUpdate object:self];
 }
 
 - (void)dismissView

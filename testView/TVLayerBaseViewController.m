@@ -16,13 +16,13 @@
 
 @implementation TVLayerBaseViewController
 
-@synthesize appRect;
 @synthesize indicator;
 @synthesize managedObjectContext;
 @synthesize managedObjectModel;
 @synthesize persistentStoreCoordinator;
 @synthesize pinchToShow;
 @synthesize box;
+@synthesize actionNo;
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -46,9 +46,26 @@
     // Avoid pinchGesture triggered multiple times by limiting its action only when gesture just begins to be recognized.
     if (self.pinchToShow.state == UIGestureRecognizerStateBegan) {
         self.box.transitionPointInRoot = [self pointBy:self.pinchToShow inView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
-        [[NSNotificationCenter defaultCenter] postNotificationName:tvPinchToShowAbove object:self];
+        [self pinchActionPicker];
     }
     
+}
+
+- (void)pinchActionPicker
+{
+    switch (self.actionNo) {
+        case TVPinchNoAction:
+            // Do nothing
+            break;
+        case TVPinchRoot:
+            [[NSNotificationCenter defaultCenter] postNotificationName:tvPinchToShowAbove object:self];
+            break;
+        case TVPinchToSave:
+            [[NSNotificationCenter defaultCenter] postNotificationName:tvPinchToShowSave object:self];
+            break;
+        default:
+            break;
+    }
 }
 
 - (void)didReceiveMemoryWarning
