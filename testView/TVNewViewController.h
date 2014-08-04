@@ -1,5 +1,5 @@
 //
-//  TVNewBaseViewController.h
+//  TVNewViewController.h
 //  testView
 //
 //  Created by Liwei on 2013-07-25.
@@ -12,7 +12,7 @@
 #import "TVLayerBaseViewController.h"
 #import "TVSaveViewController.h"
 
-@interface TVNewBaseViewController : TVLayerBaseViewController <UIScrollViewDelegate, UITextViewDelegate, CAMediaTiming>
+@interface TVNewViewController : TVLayerBaseViewController <UIScrollViewDelegate, UITextViewDelegate, CAMediaTiming>
 
 @property (strong, nonatomic) TVScrollViewVertical *myNewView;
 @property (strong, nonatomic) UITextView *myContextView;

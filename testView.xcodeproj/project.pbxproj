@@ -56,7 +56,7 @@
 		EE1997AE1816F5A400B5A993 /* langListShort.txt in Resources */ = {isa = PBXBuildFile; fileRef = EE1997AD1816F5A400B5A993 /* langListShort.txt */; };
 		EE1997B01816F60000B5A993 /* langListLong.txt in Resources */ = {isa = PBXBuildFile; fileRef = EE1997AF1816F60000B5A993 /* langListLong.txt */; };
 		EE5F3B5D197E2F890031749E /* TVRootViewCtlBox.m in Sources */ = {isa = PBXBuildFile; fileRef = EE5F3B5C197E2F890031749E /* TVRootViewCtlBox.m */; };
-		EEA889EC19885E4100F042EB /* TVNewBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA889EB19885E4100F042EB /* TVNewBaseViewController.m */; };
+		EEA889EC19885E4100F042EB /* TVNewViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA889EB19885E4100F042EB /* TVNewViewController.m */; };
 		EEA889F21988A0E200F042EB /* TVScrollViewVertical.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA889F11988A0E200F042EB /* TVScrollViewVertical.m */; };
 		EEC26FB0195008C7002818A0 /* TVKeyboard.m in Sources */ = {isa = PBXBuildFile; fileRef = EEC26FAF195008C7002818A0 /* TVKeyboard.m */; };
 		EED30219198A8023007114C1 /* TVSaveViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EED30218198A8023007114C1 /* TVSaveViewController.m */; };
@@ -148,8 +148,8 @@
 		EE1997AF1816F60000B5A993 /* langListLong.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = langListLong.txt; sourceTree = "<group>"; };
 		EE5F3B5B197E2F890031749E /* TVRootViewCtlBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVRootViewCtlBox.h; sourceTree = "<group>"; };
 		EE5F3B5C197E2F890031749E /* TVRootViewCtlBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVRootViewCtlBox.m; sourceTree = "<group>"; };
-		EEA889EA19885E4100F042EB /* TVNewBaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVNewBaseViewController.h; sourceTree = "<group>"; };
-		EEA889EB19885E4100F042EB /* TVNewBaseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVNewBaseViewController.m; sourceTree = "<group>"; };
+		EEA889EA19885E4100F042EB /* TVNewViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVNewViewController.h; sourceTree = "<group>"; };
+		EEA889EB19885E4100F042EB /* TVNewViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVNewViewController.m; sourceTree = "<group>"; };
 		EEA889F01988A0E200F042EB /* TVScrollViewVertical.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVScrollViewVertical.h; sourceTree = "<group>"; };
 		EEA889F11988A0E200F042EB /* TVScrollViewVertical.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVScrollViewVertical.m; sourceTree = "<group>"; };
 		EEC26FAE195008C7002818A0 /* TVKeyboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVKeyboard.h; sourceTree = "<group>"; };
@@ -410,8 +410,8 @@
 		EE13270819885D0400EAD11D /* New */ = {
 			isa = PBXGroup;
 			children = (
-				EEA889EA19885E4100F042EB /* TVNewBaseViewController.h */,
-				EEA889EB19885E4100F042EB /* TVNewBaseViewController.m */,
+				EEA889EA19885E4100F042EB /* TVNewViewController.h */,
+				EEA889EB19885E4100F042EB /* TVNewViewController.m */,
 				EEA889F01988A0E200F042EB /* TVScrollViewVertical.h */,
 				EEA889F11988A0E200F042EB /* TVScrollViewVertical.m */,
 			);
@@ -594,7 +594,7 @@
 				D098EE6B19282D1E0051B305 /* TVRequestId.m in Sources */,
 				EEE0CE79195B217B0061E7A5 /* TVActivationViewController.m in Sources */,
 				D0347975179EDD55006FFCF6 /* TVSearchBaseViewController.m in Sources */,
-				EEA889EC19885E4100F042EB /* TVNewBaseViewController.m in Sources */,
+				EEA889EC19885E4100F042EB /* TVNewViewController.m in Sources */,
 				EE5F3B5D197E2F890031749E /* TVRootViewCtlBox.m in Sources */,
 				D096CE7C182F61A100D09446 /* TVTextField.m in Sources */,
 				D095FF15192C4F35000604A1 /* TVUser.m in Sources */,

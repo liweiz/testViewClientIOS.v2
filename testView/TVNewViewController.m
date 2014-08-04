@@ -1,12 +1,12 @@
 //
-//  TVNewBaseViewController.m
+//  TVNewViewController.m
 //  testView
 //
 //  Created by Liwei on 2013-07-25.
 //  Copyright (c) 2013 Liwei. All rights reserved.
 //
 
-#import "TVNewBaseViewController.h"
+#import "TVNewViewController.h"
 #import "TVAppRootViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "UIViewController+InOutTransition.h"
@@ -14,11 +14,11 @@
 #import "TVSaveViewController.h"
 #import "TVLayerBaseViewController.h"
 
-@interface TVNewBaseViewController ()
+@interface TVNewViewController ()
 
 @end
 
-@implementation TVNewBaseViewController
+@implementation TVNewViewController
 
 @synthesize myContextView, myDetailView, myNewView, myTargetView, myTranslationView;
 @synthesize createNewOnly;
@@ -34,6 +34,9 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        self.actionNo = TVPinchToSave;
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getSaveView) name:tvPinchToShowSave object:nil];
+        self.createNewOnly = YES;
     }
     return self;
 }
@@ -59,8 +62,6 @@
     self.view = theView;
     self.view.backgroundColor = [UIColor yellowColor];
     self.view.clipsToBounds = YES;
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getSaveView) name:tvPinchToShowSave object:nil];
 }
 
 - (void)viewDidLoad
@@ -163,7 +164,7 @@
     }
     self.saveViewCtl.createNewOnly = toCreateNewOnly;
     [self.saveViewCtl checkIfUpdateBtnNeeded];
-    [self showViewAbove:self.saveViewCtl.view currentView:self.view baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+    [self showViewAbove:self.saveViewCtl.view currentView:self.view baseView:self.parentViewController.view pointInBaseView:self.box.transitionPointInRoot];
 }
 
 #pragma mark - Bit left
