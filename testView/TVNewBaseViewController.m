@@ -10,6 +10,7 @@
 #import "TVNewViewController.h"
 #import "UIViewController+InOutTransition.h"
 #import "TVAppRootViewController.h"
+#import "NSObject+DataHandler.h"
 
 @interface TVNewBaseViewController ()
 
@@ -19,7 +20,7 @@
 
 @synthesize managedObjectContext;
 @synthesize managedObjectModel;
-@synthesize persistentStoreCoordinator;
+
 @synthesize myNewViewCtl;
 @synthesize box;
 @synthesize createNewOnly;
@@ -49,7 +50,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.myNewViewCtl = [[TVNewViewController alloc] initWithNibName:nil bundle:nil];
-    self.myNewViewCtl.persistentStoreCoordinator = self.persistentStoreCoordinator;
+
     self.myNewViewCtl.managedObjectContext = self.managedObjectContext;
     self.myNewViewCtl.managedObjectModel = self.managedObjectModel;
     self.myNewViewCtl.box = self.box;
@@ -104,6 +105,35 @@
             [self.saveViewCtl.view.layer removeAllAnimations];
         }
     }
+}
+
+#pragma mark - check and save
+
+- (void)saveAsNew
+{
+    if ([self checkIfTargetIsInContext]) {
+        TVCard *newCard = [NSEntityDescription insertNewObjectForEntityForName:@"TVCard" inManagedObjectContext:self.managedObjectContext];
+        [self setupNewDocBaseLocal:newCard];
+        NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
+        [d setObject:self.myNewViewCtl.myContextView.text forKey:@"context"];
+        [d setObject:self.myNewViewCtl.myTargetView.text forKey:@"target"];
+        [d setObject:self.myNewViewCtl.myTranslationView.text forKey:@"translation"];
+        [d setObject:self.myNewViewCtl.myDetailView.text forKey:@"detail"];
+        [d setObject:self.myNewViewCtl.myDetailView.text forKey:@"belongTo"];
+        [self setupNewCard:newCard withDic:d];
+    }
+}
+
+- (BOOL)checkIfTargetIsInContext
+{
+    // Add target language locale
+    NSRange range = [self.myNewViewCtl.myContextView.text rangeOfString:self.myNewViewCtl.myTargetView.text options:NSCaseInsensitiveSearch range:NSMakeRange(0, self.myNewViewCtl.myContextView.text.length) locale:nil];
+    // Returns {NSNotFound, 0} if aString is not found or is empty (@"").
+    if (range.location == NSNotFound) {
+        // Send system alert
+        return NO;
+    }
+    return  YES;
 }
 
 - (void)didReceiveMemoryWarning {

@@ -22,6 +22,10 @@
 @synthesize labelWidth;
 @synthesize gapY;
 
+@synthesize user;
+@synthesize persistentStoreCoordinator;
+@synthesize indicator;
+
 - (id)init
 {
     self = [super init];

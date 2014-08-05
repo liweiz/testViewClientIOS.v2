@@ -14,7 +14,7 @@
 
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 @property (strong, nonatomic) NSManagedObjectModel *managedObjectModel;
-@property (strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+
 @property (strong, nonatomic) TVNewViewController *myNewViewCtl;
 @property (strong, nonatomic) TVRootViewCtlBox *box;
 @property (strong, nonatomic) TVSaveViewController *saveViewCtl;

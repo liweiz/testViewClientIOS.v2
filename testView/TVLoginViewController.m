@@ -187,7 +187,6 @@
     TVRequester *reqster = [[TVRequester alloc] init];
     reqster.box = self.box;
     reqster.fromVewTag = self.view.tag;
-    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = TVSignIn;
     
     NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
@@ -205,7 +204,6 @@
     reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    reqster.indicator = self.indicator;
     [reqster checkServerAvailToProceed];
 }
 
@@ -341,7 +339,6 @@
     TVRequester *reqster = [[TVRequester alloc] init];
     reqster.box = self.box;
     reqster.fromVewTag = self.view.tag;
-    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = TVSignUp;
     reqster.email = self.emailInput.text;
     reqster.password = self.passwordInput.text;
@@ -359,7 +356,6 @@
     reqster.body = [self getJSONSignUpWithSource:self.box.sourceLang target:self.box.targetLang err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    reqster.indicator = self.indicator;
     reqster.isUserTriggered = YES;
     [reqster checkServerAvailToProceed];
 }
@@ -472,14 +468,13 @@
 - (void)emailToResettingPassword
 {
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.coordinator = self.persistentStoreCoordinator;
+    reqster.box = self.box;
     reqster.requestType = TVEmailForPasswordResetting;
     reqster.email = self.emailInput.text;
     reqster.body = [self getJSONForgotPasswordWithEmail:reqster.email err:nil];
     
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    reqster.indicator = self.indicator;
     [reqster checkServerAvailToProceed];
 }
 

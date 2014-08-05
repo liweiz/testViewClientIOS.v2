@@ -25,7 +25,6 @@
 
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 @property (strong, nonatomic) NSManagedObjectModel *managedObjectModel;
-@property (strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
 @property (strong, nonatomic) NSString *draftDirectory;
 @property (strong, nonatomic) NSString *draftPath;
@@ -43,7 +42,6 @@
 @property (assign, nonatomic) NSInteger searchViewPosition;
 
 @property (strong, nonatomic) TVCard *cardToUpdate;
-@property (strong, nonatomic) TVUser *user;
 
 @property (strong, nonatomic) NSTimer *scanForNew;
 @property (strong, nonatomic) NSTimer *scanForChange;

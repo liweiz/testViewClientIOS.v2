@@ -97,13 +97,12 @@
     TVRequester *r = [[TVRequester alloc] init];
     r.box = self.box;
     r.fromVewTag = self.view.tag;
-    r.coordinator = self.persistentStoreCoordinator;
     r.requestType = TVOneUser;
     r.isUserTriggered = YES;
-    r.userId = self.user.serverId;
+    r.userId = self.box.user.serverId;
     r.isBearer = YES;
     r.method = @"GET";
-    r.accessToken = [self getAccessTokenForAccount:self.user.serverId];
+    r.accessToken = [self getAccessTokenForAccount:self.box.user.serverId];
     [r checkServerAvailToProceed];
 }
 
@@ -121,8 +120,8 @@
         // Show email sent msg to user
     } else if (r.requestType == TVOneUser) {
         // Check the user in local db to know the activation status
-        [self.managedObjectContext refreshObject:self.user mergeChanges:NO];
-        if (self.user.activated) {
+        [self.managedObjectContext refreshObject:self.box.user mergeChanges:NO];
+        if (self.box.user.activated) {
             
 //            [[NSNotificationCenter defaultCenter] postNotificationName: object:r];
         }

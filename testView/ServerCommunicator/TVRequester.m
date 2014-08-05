@@ -37,7 +37,6 @@
 
 @synthesize ctx;
 @synthesize model;
-@synthesize coordinator;
 
 @synthesize isUserTriggered;
 @synthesize fromVewTag;
@@ -45,7 +44,7 @@
 @synthesize record;
 @synthesize reqIdNeeded;
 @synthesize reqId;
-@synthesize indicator;
+
 @synthesize box;
 
 - (id)init
@@ -405,7 +404,6 @@
              req.objectArray = self.objectArray;
              req.ctx = self.ctx;
              req.model = self.model;
-             req.coordinator = self.coordinator;
              req.record = self.record;
              req.reqId = self.reqId;
              err = [req proceedToRequest];
@@ -603,9 +601,9 @@
     if (self.ctx) {
         return self.ctx;
     }
-    if (self.coordinator != nil) {
+    if (self.box.persistentStoreCoordinator != nil) {
         self.ctx = [[NSManagedObjectContext alloc] init];
-        [self.ctx setPersistentStoreCoordinator:self.coordinator];
+        [self.ctx setPersistentStoreCoordinator:self.box.persistentStoreCoordinator];
     }
     return self.ctx;
 }
@@ -620,25 +618,6 @@
     NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"testView" withExtension:@"momd"];
     self.model = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
     return self.model;
-}
-
-// Returns the persistent store coordinator for the application.
-// If the coordinator doesn't already exist, it is created and the application's store added to it.
-- (NSPersistentStoreCoordinator *)persistentStoreCoordinator
-{
-    if (self.coordinator) {
-        return self.coordinator;
-    }
-    
-    NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"testView.sqlite"];
-    
-    NSError *error = nil;
-    self.coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:self.model];
-    if (![self.coordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error]) {
-        NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-        abort();
-    }
-    return self.coordinator;
 }
 
 - (NSURL *)applicationDocumentsDirectory

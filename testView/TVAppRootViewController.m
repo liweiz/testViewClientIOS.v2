@@ -150,7 +150,7 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
         [self refreshUser];
     }
     TVRequester *r = [[TVRequester alloc] init];
-    r.coordinator = self.persistentStoreCoordinator;
+    r.box = self.box;
     r.requestType = TVEmailForActivation;
     if (isUserTriggered) {
         r.isUserTriggered = YES;
@@ -158,7 +158,6 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
     r.userId = self.user.serverId;
     r.isBearer = YES;
     r.method = @"GET";
-    r.indicator = self.indicator;
     r.accessToken = [self getAccessTokenForAccount:self.user.serverId];
     [r checkServerAvailToProceed];
 }
@@ -326,6 +325,7 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
     // When sync with server, isLoggedIn is not processed on server. The response in turn is always true. So when user signs out, isLoggedIn is set to be false. Once user signs in it set to be the value in response, which is alwasy true.
     [self refreshUser];
     if (self.user) {
+        self.box.user = self.user;
         if (self.user.activated.integerValue == 1) {
             
         } else {
@@ -348,10 +348,9 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
         // Show langPick first. At the mean time, send request show indicator accordingly.
         // Prepare request
         TVRequester *r = [[TVRequester alloc] init];
-        r.indicator = self.indicator;
+        r.box = self.box;
         // We need user wait for the result from server
         r.isUserTriggered = YES;
-        r.coordinator = self.persistentStoreCoordinator;
         r.requestType = TVSync;
         r.isBearer = YES;
         r.method = @"GET";
@@ -370,9 +369,9 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
         self.loginViewController = [[TVLoginViewController alloc] initWithNibName:nil bundle:nil];
         self.loginViewController.managedObjectContext = self.managedObjectContext;
         self.loginViewController.managedObjectModel = self.managedObjectModel;
-        self.loginViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+        
         self.loginViewController.box = self.box;
-        self.loginViewController.indicator = self.indicator;
+        
         [self addChildViewController:self.loginViewController];
         [self.view addSubview:self.loginViewController.view];
         [self.loginViewController didMoveToParentViewController:self];
@@ -390,9 +389,8 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
 
         self.nativeViewController.managedObjectContext = self.managedObjectContext;
         self.nativeViewController.managedObjectModel = self.managedObjectModel;
-        self.nativeViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+        
         self.nativeViewController.box = self.box;
-        self.nativeViewController.user = self.user;
         [self addChildViewController:self.nativeViewController];
         [self.view addSubview:self.nativeViewController.view];
         [self.nativeViewController didMoveToParentViewController:self];
@@ -408,9 +406,9 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
         self.targetViewController.tableIsForSourceLang = NO;
         self.targetViewController.managedObjectContext = self.managedObjectContext;
         self.targetViewController.managedObjectModel = self.managedObjectModel;
-        self.targetViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+        
         self.targetViewController.box = self.box;
-        self.targetViewController.user = self.user;
+        
         [self addChildViewController:self.targetViewController];
         [self.view addSubview:self.targetViewController.view];
         [self.targetViewController didMoveToParentViewController:self];
@@ -426,9 +424,7 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
         self.activationViewController = [[TVActivationViewController alloc] initWithNibName:nil bundle:nil];
         self.activationViewController.managedObjectContext = self.managedObjectContext;
         self.activationViewController.managedObjectModel = self.managedObjectModel;
-        self.activationViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
-        self.activationViewController.indicator = self.indicator;
-        self.activationViewController.user = self.user;
+        
         [self addChildViewController:self.activationViewController];
         [self.activationViewController didMoveToParentViewController:self];
         self.activationViewController.view.tag = 1002;
@@ -447,9 +443,7 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
     
     self.contentViewController.managedObjectContext = self.managedObjectContext;
     self.contentViewController.managedObjectModel = self.managedObjectModel;
-    self.contentViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
-    
-    self.contentViewController.user = self.user;
+
     self.contentViewController.box = self.box;
     
     [self addChildViewController:self.contentViewController];

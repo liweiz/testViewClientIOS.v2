@@ -19,12 +19,8 @@ typedef NS_ENUM(NSInteger, TVPinchAction) {
 
 @interface TVLayerBaseViewController : UIViewController
 
-@property (strong, nonatomic) TVIndicator *indicator;
-@property (strong, nonatomic) TVUser *user;
-
 @property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 @property (strong, nonatomic) NSManagedObjectModel *managedObjectModel;
-@property (strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
 @property (strong, nonatomic) UIPinchGestureRecognizer *pinchToShow;
 @property (strong, nonatomic) TVRootViewCtlBox *box;

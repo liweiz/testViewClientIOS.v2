@@ -7,6 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "TVUser.h"
+#import "TVIndicator.h"
 
 typedef NS_ENUM(NSInteger, TVCtl) {
     TVNoCtl,
@@ -32,6 +34,11 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (assign, nonatomic) CGFloat originX;
 @property (assign, nonatomic) CGFloat labelWidth;
 @property (assign, nonatomic) CGFloat gapY;
+
+@property (strong, nonatomic) TVUser *user;
+@property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+
+@property (strong, nonatomic) TVIndicator *indicator;
 
 - (void)setupBox;
 

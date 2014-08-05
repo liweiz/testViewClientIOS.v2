@@ -24,11 +24,11 @@
     return self;
 }
 
-
 // Add all those views that are touched to dismiss keyboard to this view.
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
     UIView *x = [super hitTest:point withEvent:event];
+//    Attention: hitTest is called even view is hidden
     if (self.hidden == NO) {
         if (self.touchToDismissKeyboardIsOn == YES) {
             if (![x isKindOfClass:[UITextField class]]) {

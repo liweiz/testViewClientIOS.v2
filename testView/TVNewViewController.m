@@ -133,17 +133,6 @@
     self.cardToUpdate = nil;
 }
 
-- (BOOL)checkIfTargetIsInContext
-{
-    // Add target language locale
-    NSRange range = [self.myContextView.text rangeOfString:self.myTargetView.text options:NSCaseInsensitiveSearch range:NSMakeRange(0, self.myContextView.text.length) locale:nil];
-    // Returns {NSNotFound, 0} if aString is not found or is empty (@"").
-    if (range.location == NSNotFound) {
-        // Send system alert
-        return NO;
-    }
-    return  YES;
-}
 
 #pragma mark - Bit left
 
@@ -233,10 +222,10 @@
             maxLength = 300;
             break;
         case 1:
-            maxLength = 30;
+            maxLength = 60;
             break;
         case 2:
-            maxLength = 30;
+            maxLength = 60;
             break;
         case 3:
             maxLength = 600;

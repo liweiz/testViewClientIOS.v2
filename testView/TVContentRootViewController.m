@@ -28,7 +28,7 @@
 @synthesize centerOffsetX, myRootView, newViewPosition, cardsViewPosition, searchViewPosition;
 @synthesize managedObjectContext;
 @synthesize managedObjectModel;
-@synthesize persistentStoreCoordinator;
+
 @synthesize myNewBaseViewController;
 @synthesize scanForNew, scanForChange, draftDirectory, draftPath, fileManager, lastSavedDraft, newDraftThisTime, draftAutoSaveTimer, userFetchedResultsController;
 
@@ -86,7 +86,7 @@
     self.myNewBaseViewController = [[TVNewBaseViewController alloc] initWithNibName:nil bundle:nil];
     self.myNewBaseViewController.managedObjectContext = self.managedObjectContext;
     self.myNewBaseViewController.managedObjectModel = self.managedObjectModel;
-    self.myNewBaseViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
+
     self.myNewBaseViewController.box = self.box;
     [self addChildViewController:myNewBaseViewController];
     [self.myRootView addSubview:self.myNewBaseViewController.view];
