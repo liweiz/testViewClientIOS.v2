@@ -7,12 +7,13 @@
 //
 
 #import "TVView.h"
+#import "TVAppRootViewController.h"
 
 @implementation TVView
 
 @synthesize touchToDismissKeyboardIsOn;
 @synthesize touchToDismissViewIsOn;
-@synthesize parentCtl;
+@synthesize ctlInCharge;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -28,13 +29,16 @@
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
     UIView *x = [super hitTest:point withEvent:event];
-    if (self.touchToDismissKeyboardIsOn == YES) {
-        if (![x isKindOfClass:[UITextField class]]) {
-            [self endEditing:YES];
-        }
-    } else if (self.touchToDismissViewIsOn) {
-        if (!([x isKindOfClass:[UILabel class]] || x.userInteractionEnabled == YES)) {
-            // Dismiss view
+    if (self.hidden == NO) {
+        if (self.touchToDismissKeyboardIsOn == YES) {
+            if (![x isKindOfClass:[UITextField class]]) {
+                [self endEditing:YES];
+            }
+        } else if (self.touchToDismissViewIsOn == YES) {
+            if (!([x isKindOfClass:[UILabel class]] && x.userInteractionEnabled == YES)) {
+                // Dismiss view
+                [[NSNotificationCenter defaultCenter] postNotificationName:tvDismissSaveViewOnly object:self];
+            }
         }
     }
     return x;

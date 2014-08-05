@@ -11,7 +11,6 @@
 
 #import <Foundation/Foundation.h>
 //#import "TVCardsViewController.h"
-#import "TVView.h"
 //#import "TVSearchBaseViewController.h"
 #import "TVAppDelegate.h"
 //#import "TVCardsBaseViewController.h"
@@ -56,7 +55,7 @@
     self.myRootView.pagingEnabled = YES;
     self.myRootView.tag = 555;
 
-    self.view = [[TVView alloc] initWithFrame:self.box.appRect];
+    self.view = [[UIView alloc] initWithFrame:self.box.appRect];
     [self.view addSubview:self.myRootView];
     self.centerOffsetX = self.myRootView.contentSize.width / 2 - self.box.appRect.size.width / 2;
 
@@ -120,16 +119,16 @@
         for (NSString *key in self.lastSavedDraft) {
             NSString *text = [self.lastSavedDraft valueForKey:key];
             if ([key isEqualToString:@"context"]) {
-                self.myNewBaseViewController.myContextView.text = text;
+                self.myNewBaseViewController.myNewViewCtl.myContextView.text = text;
             }
             if ([key isEqualToString:@"target"]) {
-                self.myNewBaseViewController.myTargetView.text = text;
+                self.myNewBaseViewController.myNewViewCtl.myTargetView.text = text;
             }
             if ([key isEqualToString:@"translation"]) {
-                self.myNewBaseViewController.myTranslationView.text = text;
+                self.myNewBaseViewController.myNewViewCtl.myTranslationView.text = text;
             }
             if ([key isEqualToString:@"detail"]) {
-                self.myNewBaseViewController.myDetailView.text = text;
+                self.myNewBaseViewController.myNewViewCtl.myDetailView.text = text;
             }
         }
     }
@@ -160,15 +159,15 @@
 - (void)updateDraft
 {
     // All the info read from textField/textView directly.
-    if ([self.lastSavedDraft valueForKey:@"context"] == self.myNewBaseViewController.myContextView.text &&
-        [self.lastSavedDraft valueForKey:@"target"] == self.myNewBaseViewController.myTargetView.text &&
-        [self.lastSavedDraft valueForKey:@"translation"] == self.myNewBaseViewController.myTranslationView.text &&
-        [self.lastSavedDraft valueForKey:@"detail"] == self.myNewBaseViewController.myDetailView.text) {
+    if ([self.lastSavedDraft valueForKey:@"context"] == self.myNewBaseViewController.myNewViewCtl.myContextView.text &&
+        [self.lastSavedDraft valueForKey:@"target"] == self.myNewBaseViewController.myNewViewCtl.myTargetView.text &&
+        [self.lastSavedDraft valueForKey:@"translation"] == self.myNewBaseViewController.myNewViewCtl.myTranslationView.text &&
+        [self.lastSavedDraft valueForKey:@"detail"] == self.myNewBaseViewController.myNewViewCtl.myDetailView.text) {
         // Don't save to file since no change occurs.
     } else {
         // Destory the current one, create an updated one and write to the plist.
         self.lastSavedDraft = nil;
-        self.lastSavedDraft = [NSDictionary dictionaryWithObjectsAndKeys:self.myNewBaseViewController.myContextView.text, @"context", self.myNewBaseViewController.myTargetView.text, @"target", self.myNewBaseViewController.myTranslationView.text, @"translation", self.myNewBaseViewController.myDetailView.text, @"detail", nil];
+        self.lastSavedDraft = [NSDictionary dictionaryWithObjectsAndKeys:self.myNewBaseViewController.myNewViewCtl.myContextView.text, @"context", self.myNewBaseViewController.myNewViewCtl.myTargetView.text, @"target", self.myNewBaseViewController.myNewViewCtl.myTranslationView.text, @"translation", self.myNewBaseViewController.myNewViewCtl.myDetailView.text, @"detail", nil];
         [self.lastSavedDraft writeToFile:self.draftPath atomically:YES];
     }
 }
@@ -253,10 +252,10 @@
         
         // Reset sectionNo to 1
         // Show context at top with keyboard when arriving at New
-        self.myNewBaseViewController.myNewView.contentOffset = CGPointMake(0.0f, 0.0f);
-        self.myNewBaseViewController.myNewView.sectionNo = 0;
+        self.myNewBaseViewController.myNewViewCtl.myNewView.contentOffset = CGPointMake(0.0f, 0.0f);
+        self.myNewBaseViewController.myNewViewCtl.myNewView.sectionNo = 0;
         if (self.newViewPosition == 1) {
-            [self.myNewBaseViewController.myContextView becomeFirstResponder];
+            [self.myNewBaseViewController.myNewViewCtl.myContextView becomeFirstResponder];
         }
     }
 }
@@ -294,7 +293,7 @@
     }
     else {
         // Will leave newView
-        self.myNewBaseViewController.cardToUpdate = nil;
+        self.myNewBaseViewController.myNewViewCtl.cardToUpdate = nil;
         [self.draftAutoSaveTimer invalidate];
         [self updateDraft];
     }
@@ -302,22 +301,22 @@
 
 - (void)refillNewContentFromCard:(TVCard *)card
 {
-    self.myNewBaseViewController.myContextView.text = nil;
-    self.myNewBaseViewController.myTargetView.text = nil;
-    self.myNewBaseViewController.myTranslationView.text = nil;
-    self.myNewBaseViewController.myDetailView.text = nil;
-    self.myNewBaseViewController.myContextView.text = card.context;
-    self.myNewBaseViewController.myTargetView.text = card.target;
-    self.myNewBaseViewController.myTranslationView.text = card.translation;
-    self.myNewBaseViewController.myDetailView.text = card.detail;
+    self.myNewBaseViewController.myNewViewCtl.myContextView.text = nil;
+    self.myNewBaseViewController.myNewViewCtl.myTargetView.text = nil;
+    self.myNewBaseViewController.myNewViewCtl.myTranslationView.text = nil;
+    self.myNewBaseViewController.myNewViewCtl.myDetailView.text = nil;
+    self.myNewBaseViewController.myNewViewCtl.myContextView.text = card.context;
+    self.myNewBaseViewController.myNewViewCtl.myTargetView.text = card.target;
+    self.myNewBaseViewController.myNewViewCtl.myTranslationView.text = card.translation;
+    self.myNewBaseViewController.myNewViewCtl.myDetailView.text = card.detail;
 }
 
 - (void)emptyContentInNewCard
 {
-    self.myNewBaseViewController.myContextView.text = nil;
-    self.myNewBaseViewController.myTargetView.text = nil;
-    self.myNewBaseViewController.myTranslationView.text = nil;
-    self.myNewBaseViewController.myDetailView.text = nil;
+    self.myNewBaseViewController.myNewViewCtl.myContextView.text = nil;
+    self.myNewBaseViewController.myNewViewCtl.myTargetView.text = nil;
+    self.myNewBaseViewController.myNewViewCtl.myTranslationView.text = nil;
+    self.myNewBaseViewController.myNewViewCtl.myDetailView.text = nil;
 }
 
 - (void)didReceiveMemoryWarning

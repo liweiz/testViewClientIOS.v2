@@ -56,6 +56,7 @@
 		EE1997AE1816F5A400B5A993 /* langListShort.txt in Resources */ = {isa = PBXBuildFile; fileRef = EE1997AD1816F5A400B5A993 /* langListShort.txt */; };
 		EE1997B01816F60000B5A993 /* langListLong.txt in Resources */ = {isa = PBXBuildFile; fileRef = EE1997AF1816F60000B5A993 /* langListLong.txt */; };
 		EE5F3B5D197E2F890031749E /* TVRootViewCtlBox.m in Sources */ = {isa = PBXBuildFile; fileRef = EE5F3B5C197E2F890031749E /* TVRootViewCtlBox.m */; };
+		EE96665D198F47F800AA3A5C /* TVNewBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EE96665C198F47F800AA3A5C /* TVNewBaseViewController.m */; };
 		EEA889EC19885E4100F042EB /* TVNewViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA889EB19885E4100F042EB /* TVNewViewController.m */; };
 		EEA889F21988A0E200F042EB /* TVScrollViewVertical.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA889F11988A0E200F042EB /* TVScrollViewVertical.m */; };
 		EEC26FB0195008C7002818A0 /* TVKeyboard.m in Sources */ = {isa = PBXBuildFile; fileRef = EEC26FAF195008C7002818A0 /* TVKeyboard.m */; };
@@ -148,6 +149,8 @@
 		EE1997AF1816F60000B5A993 /* langListLong.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = langListLong.txt; sourceTree = "<group>"; };
 		EE5F3B5B197E2F890031749E /* TVRootViewCtlBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVRootViewCtlBox.h; sourceTree = "<group>"; };
 		EE5F3B5C197E2F890031749E /* TVRootViewCtlBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVRootViewCtlBox.m; sourceTree = "<group>"; };
+		EE96665B198F47F800AA3A5C /* TVNewBaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVNewBaseViewController.h; sourceTree = "<group>"; };
+		EE96665C198F47F800AA3A5C /* TVNewBaseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVNewBaseViewController.m; sourceTree = "<group>"; };
 		EEA889EA19885E4100F042EB /* TVNewViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVNewViewController.h; sourceTree = "<group>"; };
 		EEA889EB19885E4100F042EB /* TVNewViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVNewViewController.m; sourceTree = "<group>"; };
 		EEA889F01988A0E200F042EB /* TVScrollViewVertical.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVScrollViewVertical.h; sourceTree = "<group>"; };
@@ -414,6 +417,8 @@
 				EEA889EB19885E4100F042EB /* TVNewViewController.m */,
 				EEA889F01988A0E200F042EB /* TVScrollViewVertical.h */,
 				EEA889F11988A0E200F042EB /* TVScrollViewVertical.m */,
+				EE96665B198F47F800AA3A5C /* TVNewBaseViewController.h */,
+				EE96665C198F47F800AA3A5C /* TVNewBaseViewController.m */,
 			);
 			name = New;
 			sourceTree = "<group>";
@@ -588,6 +593,7 @@
 			files = (
 				EEC26FB0195008C7002818A0 /* TVKeyboard.m in Sources */,
 				D09364E81818711A002424A2 /* TVLangPickTableViewController.m in Sources */,
+				EE96665D198F47F800AA3A5C /* TVNewBaseViewController.m in Sources */,
 				D098EE7A192854760051B305 /* TVRequester.m in Sources */,
 				EEE0E0D119531EBE00560D95 /* UIViewController+InOutTransition.m in Sources */,
 				D0F668C6191E9E830091E801 /* TVTableViewCell.m in Sources */,

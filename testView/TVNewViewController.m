@@ -24,7 +24,7 @@
 @synthesize createNewOnly;
 
 @synthesize stopContextTarget, stopTargetTranslation, stopTranslationDetail, startPosition, targetPosition, dragStartPoint;
-@synthesize saveViewCtl;
+
 @synthesize tempContext, tempTarget, tempTranslation, tempDetail, textBefore;
 
 @synthesize beginTime, timeOffset, repeatCount, repeatDuration, duration, speed, autoreverses, fillMode, bitLeft, cardToUpdate;
@@ -35,8 +35,6 @@
     if (self) {
         // Custom initialization
         self.actionNo = TVPinchToSave;
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getSaveView) name:tvPinchToShowSave object:nil];
-        self.createNewOnly = YES;
     }
     return self;
 }
@@ -145,26 +143,6 @@
         return NO;
     }
     return  YES;
-}
-
-#pragma mark - SaveView
-
-- (void)getSaveView
-{
-    [self launchSaveView:self.createNewOnly];
-}
-
-- (void)launchSaveView:(BOOL)toCreateNewOnly
-{
-    if (!self.saveViewCtl) {
-        self.saveViewCtl = [[TVSaveViewController alloc] init];
-        [self addChildViewController:self.saveViewCtl];
-        [self.saveViewCtl didMoveToParentViewController:self];
-        [self.view addSubview:self.saveViewCtl.view];
-    }
-    self.saveViewCtl.createNewOnly = toCreateNewOnly;
-    [self.saveViewCtl checkIfUpdateBtnNeeded];
-    [self showViewAbove:self.saveViewCtl.view currentView:self.view baseView:self.parentViewController.view pointInBaseView:self.box.transitionPointInRoot];
 }
 
 #pragma mark - Bit left

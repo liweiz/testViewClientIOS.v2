@@ -22,6 +22,7 @@
 @synthesize updateBtn;
 @synthesize updateTap;
 @synthesize createNewOnly;
+@synthesize ctlInCharge;
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -38,10 +39,9 @@
     TVView *theView = [[TVView alloc] initWithFrame:self.box.appRect];
     theView.touchToDismissKeyboardIsOn = NO;
     theView.touchToDismissViewIsOn = YES;
-    theView.parentCtl = self;
+    theView.ctlInCharge = self.ctlInCharge;
     self.view = theView;
     self.view.backgroundColor = [UIColor whiteColor];
-    self.view.clipsToBounds = YES;
 }
 
 - (void)viewDidLoad
@@ -91,11 +91,6 @@
 - (void)saveAsUpdate
 {
 //    [[NSNotificationCenter defaultCenter] postNotificationName:tvSaveAsUpdate object:self];
-}
-
-- (void)dismissView
-{
-    [[NSNotificationCenter defaultCenter] postNotificationName:tvDismissSaveViewOnly object:self];
 }
 
 - (void)didReceiveMemoryWarning {

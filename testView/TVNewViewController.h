@@ -20,7 +20,7 @@
 @property (strong, nonatomic) UITextView *myTranslationView;
 @property (strong, nonatomic) UITextView *myDetailView;
 
-@property (strong, nonatomic) TVSaveViewController *saveViewCtl;
+
 @property (assign, nonatomic) BOOL createNewOnly;
 
 // stop points for vertical scrolling

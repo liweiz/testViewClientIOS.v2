@@ -12,6 +12,6 @@
 
 @property (assign, nonatomic) BOOL touchToDismissKeyboardIsOn;
 @property (assign, nonatomic) BOOL touchToDismissViewIsOn;
-@property (weak, nonatomic) UIViewController *parentCtl;
+@property (weak, nonatomic) UIViewController *ctlInCharge;
 
 @end

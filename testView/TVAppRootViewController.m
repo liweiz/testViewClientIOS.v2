@@ -275,11 +275,6 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
     }
 }
 
-- (void)animationDidStart:(CAAnimation *)anim
-{
-    
-}
-
 // viewController hierarchy
 // root/content/activation/login
 // login: target/native/signInOrUp

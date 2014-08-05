@@ -17,6 +17,7 @@
 @property (strong, nonatomic) UILabel *updateBtn;
 @property (strong, nonatomic) UITapGestureRecognizer *updateTap;
 @property (assign, nonatomic) BOOL createNewOnly;
+@property (strong, nonatomic) UIViewController *ctlInCharge;
 
 - (void)checkIfUpdateBtnNeeded;
 
