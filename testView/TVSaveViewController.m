@@ -9,6 +9,7 @@
 #import "TVSaveViewController.h"
 #import "TVAppRootViewController.h"
 #import "TVView.h"
+#import "UIViewController+InOutTransition.h"
 
 @interface TVSaveViewController ()
 
@@ -85,12 +86,14 @@
 
 - (void)saveAsNew
 {
-//    [[NSNotificationCenter defaultCenter] postNotificationName:tvSaveAsNew object:self];
+    self.box.transitionPointInRoot = [self pointBy:self.saveAsNewTap inView:self.parentViewController.view];
+    [[NSNotificationCenter defaultCenter] postNotificationName:tvSaveAsNew object:self];
 }
 
 - (void)saveAsUpdate
 {
-//    [[NSNotificationCenter defaultCenter] postNotificationName:tvSaveAsUpdate object:self];
+    self.box.transitionPointInRoot = [self pointBy:self.updateTap inView:self.parentViewController.view];
+    [[NSNotificationCenter defaultCenter] postNotificationName:tvSaveAsUpdate object:self];
 }
 
 

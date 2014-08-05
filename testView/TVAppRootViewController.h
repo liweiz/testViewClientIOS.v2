@@ -38,7 +38,8 @@ extern NSString *const tvUserChangedLocalDb;
 extern NSString *const tvUserSignUp;
 extern NSString *const tvShowWarning;
 extern NSString *const tvPinchToShowSave;
-
+extern NSString *const tvSaveAsNew;
+extern NSString *const tvSaveAsUpdate;
 extern NSString *const tvDismissSaveViewOnly;
 
 @interface TVAppRootViewController : UIViewController

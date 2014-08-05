@@ -48,6 +48,4 @@
 // To compare if the result of an input action is diferent from the content before
 @property (strong, nonatomic) NSMutableString *textBefore;
 
-- (BOOL)checkIfTargetIsInContext;
-
 @end

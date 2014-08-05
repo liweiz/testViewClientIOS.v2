@@ -43,6 +43,8 @@ NSString *const tvUserSignUp = @"tvUserSignUp";
 NSString *const tvShowWarning = @"tvShowWarning";
 
 NSString *const tvPinchToShowSave = @"tvPinchToShowSave";
+NSString *const tvSaveAsNew = @"tvSaveAsNew";
+NSString *const tvSaveAsUpdate = @"tvSaveAsUpdate";
 
 NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
 

@@ -25,6 +25,7 @@
 @synthesize box;
 @synthesize createNewOnly;
 @synthesize saveViewCtl;
+@synthesize cardToUpdate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -33,6 +34,8 @@
         // Custom initialization
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getSaveView) name:tvPinchToShowSave object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dismissSaveView) name:tvDismissSaveViewOnly object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveAsNew) name:tvSaveAsNew object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(saveAsUpdate) name:tvSaveAsUpdate object:nil];
         self.createNewOnly = YES;
     }
     return self;
@@ -114,14 +117,37 @@
     if ([self checkIfTargetIsInContext]) {
         TVCard *newCard = [NSEntityDescription insertNewObjectForEntityForName:@"TVCard" inManagedObjectContext:self.managedObjectContext];
         [self setupNewDocBaseLocal:newCard];
-        NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
-        [d setObject:self.myNewViewCtl.myContextView.text forKey:@"context"];
-        [d setObject:self.myNewViewCtl.myTargetView.text forKey:@"target"];
-        [d setObject:self.myNewViewCtl.myTranslationView.text forKey:@"translation"];
-        [d setObject:self.myNewViewCtl.myDetailView.text forKey:@"detail"];
-        [d setObject:self.myNewViewCtl.myDetailView.text forKey:@"belongTo"];
-        [self setupNewCard:newCard withDic:d];
+        [self setupNewCard:newCard withDic:[self getReadyForCard]];
+        [self.managedObjectContext save:nil];
+        [self dismissSaveView];
     }
+}
+
+- (void)saveAsUpdate
+{
+    if ([self checkIfTargetIsInContext]) {
+        if (self.cardToUpdate) {
+            [self updateDocBaseLocal:self.cardToUpdate];
+            [self updateCard:self.cardToUpdate withDic:[self getReadyForCard]];
+            [self.managedObjectContext save:nil];
+        } else {
+            [self saveAsNew];
+        }
+        [self dismissSaveView];
+    }
+}
+
+- (NSMutableDictionary *)getReadyForCard
+{
+    NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
+    [d setObject:self.myNewViewCtl.myContextView.text forKey:@"context"];
+    [d setObject:self.myNewViewCtl.myTargetView.text forKey:@"target"];
+    [d setObject:self.myNewViewCtl.myTranslationView.text forKey:@"translation"];
+    [d setObject:self.myNewViewCtl.myDetailView.text forKey:@"detail"];
+    [d setObject:self.box.user.serverId forKey:@"belongTo"];
+    [d setObject:self.box.user.sourceLang forKey:@"sourceLang"];
+    [d setObject:self.box.user.targetLang forKey:@"targetLang"];
+    return d;
 }
 
 - (BOOL)checkIfTargetIsInContext

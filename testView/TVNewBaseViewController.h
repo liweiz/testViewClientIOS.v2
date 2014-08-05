@@ -19,5 +19,6 @@
 @property (strong, nonatomic) TVRootViewCtlBox *box;
 @property (strong, nonatomic) TVSaveViewController *saveViewCtl;
 @property (assign, nonatomic) BOOL createNewOnly;
+@property (strong, nonatomic) TVCard *cardToUpdate;
 
 @end
