@@ -40,6 +40,8 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 - (void)updateUser:(TVUser *)user withDic:(NSMutableDictionary *)dic;
 - (void)updateCard:(TVCard *)card withDic:(NSMutableDictionary *)dic;
 
+- (void)deleteDocBaseLocal:(TVBase *)doc;
+
 - (NSArray *)refreshCards:(NSString *)userId withCtx:(NSManagedObjectContext *)ctx;
 
 - (NSInteger)getRequestIdOperationVersion:(TVBase *)base;

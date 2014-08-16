@@ -135,9 +135,7 @@
         // Sync
         TVRequester *req = [[TVRequester alloc] init];
         req.box = self.box;
-        req.indicator = self.indicator;
         req.isUserTriggered = itIsUserTriggered;
-        req.coordinator = self.persistentStoreCoordinator;
         req.isBearer = YES;
         req.method = @"POST";
         req.requestType = TVSync;

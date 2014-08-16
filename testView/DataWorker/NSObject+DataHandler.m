@@ -169,6 +169,27 @@
     card.translation = [dicInside valueForKey:@"translation"];
 }
 
+#pragma - mark delete
+
+- (void)deleteDocBaseLocal:(TVBase *)doc
+{
+    // requestID is not processed here
+    doc.lastUnsyncAction = [NSNumber numberWithInteger:TVDocDeleted];
+    doc.lastModifiedAtLocal = [NSDate date];
+}
+
+- (void)deleteDocBaseServerWithServerId:(NSString *)serverId inCtx:(NSManagedObjectContext *)ctx
+{
+    NSFetchRequest *r = [NSFetchRequest fetchRequestWithEntityName:@"TVCard"];
+    NSPredicate *p = [NSPredicate predicateWithFormat:@"serverId like %@",
+    serverId];
+    [r setPredicate:p];
+    NSArray *a = [ctx executeFetchRequest:r error:nil];
+    if ([a count] > 0) {
+        [ctx deleteObject:a[0]];
+    }
+}
+
 #pragma mark - user triggered save
 
 // Post a notification after successful save
