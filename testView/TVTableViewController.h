@@ -31,9 +31,15 @@
 @property (assign, nonatomic) NSIndexPath *pathOfRowReadyToDelete;
 @property (strong, nonatomic) UIView *deleteViewIn;
 @property (strong, nonatomic) UIView *deleteViewOut;
-// A cell's rect
+// An expandedCellSuite is a set of parts needed for cell expanding display
+@property (strong, nonatomic) NSMutableSet *expandedCellSuites
+
 @property (assign, nonatomic) CGRect cellRect;
-@property (strong, nonatomic) TVCard *cardSelected;
+@property (assign, nonatomic) CGFloat gap;
+@property (assign, nonatomic) CGRect cardToShowRect;
+
+@property (strong, nonatomic) UIScrollView *cardWillShow;
+@property (strong, nonatomic) UIScrollView *cardShown;
 @property (strong, nonatomic) UILabel *labelTranslation;
 @property (strong, nonatomic) UILabel *labelDetail;
 @property (strong, nonatomic) UILabel *labelContext;
@@ -53,13 +59,13 @@
 @property (strong, nonatomic) NSArray *sortDescriptors;
 
 @property (strong, nonatomic) NSArray *rawDataSource;
-@property (strong, nonatomic) NSMutableArray *tableDataSource;
+/* tableViewDataSources is an array with different versions of dataSources.
+ index = 0 indicates the dataSource is the current one in use, while index = 1 means the next version to update to. The last dataSource in the tableViewDataSources is the most recent one tableView needs to present.
+ The reason we need a mechanism like this is that we want tableView to update automatically while user use it, during which time server side sync could also affect the presentation of the tableView. We could show some animation simutanously, but for a tableView that could constantly change. The best way to do that is to process those changes in a queue. The array of tableViewDataSource is a kind of queue to support this kind of operation. It keeps running till only one dataSource, the mostly updated one, left in the array.
+ */
+@property (strong, nonatomic) NSMutableArray *tableDataSources;
 // This is used to carry the insertion/deletion/update data set for tableView. Each of the keys is an array.
 @property (strong, nonatomic) NSMutableDictionary *dicObjChangeToTable;
 @property (strong, nonatomic) NSMutableDictionary *dicPathChangeToTable;
-
-- (void)hideDeleteViewIn;
-- (void)selectionActionAtPath:(NSIndexPath *)path;
-- (void)configureStatusCodeForCell:(TVTableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath;
 
 @end
