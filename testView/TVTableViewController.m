@@ -44,8 +44,6 @@
 @synthesize cardWillShow;
 @synthesize cardShown;
 
-@synthesize dicObjChangeToTable;
-@synthesize dicPathChangeToTable;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -71,15 +69,62 @@
  rawDataSource and tableDataSource are two independent arrays. Instead of refreshing managedObjects one by one, We dealloc ctx and establish a new ctx to execute fetchRequest for the most recently data in local db.
  */
 
-- (void)updateTableView
+- (NSDictionary *)getTableViewPathsToChange
 {
+    NSMutableDictionary *r = [NSMutableDictionary dictionaryWithCapacity:0];
     if ([self.tableDataSources count] > 1) {
-        NSArray *dsNow = self.tableDataSources[0];
-        NSArray *dsNext = self.tableDataSources[1];
-        
+        NSMutableArray *dsNow = self.tableDataSources[0];
+        NSMutableArray *dsNext = self.tableDataSources[1];
+        NSMutableArray *toInsert = [NSMutableArray arrayWithCapacity:0];
+        NSMutableArray *toUpdate = [NSMutableArray arrayWithCapacity:0];
+        NSMutableArray *toDelete = [NSMutableArray arrayWithCapacity:0];
+        for (NSDictionary *d in dsNow) {
+            NSString *localId = [d valueForKey:@"localId"];
+            NSString *serverId = [d valueForKey:@"serverId"];
+            NSNumber *versionNo = [d valueForKey:@"versionNo"];
+            NSInteger versionNo0 = versionNo.integerValue;
+            NSDate *lastModifiedAtLocal = [d valueForKey:@"lastModifiedAtLocal"];
+            NSInteger rowNo = [dsNow indexOfObject:d];
+            NSIndexPath *path = [NSIndexPath indexPathWithIndex:rowNo];
+            NSDictionary *cardInNext = [self findCard:serverId localId:localId inArray:dsNext];
+            if ([cardInNext count] > 0) {
+                // Corresponding card found
+                NSNumber *versionNo1 = [cardInNext valueForKey:@"versionNo"];
+                NSInteger versionNo2 = versionNo1.integerValue;
+                if ([self isNeededToBeUpdatedByVerNo:versionNo0 criteria:versionNo2]) {
+                    // Update row, path is for its location in current dataSource. And d and cardInNext may not be the same object, though they present the same card in local db.
+                    [toUpdate addObject:path];
+                    // Update the data for this row in current dataSource as well since tableView probably loads data from this instead of the one in the new dataSource. It can be tested to find the answer later.
+                    [dsNow replaceObjectAtIndex:rowNo withObject:cardInNext];
+                } else {
+                    NSDate *lastModifiedAtLocal0 = [cardInNext valueForKey:@"lastModifiedAtLocal"];
+                    if ([self isNeededToBeUpdatedByLastModified:lastModifiedAtLocal criteria:lastModifiedAtLocal0]) {
+                        // Update row
+                        [toUpdate addObject:path];
+                        [dsNow replaceObjectAtIndex:rowNo withObject:cardInNext];
+                    }
+                }
+            } else {
+                // No such card found in new dataSource. Delete row.
+                [toDelete addObject:path];
+            }
+        }
+        for (NSDictionary *dd in dsNext) {
+            NSString *localId = [dd valueForKey:@"localId"];
+            NSString *serverId = [dd valueForKey:@"serverId"];
+            NSDictionary *cardInNow = [self findCard:serverId localId:localId inArray:dsNow];
+            if ([cardInNow count] == 0) {
+                // No such card found in current dataSource. Insert row.
+                NSInteger rowNo = [dsNext indexOfObject:dd];
+                NSIndexPath *path = [NSIndexPath indexPathWithIndex:rowNo];
+                [toInsert addObject:path];
+            }
+        }
+        [r setObject:toUpdate forKey:@"update"];
+        [r setObject:toDelete forKey:@"delete"];
+        [r setObject:toInsert forKey:@"insert"];
     }
-    
-    
+    return r;
 }
 
 - (void)addBlankRows:(NSSet *)expandedCardSet toTableViewDataSource:(NSMutableArray *)dataSource
@@ -179,111 +224,6 @@
 }
 
 #pragma mark - Sync with local db
-/*
- 1.     For any row in tableDataSource, search for the counterpart in refreshed rawDataSource.
- 1.1    Search for same serverId
- 1.1.1    Match by versionNo to ensure the latest version is shown
- 1.1.2    Match by lastModifiedAtLocal to ensure local made changes are shown
- 1.1.3    For those with no match in tableDataSource, delete them.
- 1.2    Search for same localId in case that serverId is not available. versionNo is not able to be used here since it's from server and no serverId means it has not successfully communicated with server.
- 1.2.1    Match by lastModifiedAtLocal to ensure local made changes are shown
- 2. For those in rawDataSource without a match in tableDataSource, add them to tableDataSource anyway.
- To easily achieve above steps, we create a new array based on rawDataSource. Add a flag to each of it's object to mark if it is matched during the search.
- */
-- (void)syncWithLocalDb:(NSString *)userServerId
-{
-    [self.dicPathChangeToTable removeAllObjects];
-    NSMutableArray *toInsert = [NSMutableArray arrayWithCapacity:0];
-    NSMutableArray *toUpdate = [NSMutableArray arrayWithCapacity:0];
-    NSMutableArray *toDelete = [NSMutableArray arrayWithCapacity:0];
-    self.rawDataSource = [self getRawDataSource:userServerId];
-    NSArray *a = [self getArrayWithFlag];
-    for (NSDictionary *d in self.tableDataSource) {
-        NSString *localId = [d valueForKey:@"localId"];
-        NSString *serverId = [d valueForKey:@"serverId"];
-        NSNumber *versionNo = [d valueForKey:@"versionNo"];
-        NSInteger versionNo0 = versionNo.integerValue;
-        NSDate *lastModifiedAtLocal = [d valueForKey:@"lastModifiedAtLocal"];
-        BOOL isMatched = NO;
-        NSInteger rowNo = [self.tableDataSource indexOfObject:d];
-        NSIndexPath *path = [NSIndexPath indexPathWithIndex:rowNo];
-        for (NSDictionary *x in a) {
-            NSManagedObject *mo = [x valueForKey:@"obj"];
-            if (serverId.length > 0) {
-                if ([[mo valueForKey:@"serverId"] isEqualToString:serverId]) {
-                    isMatched = YES;
-                    NSNumber *nn = [NSNumber numberWithBool:YES];
-                    [x setValue:nn forKey:@"isMatched"];
-                    NSNumber *versionNo1 = [mo valueForKey:@"versionNo"];
-                    NSInteger versionNo2 = versionNo1.integerValue;
-                    if ([self isNeededToBeUpdatedByVerNo:versionNo0 criteria:versionNo2]) {
-                        // Update row
-                        NSDictionary *newD = [self convertObjToDic:mo];
-                        [self.tableDataSource replaceObjectAtIndex:rowNo withObject:newD];
-                        [toUpdate addObject:path];
-                    } else {
-                        NSDate *lastModifiedAtLocal0 = [mo valueForKey:@"lastModifiedAtLocal"];
-                        if ([self isNeededToBeUpdatedByLastModified:lastModifiedAtLocal criteria:lastModifiedAtLocal0]) {
-                            NSDictionary *newD = [self convertObjToDic:mo];
-                            // Update row
-                            [self.tableDataSource replaceObjectAtIndex:rowNo withObject:newD];
-                            [toUpdate addObject:path];
-                        }
-                    }
-                    break;
-                }
-            } else if (localId.length > 0) {
-                if ([[mo valueForKey:@"localId"] isEqualToString:localId]) {
-                    isMatched = YES;
-                    NSNumber *nn = [NSNumber numberWithBool:YES];
-                    [x setValue:nn forKey:@"isMatched"];
-                    NSDate *lastModifiedAtLocal0 = [mo valueForKey:@"lastModifiedAtLocal"];
-                    if ([self isNeededToBeUpdatedByLastModified:lastModifiedAtLocal criteria:lastModifiedAtLocal0]) {
-                        NSDictionary *newD = [self convertObjToDic:mo];
-                        // Update row
-                        [self.tableDataSource replaceObjectAtIndex:rowNo withObject:newD];
-                        [toUpdate addObject:path];
-                    }
-                    break;
-                }
-            }
-        }
-        if (!isMatched) {
-            // Delete row
-            [self.tableDataSource removeObject:d];
-            [toDelete addObject:path];
-        }
-    }
-    for (NSMutableDictionary *y in a) {
-        NSNumber *i = [y valueForKey:@"isMatched"];
-        if (!i.boolValue) {
-            NSManagedObject *mo = [y valueForKey:@"obj"];
-            NSDictionary *newD = [self convertObjToDic:mo];
-            // Insert row
-            [self.tableDataSource addObject:newD];
-            NSInteger rowNo = [self.tableDataSource indexOfObject:newD];
-            NSIndexPath *path = [NSIndexPath indexPathWithIndex:rowNo];
-            [toInsert addObject:path];
-        }
-    }
-    [self.dicPathChangeToTable setObject:toUpdate forKey:@"update"];
-    [self.dicPathChangeToTable setObject:toDelete forKey:@"delete"];
-    [self.dicPathChangeToTable setObject:toInsert forKey:@"insert"];
-//    [self.tableDataSource sortUsingDescriptors:self.sortDescriptors];
-}
-
-- (NSArray *)getArrayWithFlag
-{
-    NSMutableArray *a = [NSMutableArray arrayWithCapacity:0];
-    for (id obj in self.rawDataSource) {
-        NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
-        [d setObject:obj forKey:@"obj"];
-        NSNumber *n = [NSNumber numberWithBool:NO];
-        [d setObject:n forKey:@"isMatched"];
-        [a addObject:d];
-    }
-    return a;
-}
 
 - (BOOL)isNeededToBeUpdatedByVerNo:(NSInteger)verNoToExe criteria:(NSInteger)verNo
 {
@@ -333,13 +273,20 @@
     return a;
 }
 
-- (void)tableChangeAnimation
+- (void)tableChangeAnimation:(NSDictionary *)paths
 {
+    // The way to have method call after the animation completed is from here: http://stackoverflow.com/questions/7623771/how-to-detect-that-animation-has-ended-on-uitableview-beginupdates-endupdates?answertab=votes#tab-top
     // To form a new array for insertion while keep the old one for reloading and deletion
+    [CATransaction begin];
+    [CATransaction setCompletionBlock:^{
+        if ([self.tableDataSources count] > 1) {
+            // Proceed to next version of dataSource till no version remains.
+        }
+    }];
     [self.tableView beginUpdates];
-    NSArray *toInsert = [self.dicPathChangeToTable valueForKey:@"insert"];
-    NSArray *toDelete = [self.dicPathChangeToTable valueForKey:@"delete"];
-    NSArray *toUpdate = [self.dicPathChangeToTable valueForKey:@"update"];
+    NSArray *toInsert = [paths valueForKey:@"insert"];
+    NSArray *toDelete = [paths valueForKey:@"delete"];
+    NSArray *toUpdate = [paths valueForKey:@"update"];
     if ([toInsert count] > 0) {
         // Insertion needs to find the indexPath in the new dataSource
         [self.tableView insertRowsAtIndexPaths:toInsert withRowAnimation:UITableViewRowAnimationFade];
@@ -358,7 +305,11 @@
         //[self configureCell:[tableView cellForRowAtIndexPath:indexPath]
         //atIndexPath:indexPath];
     }
+    if ([self.tableDataSources count] > 1) {
+        [self.tableDataSources removeObjectAtIndex:0];
+    }
     [self.tableView endUpdates];
+    [CATransaction commit];
 }
 
 #pragma mark - Table view data source

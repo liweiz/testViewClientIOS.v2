@@ -64,8 +64,5 @@
  The reason we need a mechanism like this is that we want tableView to update automatically while user use it, during which time server side sync could also affect the presentation of the tableView. We could show some animation simutanously, but for a tableView that could constantly change. The best way to do that is to process those changes in a queue. The array of tableViewDataSource is a kind of queue to support this kind of operation. It keeps running till only one dataSource, the mostly updated one, left in the array.
  */
 @property (strong, nonatomic) NSMutableArray *tableDataSources;
-// This is used to carry the insertion/deletion/update data set for tableView. Each of the keys is an array.
-@property (strong, nonatomic) NSMutableDictionary *dicObjChangeToTable;
-@property (strong, nonatomic) NSMutableDictionary *dicPathChangeToTable;
 
 @end
