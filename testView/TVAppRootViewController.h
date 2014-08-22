@@ -41,6 +41,7 @@ extern NSString *const tvPinchToShowSave;
 extern NSString *const tvSaveAsNew;
 extern NSString *const tvSaveAsUpdate;
 extern NSString *const tvDismissSaveViewOnly;
+extern NSString *const tvHideExpandedCard;
 
 @interface TVAppRootViewController : UIViewController
 

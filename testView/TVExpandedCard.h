@@ -26,6 +26,7 @@
 // This is also an indicator for the most up-to-date snapShot.
 @property (assign, nonatomic) NSInteger numberOfRowsNeeded;
 @property (strong, nonatomic) UIScrollView *baseView;
+@property (strong, nonatomic) UITapGestureRecognizer *tapToHide;
 @property (strong, nonatomic) UILabel *labelTranslation;
 @property (strong, nonatomic) UILabel *labelDetail;
 @property (strong, nonatomic) UILabel *labelContext;
@@ -35,6 +36,8 @@
 @property (assign, nonatomic) CGFloat gap;
 @property (assign, nonatomic) CGFloat cellHeight;
 
+
 - (void)setup;
+- (void)show;
 
 @end

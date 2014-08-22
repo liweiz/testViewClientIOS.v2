@@ -7,6 +7,7 @@
 //
 
 #import "TVExpandedCard.h"
+#import "TVAppRootViewController.h"
 
 @implementation TVExpandedCard
 
@@ -21,6 +22,7 @@
 @synthesize rowNo;
 @synthesize blanks;
 @synthesize baseView;
+@synthesize tapToHide;
 @synthesize labelTranslation;
 @synthesize labelDetail;
 @synthesize labelContext;
@@ -43,6 +45,22 @@
 {
     CGRect oRect = [self getOriginalRectOfFullCardView];
     self.numberOfRowsNeeded = [self getRowNoOfFullCardView:oRect.size.height];
+    // Adjust number of blanks to match the number needed
+    if ([self.blanks count] > self.numberOfRowsNeeded) {
+        for (NSInteger n = 1; [self.blanks count] - self.numberOfRowsNeeded; n++) {
+            [self.blanks removeObject:[self.blanks lastObject]];
+        }
+    } else if ([self.blanks count] < self.numberOfRowsNeeded) {
+        for (NSInteger n = 1; self.numberOfRowsNeeded - [self.blanks count]; n++) {
+            NSDictionary *newBlank = [[NSDictionary alloc] init];
+            [self.blanks addObject:newBlank];
+        }
+    }
+}
+
+// It has to be setup before show.
+- (void)show
+{
     CGRect fRect = [self getFinalRectOfFullCardView:self.numberOfRowsNeeded];
     if (!self.baseView) {
         self.baseView = [[UIScrollView alloc] initWithFrame:fRect];
@@ -57,22 +75,12 @@
         contentView.backgroundColor = [UIColor grayColor];
         [self.baseView setContentOffset:CGPointMake(0.0f, self.baseView.frame.size.height) animated:NO];
         self.baseView.backgroundColor = [UIColor clearColor];
-        
+        self.tapToHide = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(sendHideCardNotification)];
+        [self.baseView addGestureRecognizer:self.tapToHide];
         [self.baseView setContentOffset:CGPointMake(0.0f, 0.0f) animated:YES];
     } else {
         self.baseView.frame = fRect;
         [self.baseView setNeedsLayout];
-    }
-    // Adjust number of blanks to match the number needed
-    if ([self.blanks count] > self.numberOfRowsNeeded) {
-        for (NSInteger n = 1; [self.blanks count] - self.numberOfRowsNeeded; n++) {
-            [self.blanks removeObject:[self.blanks lastObject]];
-        }
-    } else if ([self.blanks count] < self.numberOfRowsNeeded) {
-        for (NSInteger n = 1; self.numberOfRowsNeeded - [self.blanks count]; n++) {
-            NSDictionary *newBlank = [[NSDictionary alloc] init];
-            [self.blanks addObject:newBlank];
-        }
     }
 }
 
@@ -137,6 +145,13 @@
     // Height of the scrollView's frame
     CGFloat myHeight = contextHeight + detailHeight + translationHeight + self.gap * 5;
     return CGRectMake(0.0f, self.originY, self.width, myHeight);
+}
+
+#pragma mark - Hide card
+
+- (void)sendHideCardNotification
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:tvHideExpandedCard object:self];
 }
 
 @end

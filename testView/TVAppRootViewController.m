@@ -48,6 +48,8 @@ NSString *const tvSaveAsUpdate = @"tvSaveAsUpdate";
 
 NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
 
+NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
+
 @interface TVAppRootViewController ()
 
 @end

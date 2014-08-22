@@ -36,9 +36,6 @@
 
 @property (strong, nonatomic) NSMutableString *userServerId;
 
-@property (strong, nonatomic) UIScrollView *cardWillShow;
-@property (strong, nonatomic) UIScrollView *cardShown;
-
 // Sort
 @property (strong, nonatomic) NSSortDescriptor *byCellTitleAlphabetA;
 @property (strong, nonatomic) NSSortDescriptor *byTimeCollectedA;
