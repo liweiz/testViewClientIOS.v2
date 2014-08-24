@@ -231,7 +231,7 @@
 -(void)printUserWithRequester
 {
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.coordinator = self.persistentStoreCoordinator;
+//    reqster.coordinator = self.persistentStoreCoordinator;
 }
 
 - (void)createDeviceInfo
@@ -270,7 +270,7 @@
 {
     NSLog(@"signUp");
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.coordinator = self.persistentStoreCoordinator;
+//    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = [reqTypeArray[0] integerValue];
     reqster.email = email;
     reqster.password = password;
@@ -284,7 +284,7 @@
 - (void)signIn
 {
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.coordinator = self.persistentStoreCoordinator;
+//    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = [reqTypeArray[1] integerValue];
     if (self.user) {
         reqster.objectIdArray = [NSMutableArray arrayWithCapacity:0];
@@ -302,7 +302,7 @@
 - (void)renewTokens
 {
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.coordinator = self.persistentStoreCoordinator;
+//    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = [reqTypeArray[3] integerValue];
     NSString *a = [self getAccessTokenForAccount:userId];
     NSString *r = [self getRefreshTokenForAccount:userId];
@@ -318,7 +318,7 @@
 - (void)emailForActivation
 {
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.coordinator = self.persistentStoreCoordinator;
+//    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = [reqTypeArray[6] integerValue];
     NSString *a = [self getAccessTokenForAccount:userId];
     reqster.isBearer = YES;
@@ -334,7 +334,7 @@
     [self setupNewRequestId:rId action:TVDocNew for:(TVBase *)self.user];
     [self.managedObjectContext save:nil];
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.coordinator = self.persistentStoreCoordinator;
+//    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.objectIdArray = [NSMutableArray arrayWithCapacity:0];
     [reqster.objectIdArray addObject:self.user.objectID];
     reqster.requestType = [reqTypeArray[4] integerValue];
@@ -355,7 +355,7 @@
     [self setupNewRequestId:rId action:TVDocUpdated for:(TVBase *)self.user];
     [self.managedObjectContext save:nil];
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.coordinator = self.persistentStoreCoordinator;
+//    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.requestType = [reqTypeArray[5] integerValue];
     NSString *a = [self getAccessTokenForAccount:userId];
     reqster.reqId = rId;
@@ -377,7 +377,7 @@
     [self setupNewRequestId:rId action:TVDocNew for:(TVBase *)self.user];
     [self.managedObjectContext save:nil];
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.coordinator = self.persistentStoreCoordinator;
+//    reqster.coordinator = self.persistentStoreCoordinator;
     reqster.objectIdArray = [NSMutableArray arrayWithCapacity:0];
     [reqster.objectIdArray addObject:self.user.objectID];
     reqster.requestType = [reqTypeArray[4] integerValue];

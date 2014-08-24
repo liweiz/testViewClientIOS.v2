@@ -10,7 +10,7 @@
 #import "TVRootViewCtlBox.h"
 #import "TVTableViewCell0.h"
 
-@interface TVTableViewController : UITableViewController <NSFetchedResultsControllerDelegate>
+@interface TVTableViewController : UITableViewController
 
 @property (assign, nonatomic) BOOL changeIsUserDriven;
 
@@ -56,6 +56,6 @@
  The reason we need a mechanism like this is that we want tableView to update automatically while user use it, during which time server side sync could also affect the presentation of the tableView. We could show some animation simutanously, but for a tableView that could constantly change. The best way to do that is to process those changes in a queue. The array of tableViewDataSource is a kind of queue to support this kind of operation. It keeps running till only one dataSource, the mostly updated one, left in the array.
  */
 @property (strong, nonatomic) NSMutableArray *tableDataSources;
-@property (strong, nonatomic) NSMutableArray *snapShots;
+@property (strong, nonatomic) NSMutableArray *snapshots;
 
 @end

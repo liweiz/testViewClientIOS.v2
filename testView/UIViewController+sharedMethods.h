@@ -12,7 +12,7 @@
 #import "TVBase.h"
 #import "TVCard.h"
 #import "TVUser.h"
-#import "TVTableViewCell.h"
+#import "TVTableViewCell0.h"
 #import "TVAppRootViewController.h"
 #import "KeychainItemWrapper.h"
 

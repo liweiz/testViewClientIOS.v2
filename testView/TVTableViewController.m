@@ -32,25 +32,27 @@
 @synthesize sortDescriptors;
 @synthesize rawDataSource;
 @synthesize tableDataSources;
-@synthesize snapShots;
+@synthesize snapshots;
 @synthesize expandedCards;
 
 @synthesize userServerId;
 
 /*
- Each snapShot includes two things:
+ Each snapshot includes two things:
  1. tableDataSource
  2. its corresponding expandedCards
  They are wrapped in a dictionary and the dictionary form an array to indicate its time-based order.
- We get the tableDataSource snapShot alone to self.tableDataSources for tableView change process.
+ We get the tableDataSource snapshot alone to self.tableDataSources for tableView change process.
  
  Modules here:
- 1. tableDataSources generator: take snapShot and form a queue
- 2. snapShots transition animator: find out difference between two adjacent snapShots and animate the change
- 3. selection management: self.expandedCards has the latest selection while the snapShot is saved in self.snapShots
+ 1. tableDataSources generator: take snapshot and form a queue
+ 2. snapshots transition animator: find out difference between two adjacent snapshots and animate the change
+ 3. selection management: self.expandedCards has the latest selection while the snapshot is saved in self.snapshots
  4. expandedCard frame management: 
  5. cellDeleteView management:
  */
+
+#pragma mark - init
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
@@ -64,11 +66,27 @@
     return self;
 }
 
+- (void)loadView
+{
+    if ([self.tableDataSources count] == 0) {
+        [self finalizeTableDataSource];
+    }
+    self.tableView = [[UITableView alloc] initWithFrame:self.box.appRect style:UITableViewStylePlain];
+    self.tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+    self.tableView.backgroundColor = [UIColor whiteColor];
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.tableView.allowsMultipleSelection = YES;
+    self.tableView.allowsSelectionDuringEditing = YES;
+    self.tableView.allowsMultipleSelectionDuringEditing = YES;
+    self.tableView.dataSource = self;
+    self.tableView.delegate = self;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
 }
 
-#pragma mark - Process tableDataSource snapShot queue
+#pragma mark - Process tableDataSource snapshot queue
 
 /*
  The process is always from rawDataSource to tableDataSource, no matter whether it's triggered by user or system, except inserting/deleting blank rows for expanding/collapsing a row.
@@ -87,10 +105,13 @@
  2.3    For sync response, use the module for a full sync between refreshed rawDataSource and tableDataSource, get difference and proceed to updating tableView.
  */
 
-// Only process current to next version of snapShot
-- (void)processOneStepSnapShotQueue
+// Only process current to next version of snapshot
+- (void)processOneStepSnapshotQueue
 {
-    [self tableChangeAnimation:[self getTableViewPathsToChange]];
+    if ([self.tableDataSources count] > 1) {
+        // Proceed to next version of dataSource till no newer version remains.
+        [self tableChangeAnimation:[self getTableViewPathsToChange]];
+    }
 }
 
 // tableview insertion/deletion/update
@@ -100,10 +121,7 @@
     // To form a new array for insertion while keep the old one for reloading and deletion
     [CATransaction begin];
     [CATransaction setCompletionBlock:^{
-        if ([self.tableDataSources count] > 1) {
-            // Proceed to next version of dataSource till no newer version remains.
-            [self processOneStepSnapShotQueue];
-        }
+        [self processOneStepSnapshotQueue];
     }];
     [self.tableView beginUpdates];
     NSArray *toInsert = [paths valueForKey:@"insert"];
@@ -129,7 +147,7 @@
     }
     if ([self.tableDataSources count] > 1) {
         [self.tableDataSources removeObjectAtIndex:0];
-        [self.snapShots removeObjectAtIndex:0];
+        [self.snapshots removeObjectAtIndex:0];
     }
     [self.tableView endUpdates];
     [CATransaction commit];
@@ -150,7 +168,7 @@
             NSIndexPath *path = [NSIndexPath indexPathWithIndex:rowNo];
             if ([d count] == 0) {
                 // Blank row
-                // blanks property of TVExpandedCard is not used here since it is reevaluated every time tableDataSource changes(in other words, take a new snapShot). So the blank obj may be removed from blanks here but still exists in that snapShot. In other cases, an added blank obj may not exist in previous snapShot.
+                // blanks property of TVExpandedCard is not used here since it is reevaluated every time tableDataSource changes(in other words, take a new snapshot). So the blank obj may be removed from blanks here but still exists in that snapshot. In other cases, an added blank obj may not exist in previous snapshot.
                 if (![dsNext containsObject:d]) {
                     // Delete blank row
                     [toDelete addObject:path];
@@ -212,31 +230,36 @@
     return r;
 }
 
-#pragma mark - tableDataSource snapShot queue generation
+#pragma mark - tableDataSource snapshot queue generation
 
 /*
- The whole concept of tableDataSources(yes, it's an array of dataSource here) is to keep the snapShots of dataSource in a time based queue so that even there is constant changes occur, such as multiple changes synced from server side, we still could use the system-provided animations to let user see the change of tableView with only a little disturbance. No need to remind user with icon. no need for the user to manually refresh table all the time.
+ The whole concept of tableDataSources(yes, it's an array of dataSource here) is to keep the snapshots of dataSource in a time based queue so that even there is constant changes occur, such as multiple changes synced from server side, we still could use the system-provided animations to let user see the change of tableView with only a little disturbance. No need to remind user with icon. no need for the user to manually refresh table all the time.
  
  Blanks are checked by the card owns them.
  */
 
-- (void)getFinalizedSnapShot:(NSMutableArray *)dataSource
+- (void)takeSnapshotAndRunQueue
 {
-    [self.rawDataSource setArray:[self getRawDataSource]];
-    NSMutableArray *snapShot = [self takeSnapShotOfTableDataSource];
-    NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
-    [d setObject:snapShot forKey:@"dataSource"];
-    NSSet *cardsSelected = self.expandedCards;
-    [d setObject:cardsSelected forKey:@"expandedCards"];
-    [self.snapShots addObject:d];
-    [self addBlankRowsToSnapShot:snapShot];
-    [self.tableDataSources addObject:snapShot];
+    [self finalizeTableDataSource];
+    [self processOneStepSnapshotQueue];
 }
 
-- (void)addBlankRowsToSnapShot:(NSMutableArray *)dataSource
+- (void)finalizeTableDataSource
+{
+    [self.rawDataSource setArray:[self getRawDataSource]];
+    NSMutableArray *snapshot = [self takeSnapshotOfTableDataSource];
+    [self addBlankRowsToTableDataSource:snapshot];
+    NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
+    [d setObject:snapshot forKey:@"dataSource"];
+    [d setObject:self.expandedCards forKey:@"expandedCards"];
+    [self.snapshots addObject:d];
+    [self.tableDataSources addObject:snapshot];
+}
+
+- (void)addBlankRowsToTableDataSource:(NSMutableArray *)dataSource
 {
     NSSet *cards;
-    for (NSDictionary *d in self.snapShots) {
+    for (NSDictionary *d in self.snapshots) {
         NSArray *ds = [d valueForKey:@"dataSource"];
         if ([ds isEqual:dataSource]) {
             cards = [d valueForKey:@"expandedCards"];
@@ -244,12 +267,12 @@
         }
     }
     for (TVExpandedCard *obj in cards) {
-        [self addBlankRows:obj ToTableViewDataSource:dataSource];
+        [self addBlankRows:obj ToTableDataSource:dataSource];
     }
 }
 
 // Animated blank row insertion is always triggered by expanding card, which should be the only difference between current and next versions of dataSource. So no need to seperate the animated and non-animated blanks here since they are not able to exist in the same tableView update.
-- (void)addBlankRows:(TVExpandedCard *)card ToTableViewDataSource:(NSMutableArray *)dataSource
+- (void)addBlankRows:(TVExpandedCard *)card ToTableDataSource:(NSMutableArray *)dataSource
 {
     NSString *serverId = card.serverId;
     NSString *localId = card.localId;
@@ -270,7 +293,7 @@
     return a;
 }
 
-- (NSMutableArray *)takeSnapShotOfTableDataSource
+- (NSMutableArray *)takeSnapshotOfTableDataSource
 {
     NSMutableArray *newArray = [NSMutableArray arrayWithCapacity:0];
     for (NSManagedObject *obj in self.rawDataSource) {
@@ -398,13 +421,9 @@
     static NSString *CellIdentifier = @"Cell";
     [self.tableView registerClass:[TVTableViewCell0 class] forCellReuseIdentifier:@"Cell"];
     TVTableViewCell0 *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
-    
-    NSManagedObject *managedObject;
-    managedObject = [self.tableDataSources[0] objectAtIndex:indexPath.row];
-    
+    NSDictionary *d = [self.tableDataSources[0] objectAtIndex:indexPath.row];
     [self configureCell:cell cellForRowAtIndexPath:indexPath];
-    cell.cellLabel.text = [managedObject valueForKey:self.cellTitle];
-    
+    cell.cellLabel.text = [d valueForKey:@"target"];
     return cell;
 }
 
@@ -412,20 +431,19 @@
 {
     // Get subviews ready to attach related tapGesture
     [cell layoutIfNeeded];
-    [cell.selectionTap addTarget:self action:@selector(triggerSelection:)];
+    [cell.selectionTap addTarget:self action:@selector(tapped:)];
     [cell.deleteTap addTarget:self action:@selector(deleteRow:)];
     cell.baseScrollView.delegate = self;
     [cell updateEditView];
 }
 
 // Actions after tapping on a cell
-- (void)triggerSelection:(UITapGestureRecognizer *)sender
+- (void)tapped:(UITapGestureRecognizer *)sender
 {
-    UITapGestureRecognizer *tempSender = sender;
     // For selectionTap
-    if ([tempSender.view.superview.superview isKindOfClass:[UITableViewCell class]]) {
-        NSIndexPath *path = [self.tableView indexPathForCell:(UITableViewCell *)tempSender.view.superview.superview];
-        [self selectionActionAtPath:path];
+    if ([sender.view.superview.superview isKindOfClass:[UITableViewCell class]]) {
+        NSIndexPath *path = [self.tableView indexPathForCell:(UITableViewCell *)sender.view.superview.superview];
+        [self tableView:self.tableView didSelectRowAtIndexPath:path];
     } else {
         // Handle error
     }
@@ -460,49 +478,55 @@
          There is some kind of animation glitch for reducing contentSize operation since reducing the contentSize leads to change of contentOffset, which even with setContetOffset animation:NO still can not resolve it very well. So I decided to abandon the reducing operatoin. Just increase to provide enough space for extraCard.
          */
         NSInteger rowSelected = indexPath.row;
-        TVExpandedCard *c = [self getTappedCard:rowSelected];
+        NSDictionary *card = [self.tableDataSources[0] objectAtIndex:rowSelected];
+        TVExpandedCard *c = [self getTappedCardInExpandedCards:card];
         // Identify whether it's a selection or deselection
         if (c) {
             // Selected, should be set to deselected next
             if ([self.expandedCards containsObject:c]) {
                 // Still seletcted now, remove and deselect
-                
+                [self.expandedCards removeObject:c];
+                [self hideCard:c];
             } else {
                 if ([self isSameExpandedCard:c inSet:self.expandedCards]) {
-                    // Different obj but for same card. Still seletcted now, remove and deselect
+                    // Different obj but for same card. Still seletcted now, remove and deselect both
+                    [self.expandedCards removeObject:c];
+                    [self hideCard:c];
+                    TVExpandedCard *cc = [self findExpandedCard:c.serverId localId:c.localId inSet:self.expandedCards];
+                    [self.expandedCards removeObject:cc];
+                    [self hideCard:cc];
                 } else {
                     // Already deselected now, nothing to do
                 }
             }
         } else {
             // Not selected, should be set to selected next
-            
+            self showExpandedCards:<#(NSSet *)#>
         }
     }
 }
 
 // Get the card user selects/deselects, in other words, taps.
-- (TVExpandedCard *)getTappedCard:(NSInteger)rowNo
+- (TVExpandedCard *)getTappedCardInExpandedCards:(NSDictionary *)card
 {
-    NSDictionary *card = [self.tableDataSources[0] objectAtIndex:rowNo];
     NSString *serverId = [card valueForKey:@"serverId"];
     NSString *localId = [card valueForKey:@"localId"];
-    return [self findCard:serverId localId:localId];
+    NSSet *cards = [self.snapshots[0] valueForKey:@"expandedCards"];
+    return [self findExpandedCard:serverId localId:localId inSet:cards];
 }
 
-// Tapping occurs on snapShot, so it is the expandedCards for that snapShot used to exam if  it's a seleciton or deselection.
-- (TVExpandedCard *)findCard:(NSString *)serverId localId:(NSString *)localId
+// Tapping occurs on snapshot, so it is the expandedCards for that snapshot used to exam if  it's a seleciton or deselection.
+- (TVExpandedCard *)findExpandedCard:(NSString *)serverId localId:(NSString *)localId inSet:(NSSet *)aSet
 {
-    NSSet *cards = [self.snapShots[0] valueForKey:@"expandedCards"];
     if (serverId.length == 0) {
-        for (TVExpandedCard *c in cards) {
+        for (TVExpandedCard *c in aSet) {
             if ([localId isEqualToString:c.localId]) {
                 // Same card located
                 return c;
             }
         }
     } else {
-        for (TVExpandedCard *c in cards) {
+        for (TVExpandedCard *c in aSet) {
             if ([serverId isEqualToString:c.serverId]) {
                 // Same card located
                 return c;
@@ -540,11 +564,23 @@
  1. When created/deselected, it calculates the blank rows needed to be inserted/deleted and form a new version of dataSource. Only the newly selected/deselected card has the silde-out/in animation and blank rows inserted/deleted animation.
  2. When other reasons trigger the generation of a new version of dataSource, it firstly generates the dataSource without any blanks. After the initial array is generated, it checks self.expandedCards for blanks needed for each selected card. In this process, the number of blank rows for every expandedCard is recalculated in case that there is content change leading to size change. Blank rows are generated and inserted accordingly.
  */
-- (TVExpandedCard *)launchExpandedCard:(NSDictionary *)cardSelected
+- (TVExpandedCard *)launchExpandedCard:(NSDictionary *)card
 {
-    TVExpandedCard *t = [[TVExpandedCard alloc] init];
+    TVExpandedCard *t;
+    NSString *serverId = [card valueForKey:@"serverId"];
+    NSString *localId = [card valueForKey:@"localId"];
+    // Reuse existing obj
+    for (NSDictionary *snapshot in self.snapshots) {
+        NSSet *cards = [snapshot valueForKey:@"expandedCards"];
+        t = [self findExpandedCard:serverId localId:localId inSet:cards];
+        if (t) {
+            return t;
+        }
+    }
+    // Create a new obj when nothing to reuse.
+    t = [[TVExpandedCard alloc] init];
     [self.expandedCards addObject:t];
-    [self configExpandedCard:t withSelectedCard:cardSelected];
+    [self configExpandedCard:t withSelectedCard:card];
     return t;
 }
 
@@ -580,6 +616,9 @@
 
 - (void)showExpandedCards:(NSSet *)cards
 {
+    // Add blanks
+    [self takeSnapshotAndRunQueue];
+    // Expand card
     for (TVExpandedCard *c in cards) {
         [c setup];
         [c show];
@@ -588,16 +627,17 @@
     }
 }
 
-- (void)hideCard:(NSNotification *)note
+- (void)hideCard:(TVExpandedCard *)card
 {
-    TVExpandedCard *card = [note object];
+    // Collapse card
     [card.baseView setContentOffset:CGPointMake(0.0f, card.baseView.frame.size.height) animated:YES];
-    [self.expandedCards removeObject:card];
+    // Add blanks
+    [self takeSnapshotAndRunQueue];
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
 {
-    NSSet *cards = [self.snapShots[0] valueForKey:@"expandedCards"];
+    NSSet *cards = [self.snapshots[0] valueForKey:@"expandedCards"];
     for (TVExpandedCard *c in cards) {
         if ([c.baseView isEqual:scrollView]) {
             [c.baseView removeFromSuperview];
