@@ -111,6 +111,9 @@
     if ([self.tableDataSources count] > 1) {
         // Proceed to next version of dataSource till no newer version remains.
         [self tableChangeAnimation:[self getTableViewPathsToChange]];
+        NSDictionary *d = [self getExpandedCardsFromState:<#(NSMutableSet *)#> toState:<#(NSMutableSet *)#>];
+        // This has to happen after the tableDataSource completes update since it uses tableDataSource[0] as the base to refresh expandedCard.
+        [self processExpandedCards:d];
     }
 }
 
@@ -479,81 +482,133 @@
          */
         NSInteger rowSelected = indexPath.row;
         NSDictionary *card = [self.tableDataSources[0] objectAtIndex:rowSelected];
-        TVExpandedCard *c = [self getTappedCardInExpandedCards:card];
+        NSMutableSet *aSet;
+        for (NSDictionary *s in self.snapshots) {
+            NSArray *ss = [s valueForKey:@"dataSource"];
+            if ([ss isEqual:self.tableDataSources[0]]) {
+                aSet = [s valueForKey:@"expandedCards"];
+                break;
+            }
+        }
+        TVExpandedCard *c = [self getTappedCard:card inExpandedCards:aSet];
+        TVExpandedCard *cc = [self getTappedCard:card inExpandedCards:self.expandedCards];
         // Identify whether it's a selection or deselection
         if (c) {
             // Selected, should be set to deselected next
-            if ([self.expandedCards containsObject:c]) {
+            if ([c isEqual:cc]) {
                 // Still seletcted now, remove and deselect
                 [self.expandedCards removeObject:c];
-                [self hideCard:c];
+                
             } else {
-                if ([self isSameExpandedCard:c inSet:self.expandedCards]) {
-                    // Different obj but for same card. Still seletcted now, remove and deselect both
-                    [self.expandedCards removeObject:c];
-                    [self hideCard:c];
-                    TVExpandedCard *cc = [self findExpandedCard:c.serverId localId:c.localId inSet:self.expandedCards];
+                if (cc) {
+                    // Selected, but have different objs
                     [self.expandedCards removeObject:cc];
-                    [self hideCard:cc];
                 } else {
                     // Already deselected now, nothing to do
                 }
             }
         } else {
             // Not selected, should be set to selected next
-            self showExpandedCards:<#(NSSet *)#>
+            if (cc) {
+                // Already selected now, nothing to do
+            } else {
+                // Not selected, select and add
+                [self launchExpandedCard:card];
+            }
         }
+        
     }
 }
 
-// Get the card user selects/deselects, in other words, taps.
-- (TVExpandedCard *)getTappedCardInExpandedCards:(NSDictionary *)card
+// Get the card user selects/deselects, in other words, taps. In a finished expandedCards snapshot, duplicates have been removed already.
+- (TVExpandedCard *)getTappedCard:(NSDictionary *)cardTapped inExpandedCards:(NSMutableSet *)aSet
 {
-    NSString *serverId = [card valueForKey:@"serverId"];
-    NSString *localId = [card valueForKey:@"localId"];
-    NSSet *cards = [self.snapshots[0] valueForKey:@"expandedCards"];
-    return [self findExpandedCard:serverId localId:localId inSet:cards];
+    NSString *serverId = [cardTapped valueForKey:@"serverId"];
+    NSString *localId = [cardTapped valueForKey:@"localId"];
+    return [[self findExpandedCard:serverId localId:localId inSet:aSet] anyObject];
 }
 
-// Tapping occurs on snapshot, so it is the expandedCards for that snapshot used to exam if  it's a seleciton or deselection.
-- (TVExpandedCard *)findExpandedCard:(NSString *)serverId localId:(NSString *)localId inSet:(NSSet *)aSet
+// This is to make sure only one TVExpandedCard exists in a set. It returns the one left.
+- (TVExpandedCard *)removeDuplicateCards:(NSString *)serverId localId:(NSString *)localId inSet:(NSMutableSet *)aSet
 {
-    if (serverId.length == 0) {
-        for (TVExpandedCard *c in aSet) {
-            if ([localId isEqualToString:c.localId]) {
-                // Same card located
-                return c;
+    NSMutableSet *s = [self findExpandedCard:serverId localId:localId inSet:aSet];
+    if ([s count] > 0) {
+        TVExpandedCard *x = [s anyObject];
+        for (TVExpandedCard *xx in s) {
+            if (![xx isEqual:x]) {
+                [aSet removeObject:xx];
             }
         }
-    } else {
-        for (TVExpandedCard *c in aSet) {
-            if ([serverId isEqualToString:c.serverId]) {
-                // Same card located
-                return c;
-            }
-        }
+        return x;
     }
     return nil;
 }
 
-- (BOOL)isSameExpandedCard:(TVExpandedCard *)card inSet:(NSSet *)aSet
+// Tapping occurs on snapshot, so it is the expandedCards for that snapshot used to exam if  it's a seleciton or deselection.
+- (NSMutableSet *)findExpandedCard:(NSString *)serverId localId:(NSString *)localId inSet:(NSSet *)aSet
 {
-    if (card.serverId.length == 0) {
-        for (TVExpandedCard *c in aSet) {
-            if ([card.localId isEqualToString:c.localId]) {
+    NSMutableSet *r = [NSMutableSet setWithCapacity:0];
+    for (TVExpandedCard *c in aSet) {
+        if (serverId.length == 0) {
+            if ([localId isEqualToString:c.localId]) {
                 // Same card located
-                return YES;
+                [r addObject:c];
             }
-        }
-    } else {
-        for (TVExpandedCard *c in aSet) {
-            if ([card.serverId isEqualToString:c.serverId]) {
+        } else {
+            if ([serverId isEqualToString:c.serverId]) {
                 // Same card located
-                return YES;
+                [r addObject:c];
             }
         }
     }
-    return NO;
+    return r;
+}
+
+#pragma mark - Process expandedCard snapshot queue
+
+// The states are from self.tableDataSources' corresponding parts, so we don't use array to get the states here.
+
+- (NSDictionary *)getExpandedCardsFromState:(NSMutableSet *)stateOrigin toState:(NSMutableSet *)stateNext
+{
+    // These two sets need animations.
+    NSMutableSet *toExpand = [NSMutableSet setWithCapacity:0];
+    NSMutableSet *toCollapse = [NSMutableSet setWithCapacity:0];
+    NSMutableSet *toKeep = [NSMutableSet setWithCapacity:0];
+    for (TVExpandedCard *o in stateOrigin) {
+        // The blanks to collapse are not in the next tableDataSource, so no need to update height and rowsNeeded for them.
+        NSMutableSet *s = [self findExpandedCard:o.serverId localId:o.localId inSet:stateNext];
+        if ([s count] == 0) {
+            // To collapse
+            [toCollapse addObject:o];
+        } else if ([s count] == 1) {
+            // To keep showing
+            [toKeep addObject:[s anyObject]];
+        }
+    }
+    for (TVExpandedCard *n in stateNext) {
+        NSMutableSet *s = [self findExpandedCard:n.serverId localId:n.localId inSet:stateOrigin];
+        if ([s count] == 0) {
+            // To expand
+            [toExpand addObject:n];
+        }
+    }
+    NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
+    [d setObject:toKeep forKey:@"toKeep"];
+    [d setObject:toExpand forKey:@"toExpand"];
+    [d setObject:toCollapse forKey:@"toCollapse"];
+    return d;
+}
+
+- (void)processExpandedCards:(NSDictionary *)stateChangeDic
+{
+    NSMutableSet *toCollapse = [stateChangeDic valueForKey:@"toCollapse"];
+    NSMutableSet *toKeep = [stateChangeDic valueForKey:@"toKeep"];
+    NSMutableSet *toExpand = [stateChangeDic valueForKey:@"toExpand"];
+    [self collapseCardWithAnimation:toCollapse];
+    for (TVExpandedCard *c in toKeep) {
+        [self refreshExpandedCard:c];
+    }
+    [self expandCardsWithAnimation:toExpand];
 }
 
 #pragma mark - ExpandedCard management
@@ -567,21 +622,21 @@
 - (TVExpandedCard *)launchExpandedCard:(NSDictionary *)card
 {
     TVExpandedCard *t;
-    NSString *serverId = [card valueForKey:@"serverId"];
-    NSString *localId = [card valueForKey:@"localId"];
     // Reuse existing obj
     for (NSDictionary *snapshot in self.snapshots) {
-        NSSet *cards = [snapshot valueForKey:@"expandedCards"];
-        t = [self findExpandedCard:serverId localId:localId inSet:cards];
+        NSMutableSet *cards = [snapshot valueForKey:@"expandedCards"];
+        t = [self getTappedCard:card inExpandedCards:cards];
         if (t) {
-            return t;
+            break;
         }
     }
-    // Create a new obj when nothing to reuse.
-    t = [[TVExpandedCard alloc] init];
+    if (!t) {
+        // Create a new obj when nothing to reuse.
+        t = [[TVExpandedCard alloc] init];
+        [self configExpandedCard:t withSelectedCard:card];
+    }
     [self.expandedCards addObject:t];
-    [self configExpandedCard:t withSelectedCard:card];
-    return t;
+    return [self removeDuplicateCards:t.serverId localId:t.localId inSet:self.expandedCards];
 }
 
 - (void)refreshExpandedCard:(TVExpandedCard *)card
@@ -614,35 +669,31 @@
 
 #pragma mark - Expand/collapse card
 
-- (void)showExpandedCards:(NSSet *)cards
+- (void)expandCardsWithAnimation:(NSSet *)cardsToExpand
 {
-    // Add blanks
-    [self takeSnapshotAndRunQueue];
     // Expand card
-    for (TVExpandedCard *c in cards) {
+    for (TVExpandedCard *c in cardsToExpand) {
         [c setup];
-        [c show];
+        [c show:YES];
         c.baseView.delegate = self;
         [self.view addSubview:c.baseView];
     }
 }
 
-- (void)hideCard:(TVExpandedCard *)card
+- (void)collapseCardWithAnimation:(NSSet *)cardToCollapse
 {
-    // Collapse card
-    [card.baseView setContentOffset:CGPointMake(0.0f, card.baseView.frame.size.height) animated:YES];
-    // Add blanks
-    [self takeSnapshotAndRunQueue];
+    for (TVExpandedCard *c in cardToCollapse) {
+        [c setup];
+        [c show:NO];
+        [c.baseView setContentOffset:CGPointMake(0.0f, c.baseView.frame.size.height) animated:YES];
+    }
 }
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
 {
-    NSSet *cards = [self.snapshots[0] valueForKey:@"expandedCards"];
-    for (TVExpandedCard *c in cards) {
-        if ([c.baseView isEqual:scrollView]) {
-            [c.baseView removeFromSuperview];
-            break;
-        }
+    // Use contentOffset and tag of uiview to identify if it's the view for expandedCard.
+    if (scrollView.contentOffset.y == scrollView.frame.size.height && scrollView.tag == 20140824) {
+        [scrollView removeFromSuperview];
     }
 }
 

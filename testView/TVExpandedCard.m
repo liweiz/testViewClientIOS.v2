@@ -59,11 +59,12 @@
 }
 
 // It has to be setup before show.
-- (void)show
+- (void)show:(BOOL)isAnimated
 {
     CGRect fRect = [self getFinalRectOfFullCardView:self.numberOfRowsNeeded];
     if (!self.baseView) {
         self.baseView = [[UIScrollView alloc] initWithFrame:fRect];
+        self.baseView.tag = 20140824;
         self.baseView.contentSize = CGSizeMake(self.baseView.frame.size.width, self.baseView.frame.size.height * 2.0f);
         UIView * contentView = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.baseView.frame.size.width, self.baseView.frame.size.height)];
         self.baseView.scrollEnabled = NO;
@@ -77,11 +78,11 @@
         self.baseView.backgroundColor = [UIColor clearColor];
         self.tapToHide = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(sendHideCardNotification)];
         [self.baseView addGestureRecognizer:self.tapToHide];
-        [self.baseView setContentOffset:CGPointMake(0.0f, 0.0f) animated:YES];
     } else {
         self.baseView.frame = fRect;
         [self.baseView setNeedsLayout];
     }
+    [self.baseView setContentOffset:CGPointMake(0.0f, 0.0f) animated:isAnimated];
 }
 
 #pragma mark - Card rect calculation

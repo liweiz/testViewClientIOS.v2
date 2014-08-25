@@ -38,6 +38,6 @@
 
 
 - (void)setup;
-- (void)show;
+- (void)show:(BOOL)isAnimated;
 
 @end
