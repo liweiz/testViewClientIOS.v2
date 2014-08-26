@@ -109,9 +109,10 @@
 - (void)processOneStepSnapshotQueue
 {
     if ([self.tableDataSources count] > 1) {
+        // This has to happen before the tableDataSource completes update, otherwise, current tableDataSource and snapshot will be removed in the process of animation.
+        NSDictionary *d = [self getExpandedCardsFromState:[self findCorrespondingExpandedCards:self.tableDataSources[0]] toState:[self findCorrespondingExpandedCards:self.tableDataSources[1]]];
         // Proceed to next version of dataSource till no newer version remains.
         [self tableChangeAnimation:[self getTableViewPathsToChange]];
-        NSDictionary *d = [self getExpandedCardsFromState:<#(NSMutableSet *)#> toState:<#(NSMutableSet *)#>];
         // This has to happen after the tableDataSource completes update since it uses tableDataSource[0] as the base to refresh expandedCard.
         [self processExpandedCards:d];
     }
@@ -231,6 +232,16 @@
         [r setObject:toInsert forKey:@"insert"];
     }
     return r;
+}
+
+- (NSMutableSet *)findCorrespondingExpandedCards:(NSArray *)tableDataSource
+{
+    for (NSDictionary *snapshot in self.snapshots) {
+        if ([[snapshot valueForKey:@"dataSource"] isEqual:tableDataSource]) {
+            return [snapshot valueForKey:@"expandedCards"];
+        }
+    }
+    return nil;
 }
 
 #pragma mark - tableDataSource snapshot queue generation
