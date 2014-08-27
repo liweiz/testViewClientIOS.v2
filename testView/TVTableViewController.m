@@ -10,6 +10,7 @@
 #import "NSObject+DataHandler.h"
 #import "TVExpandedCard.h"
 #import "TVAppRootViewController.h"
+#import "NSObject+CoreDataStack.h"
 
 @interface TVTableViewController ()
 
@@ -19,7 +20,6 @@
 
 @synthesize changeIsUserDriven;
 @synthesize ctx;
-@synthesize model;
 @synthesize box;
 
 @synthesize tableEntityName;
@@ -34,8 +34,6 @@
 @synthesize tableDataSources;
 @synthesize snapshots;
 @synthesize expandedCards;
-
-@synthesize userServerId;
 
 /*
  Each snapshot includes two things:
@@ -71,10 +69,11 @@
     if ([self.tableDataSources count] == 0) {
         [self finalizeTableDataSource];
     }
-    self.tableView = [[UITableView alloc] initWithFrame:self.box.appRect style:UITableViewStylePlain];
+    CGRect r = CGRectMake(self.box.appRect.size.width, 0.0f, self.box.appRect.size.width, self.box.appRect.size.height);
+    self.tableView = [[UITableView alloc] initWithFrame:r style:UITableViewStylePlain];
     self.tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     self.tableView.backgroundColor = [UIColor whiteColor];
-    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLineEtched;
     self.tableView.allowsMultipleSelection = YES;
     self.tableView.allowsSelectionDuringEditing = YES;
     self.tableView.allowsMultipleSelectionDuringEditing = YES;
@@ -82,9 +81,17 @@
     self.tableView.delegate = self;
 }
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
 }
+
+- (void)refreshCtx
+{
+    self.ctx = nil;
+    self.ctx = [self managedObjectContext:self.ctx coordinator:self.box.coordinator model:self.box.model];
+}
+
 
 #pragma mark - Process tableDataSource snapshot queue
 
@@ -384,8 +391,9 @@
     if (!self.fetchRequest) {
         self.fetchRequest = [NSFetchRequest fetchRequestWithEntityName:self.tableEntityName];
     }
-    NSPredicate *p = [NSPredicate predicateWithFormat:@"(belongToUser like %@) && !(lastUnsyncAction like TVDocDeleted)", self.userServerId];
+    NSPredicate *p = [NSPredicate predicateWithFormat:@"(belongToUser like %@) && !(lastUnsyncAction like TVDocDeleted)", self.box.user.serverId];
     [self.fetchRequest setPredicate:p];
+    [self refreshCtx];
     return [self.ctx executeFetchRequest:self.fetchRequest error:nil];
 }
 

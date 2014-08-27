@@ -16,9 +16,6 @@
 
 @implementation TVLayerBaseViewController
 
-@synthesize managedObjectContext;
-@synthesize managedObjectModel;
-
 @synthesize pinchToShow;
 @synthesize box;
 @synthesize actionNo;

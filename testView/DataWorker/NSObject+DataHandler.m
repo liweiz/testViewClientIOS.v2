@@ -69,6 +69,7 @@
         NSMutableDictionary *u = [dic valueForKey:@"user"];
         user.activated = [u valueForKey:@"activated"];
         user.email = [u valueForKey:@"email"];
+        user.isSharing = [u valueForKey:@"isSharing"];
         user.sourceLang = [u valueForKey:@"sourceLang"];
         user.targetLang = [u valueForKey:@"targetLang"];
     }
@@ -136,6 +137,7 @@
 {
     if ([dic valueForKey:@"user"]) {
         user.activated = [[dic valueForKey:@"user"] valueForKey:@"activated"];
+        user.isSharing = [[dic valueForKey:@"user"] valueForKey:@"isSharing"];
     }
     if ([dic valueForKey:@"deviceInfo"]) {
         NSMutableDictionary *d = [dic valueForKey:@"deviceInfo"];

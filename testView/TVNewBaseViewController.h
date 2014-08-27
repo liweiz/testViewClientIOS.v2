@@ -12,8 +12,7 @@
 
 @interface TVNewBaseViewController : UIViewController
 
-@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
-@property (strong, nonatomic) NSManagedObjectModel *managedObjectModel;
+@property (strong, nonatomic) NSManagedObjectContext *ctx;
 
 @property (strong, nonatomic) TVNewViewController *myNewViewCtl;
 @property (strong, nonatomic) TVRootViewCtlBox *box;

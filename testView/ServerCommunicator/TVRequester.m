@@ -601,9 +601,9 @@
     if (self.ctx) {
         return self.ctx;
     }
-    if (self.box.persistentStoreCoordinator != nil) {
+    if (self.box.coordinator != nil) {
         self.ctx = [[NSManagedObjectContext alloc] init];
-        [self.ctx setPersistentStoreCoordinator:self.box.persistentStoreCoordinator];
+        [self.ctx setPersistentStoreCoordinator:self.box.coordinator];
     }
     return self.ctx;
 }

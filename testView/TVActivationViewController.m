@@ -120,7 +120,7 @@
         // Show email sent msg to user
     } else if (r.requestType == TVOneUser) {
         // Check the user in local db to know the activation status
-        [self.managedObjectContext refreshObject:self.box.user mergeChanges:NO];
+        [self.box.ctx refreshObject:self.box.user mergeChanges:NO];
         if (self.box.user.activated) {
             
 //            [[NSNotificationCenter defaultCenter] postNotificationName: object:r];

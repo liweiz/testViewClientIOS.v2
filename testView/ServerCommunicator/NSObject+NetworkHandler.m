@@ -74,6 +74,7 @@
     [dictDeviceInfo setValue:user.targetLang forKey:@"targetLang"];
 //    [dictDeviceInfo setValue:user.sortOption forKey:@"sortOption"];
     [dictDeviceInfo setValue:user.isLoggedIn forKey:@"isLoggedIn"];
+    [dictDeviceInfo setValue:user.isSharing forKey:@"isSharing"];
     [dictDeviceInfo setValue:user.rememberMe forKey:@"rememberMe"];
     [dictDeviceInfo setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forKey:@"deviceUUID"];
     [dict setValue:reqId forKey:@"requestId"];

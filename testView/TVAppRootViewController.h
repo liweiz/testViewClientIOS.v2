@@ -46,9 +46,9 @@ extern NSString *const tvHideExpandedCard;
 @interface TVAppRootViewController : UIViewController
 
 @property (nonatomic, assign) CGRect appRect;
-@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
-@property (strong, nonatomic) NSManagedObjectModel *managedObjectModel;
-@property (strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+@property (strong, nonatomic) NSManagedObjectContext *ctx;
+@property (strong, nonatomic) NSManagedObjectModel *model;
+@property (strong, nonatomic) NSPersistentStoreCoordinator *coordinator;
 
 @property (strong, nonatomic) NSFetchRequest *userFetchRequest;
 @property (strong, nonatomic) TVUser *user;

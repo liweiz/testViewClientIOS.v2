@@ -192,7 +192,7 @@
     NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
     NSPredicate *pUser = [NSPredicate predicateWithFormat:@"email like %@", self.emailInput.text];
     [fetchRequest setPredicate:pUser];
-    NSArray *r = [self.managedObjectContext executeFetchRequest:fetchRequest error:nil];
+    NSArray *r = [self.box.ctx executeFetchRequest:fetchRequest error:nil];
     if ([r count] > 0) {
         reqster.objectIdArray = [NSMutableArray arrayWithCapacity:0];
         [reqster.objectIdArray addObject:r[0]];

@@ -21,5 +21,6 @@
 @dynamic targetLang;
 @dynamic deviceInfoId;
 @dynamic hasCards;
+@dynamic isSharing;
 
 @end

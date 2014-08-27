@@ -16,21 +16,20 @@
 //#import "TVSearchBaseViewController.h"
 //#import "TVCardsBaseViewController.h"
 #import "TVNewBaseViewController.h"
+#import "TVTableViewController.h"
 
 @interface TVContentRootViewController : UIViewController <UIScrollViewDelegate, UIGestureRecognizerDelegate>
 
-//@property (nonatomic, strong) TVCardsBaseViewController *myCardsBaseViewController;
+@property (nonatomic, strong) TVTableViewController *myCardsViewController;
 @property (nonatomic, strong) TVNewBaseViewController *myNewBaseViewController;
 //@property (nonatomic, strong) TVSearchBaseViewController *mySearchViewController;
-
-@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
-@property (strong, nonatomic) NSManagedObjectModel *managedObjectModel;
 
 @property (strong, nonatomic) NSString *draftDirectory;
 @property (strong, nonatomic) NSString *draftPath;
 @property (strong, nonatomic) NSFileManager *fileManager;
 @property (strong, nonatomic) NSDictionary *lastSavedDraft;
 @property (assign, nonatomic) BOOL newDraftThisTime;
+@property (assign, nonatomic) BOOL searchViewIncluded;
 @property (strong, nonatomic) NSTimer *draftAutoSaveTimer;
 
 @property (strong, nonatomic) TVRootViewCtlBox *box;

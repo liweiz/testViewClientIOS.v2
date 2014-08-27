@@ -19,7 +19,7 @@
 @property (strong, nonatomic) UITextView *myTargetView;
 @property (strong, nonatomic) UITextView *myTranslationView;
 @property (strong, nonatomic) UITextView *myDetailView;
-
+@property (strong, nonatomic) NSManagedObjectContext *ctx;
 
 @property (assign, nonatomic) BOOL createNewOnly;
 

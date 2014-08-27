@@ -36,8 +36,9 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (assign, nonatomic) CGFloat gapY;
 
 @property (strong, nonatomic) TVUser *user;
-@property (strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
-
+@property (strong, nonatomic) NSPersistentStoreCoordinator *coordinator;
+@property (strong, nonatomic) NSManagedObjectModel *model;
+@property (strong, nonatomic) NSManagedObjectContext *ctx;
 @property (strong, nonatomic) TVIndicator *indicator;
 
 - (void)setupBox;

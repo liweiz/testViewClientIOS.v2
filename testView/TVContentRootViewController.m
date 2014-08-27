@@ -23,13 +23,12 @@
 
 @implementation TVContentRootViewController
 
-//@synthesize myCardsBaseViewController, myNewBaseViewController, mySearchViewController;
+//@synthesize mySearchViewController;
 @synthesize box, cardToUpdate;
 @synthesize centerOffsetX, myRootView, newViewPosition, cardsViewPosition, searchViewPosition;
-@synthesize managedObjectContext;
-@synthesize managedObjectModel;
-
+@synthesize myCardsViewController;
 @synthesize myNewBaseViewController;
+@synthesize searchViewIncluded;
 @synthesize scanForNew, scanForChange, draftDirectory, draftPath, fileManager, lastSavedDraft, newDraftThisTime, draftAutoSaveTimer, userFetchedResultsController;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -46,20 +45,26 @@
 
 - (void)loadView
 {
+    self.view = [[UIView alloc] initWithFrame:self.box.appRect];
     self.myRootView = [[UIScrollView alloc] initWithFrame:self.box.appRect];
-    CGSize theContentSize = CGSizeMake(self.box.appRect.size.width * 3, self.box.appRect.size.height);
+    NSInteger i;
+    if (self.searchViewIncluded) {
+        i = 3;
+        self.centerOffsetX = self.myRootView.contentSize.width / 2 - self.box.appRect.size.width / 2;
+        self.myRootView.delegate = self;
+    } else {
+        i = 2;
+    }
+    CGSize theContentSize = CGSizeMake(self.box.appRect.size.width * i, self.box.appRect.size.height);
     self.myRootView.contentSize = theContentSize;
     self.myRootView.bounces = NO;
-    self.myRootView.showsHorizontalScrollIndicator = YES;
-    self.myRootView.delegate = self;
+    self.myRootView.showsVerticalScrollIndicator = NO;
+    self.myRootView.showsHorizontalScrollIndicator = NO;
     self.myRootView.pagingEnabled = YES;
     self.myRootView.tag = 555;
-
-    self.view = [[UIView alloc] initWithFrame:self.box.appRect];
-    [self.view addSubview:self.myRootView];
-    self.centerOffsetX = self.myRootView.contentSize.width / 2 - self.box.appRect.size.width / 2;
-
     self.view.backgroundColor = [UIColor whiteColor];
+    
+    [self.view addSubview:self.myRootView];
 }
 
 - (void)viewDidLoad
@@ -71,22 +76,15 @@
     
     // Get user's settings
     
-//    self.myCardsBaseViewController = [[TVCardsBaseViewController alloc] init];
-//    self.myCardsBaseViewController.managedObjectContext = self.managedObjectContext;
-//    self.myCardsBaseViewController.managedObjectModel = self.managedObjectModel;
-//    self.myCardsBaseViewController.persistentStoreCoordinator = self.persistentStoreCoordinator;
-//    self.myCardsBaseViewController.user = self.user;
-//    self.myCardsBaseViewController.tabNoAccordingToSharingFunction = 2;
-//    
-//    [self addChildViewController:myCardsBaseViewController];
-//    [self.myRootView addSubview:self.myCardsBaseViewController.view];
-//    [self.myCardsBaseViewController didMoveToParentViewController:self];
+    self.myCardsViewController = [[TVTableViewController alloc] initWithStyle:UITableViewStylePlain];
+    self.myCardsViewController.box = self.box;
+    self.myCardsViewController.tableEntityName = @"TVCard";
+    [self addChildViewController:self.myCardsViewController];
+    [self.myRootView addSubview:self.myCardsViewController.view];
+    [self.myCardsViewController didMoveToParentViewController:self];
     
     // Add new view
     self.myNewBaseViewController = [[TVNewBaseViewController alloc] initWithNibName:nil bundle:nil];
-    self.myNewBaseViewController.managedObjectContext = self.managedObjectContext;
-    self.myNewBaseViewController.managedObjectModel = self.managedObjectModel;
-
     self.myNewBaseViewController.box = self.box;
     [self addChildViewController:myNewBaseViewController];
     [self.myRootView addSubview:self.myNewBaseViewController.view];
@@ -247,7 +245,7 @@
         
         // Update the frame
         self.myNewBaseViewController.view.frame = [self updateFrame:self.newViewPosition];
-//        self.myCardsBaseViewController.view.frame = [self updateFrame:self.cardsViewPosition];
+        self.myCardsViewController.view.frame = [self updateFrame:self.cardsViewPosition];
 //        self.mySearchViewController.view.frame = [self updateFrame:self.searchViewPosition];
         
         // Reset sectionNo to 1

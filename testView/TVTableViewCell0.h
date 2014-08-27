@@ -16,6 +16,7 @@
 @property (strong, nonatomic) UIView *selectionViewFull;
 @property (strong, nonatomic) UITapGestureRecognizer *selectionTap;
 @property (strong, nonatomic) UITapGestureRecognizer *deleteTap;
+@property (strong, nonatomic) UILongPressGestureRecognizer *longPress;
 @property (strong, nonatomic) NSIndexPath *currentIndexPath;
 @property (strong, nonatomic) UIScrollView *baseScrollView;
 @property (strong, nonatomic) UIView *deleteView;

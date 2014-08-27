@@ -23,7 +23,9 @@
 @synthesize gapY;
 
 @synthesize user;
-@synthesize persistentStoreCoordinator;
+@synthesize coordinator;
+@synthesize model;
+@synthesize ctx;
 @synthesize indicator;
 
 - (id)init

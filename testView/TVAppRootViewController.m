@@ -56,7 +56,8 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 
 @implementation TVAppRootViewController
 
-@synthesize managedObjectContext, persistentStoreCoordinator, managedObjectModel, userFetchRequest, user, loginViewController, requestReceivedResponse, willSendRequest, passItem, appRect, internetIsAccessible;
+@synthesize ctx, coordinator, model;
+@synthesize userFetchRequest, user, loginViewController, requestReceivedResponse, willSendRequest, passItem, appRect, internetIsAccessible;
 @synthesize indicator;
 @synthesize sysMsg;
 
@@ -93,6 +94,9 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
+    self.box.ctx = self.ctx;
+    self.box.model = self.model;
+    self.box.coordinator = self.coordinator;
     self.box.appRect = self.appRect;
     [self.box setupBox];
     
@@ -359,7 +363,7 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
         r.isBearer = YES;
         r.method = @"GET";
         r.urlBranch = [self getUrlBranchFor:TVOneDeviceInfo userId:self.user.serverId deviceInfoId:nil cardId:nil];
-        NSMutableArray *m = [self getCardVerList:self.user.serverId withCtx:self.managedObjectContext];
+        NSMutableArray *m = [self getCardVerList:self.user.serverId withCtx:self.box.ctx];
         r.body = [self getJSONSyncWithCardVerList:m err:nil];
         [r checkServerAvailToProceed];
     } else {
@@ -371,8 +375,6 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 {
     if (!self.loginViewController) {
         self.loginViewController = [[TVLoginViewController alloc] initWithNibName:nil bundle:nil];
-        self.loginViewController.managedObjectContext = self.managedObjectContext;
-        self.loginViewController.managedObjectModel = self.managedObjectModel;
         
         self.loginViewController.box = self.box;
         
@@ -390,9 +392,6 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
     if (!self.nativeViewController) {
         self.nativeViewController = [[TVLangPickViewController alloc] initWithNibName:nil bundle:nil];
         self.nativeViewController.tableIsForSourceLang = YES;
-
-        self.nativeViewController.managedObjectContext = self.managedObjectContext;
-        self.nativeViewController.managedObjectModel = self.managedObjectModel;
         
         self.nativeViewController.box = self.box;
         [self addChildViewController:self.nativeViewController];
@@ -408,8 +407,6 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
     if (!self.targetViewController) {
         self.targetViewController = [[TVLangPickViewController alloc] initWithNibName:nil bundle:nil];
         self.targetViewController.tableIsForSourceLang = NO;
-        self.targetViewController.managedObjectContext = self.managedObjectContext;
-        self.targetViewController.managedObjectModel = self.managedObjectModel;
         
         self.targetViewController.box = self.box;
         
@@ -426,8 +423,6 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 {
     if (!self.activationViewController) {
         self.activationViewController = [[TVActivationViewController alloc] initWithNibName:nil bundle:nil];
-        self.activationViewController.managedObjectContext = self.managedObjectContext;
-        self.activationViewController.managedObjectModel = self.managedObjectModel;
         
         [self addChildViewController:self.activationViewController];
         [self.activationViewController didMoveToParentViewController:self];
@@ -445,9 +440,7 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(startSync:) name:NSManagedObjectContextDidSaveNotification object:nil];
     self.contentViewController = [[TVContentRootViewController alloc] initWithNibName:nil bundle:nil];
     
-    self.contentViewController.managedObjectContext = self.managedObjectContext;
-    self.contentViewController.managedObjectModel = self.managedObjectModel;
-
+    self.contentViewController.searchViewIncluded = NO;
     self.contentViewController.box = self.box;
     
     [self addChildViewController:self.contentViewController];
@@ -505,7 +498,7 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 - (TVUser *)getLoggedInUser
 {
     NSFetchRequest *fRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
-    NSArray *users = [self.managedObjectContext executeFetchRequest:fRequest error:nil];
+    NSArray *users = [self.box.ctx executeFetchRequest:fRequest error:nil];
     if ([users count] != 0) {
         for (TVUser *u in users) {
             NSString *s = [self getRefreshTokenForAccount:u.serverId];
@@ -524,7 +517,7 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
     } else {
         self.userFetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
         self.userFetchRequest.predicate = [NSPredicate predicateWithFormat:@"serverId == %@", self.user.serverId];
-        self.user = [self.managedObjectContext executeFetchRequest:self.userFetchRequest error:nil][0];
+        self.user = [self.box.ctx executeFetchRequest:self.userFetchRequest error:nil][0];
     }
 }
 

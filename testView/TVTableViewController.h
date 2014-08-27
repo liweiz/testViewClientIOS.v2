@@ -15,7 +15,6 @@
 @property (assign, nonatomic) BOOL changeIsUserDriven;
 
 @property (strong, nonatomic) NSManagedObjectContext *ctx;
-@property (strong, nonatomic) NSManagedObjectModel *model;
 
 @property (strong, nonatomic) TVRootViewCtlBox *box;
 
@@ -33,8 +32,6 @@
  
  */
 @property (strong, nonatomic) NSMutableSet *expandedCards;
-
-@property (strong, nonatomic) NSMutableString *userServerId;
 
 // Sort
 @property (strong, nonatomic) NSSortDescriptor *byCellTitleAlphabetA;

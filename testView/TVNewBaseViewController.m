@@ -18,8 +18,7 @@
 
 @implementation TVNewBaseViewController
 
-@synthesize managedObjectContext;
-@synthesize managedObjectModel;
+@synthesize ctx;
 
 @synthesize myNewViewCtl;
 @synthesize box;
@@ -54,8 +53,6 @@
     // Do any additional setup after loading the view.
     self.myNewViewCtl = [[TVNewViewController alloc] initWithNibName:nil bundle:nil];
 
-    self.myNewViewCtl.managedObjectContext = self.managedObjectContext;
-    self.myNewViewCtl.managedObjectModel = self.managedObjectModel;
     self.myNewViewCtl.box = self.box;
     [self addChildViewController:self.myNewViewCtl];
     [self.view addSubview:self.myNewViewCtl.view];
@@ -115,10 +112,10 @@
 - (void)saveAsNew
 {
     if ([self checkIfTargetIsInContext]) {
-        TVCard *newCard = [NSEntityDescription insertNewObjectForEntityForName:@"TVCard" inManagedObjectContext:self.managedObjectContext];
+        TVCard *newCard = [NSEntityDescription insertNewObjectForEntityForName:@"TVCard" inManagedObjectContext:self.ctx];
         [self setupNewDocBaseLocal:newCard];
         [self setupNewCard:newCard withDic:[self getReadyForCard]];
-        [self.managedObjectContext save:nil];
+        [self.ctx save:nil];
         [self dismissSaveView];
     }
 }
@@ -129,7 +126,7 @@
         if (self.cardToUpdate) {
             [self updateDocBaseLocal:self.cardToUpdate];
             [self updateCard:self.cardToUpdate withDic:[self getReadyForCard]];
-            [self.managedObjectContext save:nil];
+            [self.ctx save:nil];
         } else {
             [self saveAsNew];
         }

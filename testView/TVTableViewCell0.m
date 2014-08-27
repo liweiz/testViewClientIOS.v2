@@ -20,6 +20,7 @@
 @synthesize deleteView;
 @synthesize cellLabel;
 @synthesize delay;
+@synthesize longPress;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
@@ -32,11 +33,6 @@
 
 - (void)awakeFromNib {
     // Initialization code
-}
-
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
-    [super setSelected:selected animated:animated];
-    // Configure the view for the selected state
 }
 
 - (void)layoutSubviews
@@ -106,7 +102,15 @@
         self.selectionTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(multiselectionAction)];
         [self.contentView addGestureRecognizer:self.selectionTap];
     }
-    
+    if (!self.longPress) {
+        self.longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(showDeletion)];
+        [self.contentView addGestureRecognizer:self.longPress];
+    }
+    if (self.selected) {
+        self.longPress.enabled = YES;
+    } else {
+        self.longPress.enabled = NO;
+    }
     [self.baseScrollView setContentOffset:CGPointZero animated:NO];
     self.contentView.backgroundColor = [UIColor yellowColor];
     self.textLabel.backgroundColor = [UIColor orangeColor];
@@ -114,6 +118,21 @@
     // Not able to access the system's default editControllView, so just make the backgroundView and contentView on top of it to hide it, otherwise, there is always a circle shown on left.
     [self bringSubviewToFront:self.backgroundView];
     [self bringSubviewToFront:self.contentView];
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+    // Configure the view for the selected state
+    if (selected) {
+        self.longPress.enabled = YES;
+    } else {
+        self.longPress.enabled = NO;
+    }
+}
+
+- (void)showDeletion
+{
+    
 }
 
 - (void)addDeleteView

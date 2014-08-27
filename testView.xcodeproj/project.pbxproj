@@ -57,6 +57,7 @@
 		EE83C3C01991793B00269B0C /* TVTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EE83C3BF1991793B00269B0C /* TVTableViewController.m */; };
 		EE96665D198F47F800AA3A5C /* TVNewBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EE96665C198F47F800AA3A5C /* TVNewBaseViewController.m */; };
 		EE9FC51619A4EBF000F18D63 /* TVExpandedCard.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9FC51519A4EBF000F18D63 /* TVExpandedCard.m */; };
+		EEA1D21819AD7A52004BE5A9 /* NSObject+CoreDataStack.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA1D21719AD7A52004BE5A9 /* NSObject+CoreDataStack.m */; };
 		EEA889EC19885E4100F042EB /* TVNewViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA889EB19885E4100F042EB /* TVNewViewController.m */; };
 		EEA889F21988A0E200F042EB /* TVScrollViewVertical.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA889F11988A0E200F042EB /* TVScrollViewVertical.m */; };
 		EEB6304F1993B96200EDFD56 /* TVCellLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = EEB630461993B96200EDFD56 /* TVCellLabel.m */; };
@@ -157,6 +158,8 @@
 		EE96665C198F47F800AA3A5C /* TVNewBaseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVNewBaseViewController.m; sourceTree = "<group>"; };
 		EE9FC51419A4EBF000F18D63 /* TVExpandedCard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVExpandedCard.h; sourceTree = "<group>"; };
 		EE9FC51519A4EBF000F18D63 /* TVExpandedCard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVExpandedCard.m; sourceTree = "<group>"; };
+		EEA1D21619AD7A52004BE5A9 /* NSObject+CoreDataStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+CoreDataStack.h"; sourceTree = "<group>"; };
+		EEA1D21719AD7A52004BE5A9 /* NSObject+CoreDataStack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+CoreDataStack.m"; sourceTree = "<group>"; };
 		EEA889EA19885E4100F042EB /* TVNewViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVNewViewController.h; sourceTree = "<group>"; };
 		EEA889EB19885E4100F042EB /* TVNewViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVNewViewController.m; sourceTree = "<group>"; };
 		EEA889F01988A0E200F042EB /* TVScrollViewVertical.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVScrollViewVertical.h; sourceTree = "<group>"; };
@@ -371,6 +374,8 @@
 			children = (
 				D09F1024192465AA00CDF21E /* NSObject+DataHandler.h */,
 				D09F1025192465AA00CDF21E /* NSObject+DataHandler.m */,
+				EEA1D21619AD7A52004BE5A9 /* NSObject+CoreDataStack.h */,
+				EEA1D21719AD7A52004BE5A9 /* NSObject+CoreDataStack.m */,
 			);
 			path = DataWorker;
 			sourceTree = "<group>";
@@ -657,6 +662,7 @@
 				D096CE79182F618500D09446 /* TVLabel.m in Sources */,
 				EEDE2CD919560490003F0F99 /* TVIndicator.m in Sources */,
 				EEDE5DEF1963AE9200782C90 /* TVLayerBaseViewController.m in Sources */,
+				EEA1D21819AD7A52004BE5A9 /* NSObject+CoreDataStack.m in Sources */,
 				EED69AB21974723700C32292 /* TVCommunicator.m in Sources */,
 				EEE3ED0D18110AFE004A232C /* TVAppRootViewController.m in Sources */,
 				EED30219198A8023007114C1 /* TVSaveViewController.m in Sources */,
