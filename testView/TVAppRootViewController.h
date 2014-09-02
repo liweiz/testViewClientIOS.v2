@@ -24,21 +24,28 @@
  2. push local db changes to server db: this is consistent with point 1
  3. sync with server db: to get the latest db that user builds through all devices
  
- So the priorities to handle changes to local db are:
- 1. Always proceed local change first.
- 2. Send local changes
+ Based on above, priorities are:
+ 1. Always proceed local change to db first.
+ 2. Send local changes to server
  3. Send sync request
  
+ Each time a change is committed to local db, its state changes from A to B. Because local change to db is the top priority, the only top state change is local A to local B(we use lA and lB in the rest of this section).
+ The order with no interruption is:
+ local change made to db =>
+ analyze local changes has not successfully processed by server and push again till no one left =>
+ sync with server => done
+ Now, let's take db priorities into account. Local change is an instant interruption. requestID, which is the record in local db to mark is one request is successfully processed by server, is not an instant interruption but it has the same priority to be processed before others. since we want to send as few repetitive requests as possible. Sync cycle, which includes analyzing uncommitted local changes and sending requests(see comments in other files for details) is stopped instantly when previous two instant interruptions occur. And a new sync cycle starts when necessary.
+ Because communication between client and server is async, not all feedbacks from server can be received before another ii(instant interruption) happens. Once an ii happens, all the unproccessed(including both received and not received) feedbacks are dismissed, except requestId.
+ *senario A: no interruption happens before everything is done*
+ lA => analyze local db and push uncommitted changes => all changes done => send sync request and successfully proccessed => lB
+ Local db transaction priority:
+ 1. user activity / requestId operation
+ 2. JSON in response
  
- To prevent concurrent ctx operation (yes, we can use merge policy, but we don't want to add that layer to this app), we use a queue to manage the process of all the ctxes so that each time only one ctx is processed. The queue is bWorker(NSOperationQueue). Since bWorker is on a background thread, all the data operation to local db does not block main thread. We also have a comminicator(call it com in the rest of this section). It is on another background thread to avoid blocking the main thread and bWorker.
- So we have three queues, one on main thread, one for data transaction, one for com.
- UserTriggered data transactions have higher priority.
+ We choose to use NSOperationQueue to manage above process. Meanwhile, use another array to store the NSOperation so that we could easily locate any given NSOperation to make further change after it is added to the queue, such as cancelation. Completed and canceled ones are removed from the array right away.
+ The NSOperation in queue above contains a ctx serving as a channel to do data transaction in local db. The queue itself is actually a queue for local db transactions. So any given time, there is only one ctx working on local db transaction.
  
- How these three parts interact with each other?
- 1. main thread: user triggered data change
- 2. thread for com: server triggered data change
- 3. thread for data transaction
- There is only one queue for data transaction. Changes triggered by the other two gather in this queue. User triggered change has higher priority since waht user does at local client has to be very responsive. The later processed com triggered change may be dismissed if it conflicts with the previous user action.
+ To prevent concurrent ctx operation (yes, we can use merge policy, but we don't want to add that layer to this app), we use a queue mentioned above to manage the process of all the ctxes so that each time only one ctx is processed. It's on the main thread. There is another queue, bWorker(NSOperationQueue). bWorker is on a background thread, all the operation does not block main thread. All communications with server are on bWork.
  */
 
 extern NSString *const tvEnglishFontName;
