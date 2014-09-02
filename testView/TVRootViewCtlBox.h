@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "TVUser.h"
 #import "TVIndicator.h"
+#import "TVCommunicator.h"
 
 typedef NS_ENUM(NSInteger, TVCtl) {
     TVNoCtl,
@@ -38,9 +39,14 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (strong, nonatomic) TVUser *user;
 @property (strong, nonatomic) NSPersistentStoreCoordinator *coordinator;
 @property (strong, nonatomic) NSManagedObjectModel *model;
-@property (strong, nonatomic) NSManagedObjectContext *ctx;
 @property (strong, nonatomic) TVIndicator *indicator;
 
+@property (strong, nonatomic) NSOperationQueue *dbWorker;
+@property (strong, nonatomic) NSOperationQueue *comWorker;
+
+@property (strong, nonatomic) TVCommunicator *com;
+
 - (void)setupBox;
+
 
 @end

@@ -15,7 +15,7 @@
 #import "TVLangPickViewController.h"
 #import "TVActivationViewController.h"
 #import "TVLayerBaseViewController.h"
-#import "TVCommunicator.h"
+
 #import "TVRootViewCtlBox.h"
 
 NSString *const tvEnglishFontName = @"TimesNewRomanPSMT";
@@ -50,14 +50,15 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
 
 NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 
+NSString *const tvFetchOrSaveErr = @"tvFetchOrSaveErr";
+
 @interface TVAppRootViewController ()
 
 @end
 
 @implementation TVAppRootViewController
 
-@synthesize ctx, coordinator, model;
-@synthesize userFetchRequest, user, loginViewController, requestReceivedResponse, willSendRequest, passItem, appRect, internetIsAccessible;
+@synthesize userFetchRequest, loginViewController, requestReceivedResponse, willSendRequest, passItem, appRect, internetIsAccessible;
 @synthesize indicator;
 @synthesize sysMsg;
 
@@ -65,8 +66,6 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 @synthesize targetViewController;
 @synthesize activationViewController;
 
-@synthesize com;
-@synthesize bWorker;
 @synthesize box;
 @synthesize warning;
 
@@ -75,11 +74,8 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        self.bWorker = [[NSOperationQueue alloc] init];
+        
         self.box = [[TVRootViewCtlBox alloc] init];
-        self.com = [[TVCommunicator alloc] init];
-        self.com.bWorker = self.bWorker;
-        self.com.box = self.box;
     }
     return self;
 }
@@ -94,9 +90,6 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.box.ctx = self.ctx;
-    self.box.model = self.model;
-    self.box.coordinator = self.coordinator;
     self.box.appRect = self.appRect;
     [self.box setupBox];
     
@@ -123,8 +116,9 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTargetPickBelow:) name:tvShowTarget object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addAndCheckReqNo) name:tvAddAndCheckReqNo object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(minusAndCheckReqNo) name:tvMinusAndCheckReqNo object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showWarningWithText) name:tvShowWarning object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showWarningWithText:) name:tvShowWarning object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pinchToShowAbove:) name:tvPinchToShowAbove object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showWarningWithText:) name:tvFetchOrSaveErr object:nil];
 }
 
 /*
@@ -154,8 +148,8 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 
 - (void)sendActivationEmail:(BOOL)isUserTriggered
 {
-    if (!self.user) {
-        [self refreshUser];
+    if (!self.box.user) {
+        [self.box refreshUser];
     }
     TVRequester *r = [[TVRequester alloc] init];
     r.box = self.box;
@@ -163,10 +157,10 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
     if (isUserTriggered) {
         r.isUserTriggered = YES;
     }
-    r.userId = self.user.serverId;
+    r.userId = self.box.user.serverId;
     r.isBearer = YES;
     r.method = @"GET";
-    r.accessToken = [self getAccessTokenForAccount:self.user.serverId];
+    r.accessToken = [self getAccessTokenForAccount:self.box.user.serverId];
     [r checkServerAvailToProceed];
 }
 
@@ -274,7 +268,7 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
         [self loadLoginCtl];
         [self showViewAbove:self.loginViewController.view currentView:c.view baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
         if (n == 1002) {
-            [self signOut];
+            [self.box signOut];
         }
     } else if (n == 1004) {
         [self loadNativePickCtl];
@@ -326,16 +320,15 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
     }
 }
 
-# pragma mark - content viewController
+# pragma mark - Child viewControllers
 
 - (void)loadController
 {
     // When sync with server, isLoggedIn is not processed on server. The response in turn is always true. So when user signs out, isLoggedIn is set to be false. Once user signs in it set to be the value in response, which is alwasy true.
-    [self refreshUser];
-    if (self.user) {
-        self.box.user = self.user;
-        if (self.user.activated.integerValue == 1) {
-            
+    [self.box refreshUser];
+    if (self.box.user) {
+        if (self.box.user.activated.boolValue == YES) {
+            [self loadContentCtl];
         } else {
             [self loadActivationCtl:YES];
         }
@@ -346,7 +339,7 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 
 - (void)actionAfterActivationDone
 {
-    if ([self.user.sourceLang isEqualToString:@""]) {
+    if ([self.box.user.sourceLang isEqualToString:@""]) {
         // This indicates that there is no data on this device previously, the app is the first time to be installed here or it's a reinstall after previous deletion. Start a sync cycle to get all from server.
         // Show langPicker and indicator since a request is sent anyway to get the deviceInfo status from server and user has to wait for the response.
         // 1. If no response received, let user pick lang pair so that user can keep use the app.
@@ -362,12 +355,13 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
         r.requestType = TVSync;
         r.isBearer = YES;
         r.method = @"GET";
-        r.urlBranch = [self getUrlBranchFor:TVOneDeviceInfo userId:self.user.serverId deviceInfoId:nil cardId:nil];
-        NSMutableArray *m = [self getCardVerList:self.user.serverId withCtx:self.box.ctx];
+        r.urlBranch = [self getUrlBranchFor:TVOneDeviceInfo userId:self.box.user.serverId deviceInfoId:nil cardId:nil];
+        NSMutableArray *m = [self getCardVerList:self.box.user.serverId withCtx:self.box.ctx];
         r.body = [self getJSONSyncWithCardVerList:m err:nil];
         [r checkServerAvailToProceed];
     } else {
         // Show content
+        [self loadContentCtl];
     }
 }
 
@@ -418,7 +412,6 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
     self.box.ctlOnDuty = TVTargetPickCtl;
 }
 
-
 - (void)loadActivationCtl:(BOOL)isOnTop
 {
     if (!self.activationViewController) {
@@ -466,14 +459,19 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 
 #pragma mark - warning display
 
-- (void)showWarningWithText
+- (void)showWarningWithText:(NSNotification *)note
 {
     if (!self.warning) {
         self.warning = [[UILabel alloc] initWithFrame:CGRectMake((self.view.frame.size.width - 220.0f) * 0.5f, (self.view.frame.size.height - 90.0f) * 0.5f, 220.0f, 90.0f)];
         [self.view addSubview:self.warning];
         self.warning.textAlignment = NSTextAlignmentLeft;
     }
-    self.warning.text = self.box.warning;
+    if ([note.name isEqualToString:tvFetchOrSaveErr]) {
+        self.warning.text = @"Something went wrong, please try later.";
+    } else {
+        self.warning.text = self.box.warning;
+    }
+    
     if (self.warning.alpha == 0.0f) {
         self.warning.alpha = 1.0f;
         [self.view bringSubviewToFront:self.warning];
@@ -481,52 +479,16 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
     [UIView animateWithDuration:4 animations:^{
         self.warning.alpha = 0.0f;
     } completion:^(BOOL finished){
-        self.box.warning = @"";
+        [self.box.warning setString:@""];
     }];
 }
 
 - (void)hideWarning
 {
-    self.warning.text = @"";
+    self.warning.text = nil;
     if (self.warning.alpha == 1.0f) {
         self.warning.alpha = 0.0f;
     }
-}
-
-#pragma mark - user management
-
-- (TVUser *)getLoggedInUser
-{
-    NSFetchRequest *fRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
-    NSArray *users = [self.box.ctx executeFetchRequest:fRequest error:nil];
-    if ([users count] != 0) {
-        for (TVUser *u in users) {
-            NSString *s = [self getRefreshTokenForAccount:u.serverId];
-            if (![s isEqualToString:@""]) {
-                return u;
-            }
-        }
-    }
-    return nil;
-}
-
-- (void)refreshUser
-{
-    if (!self.user) {
-        self.user = [self getLoggedInUser];
-    } else {
-        self.userFetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
-        self.userFetchRequest.predicate = [NSPredicate predicateWithFormat:@"serverId == %@", self.user.serverId];
-        self.user = [self.box.ctx executeFetchRequest:self.userFetchRequest error:nil][0];
-    }
-}
-
-- (void)signOut
-{
-    if (!self.user) {
-        [self refreshUser];
-    }
-    [self resetTokens:self.user.serverId];
 }
 
 - (void)didReceiveMemoryWarning

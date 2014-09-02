@@ -18,6 +18,7 @@
 @property (strong, nonatomic) TVRootViewCtlBox *box;
 @property (strong, nonatomic) TVSaveViewController *saveViewCtl;
 @property (assign, nonatomic) BOOL createNewOnly;
-@property (strong, nonatomic) TVCard *cardToUpdate;
+@property (strong, nonatomic) NSString *cardToUpdateServerId;
+@property (strong, nonatomic) NSString *cardToUpdateLocalId;
 
 @end

@@ -41,6 +41,22 @@
     return r;
 }
 
+#pragma - mark managedObject Dictionary converter
+
+- (NSDictionary *)convertCardObjToDic:(NSManagedObject *)obj
+{
+    NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
+    [d setValue:[obj valueForKey:@"localId"] forKey:@"localId"];
+    [d setValue:[obj valueForKey:@"serverId"] forKey:@"serverId"];
+    [d setValue:[obj valueForKey:@"versionNo"] forKey:@"versionNo"];
+    [d setValue:[obj valueForKey:@"lastModifiedAtLocal"] forKey:@"lastModifiedAtLocal"];
+    [d setValue:[obj valueForKey:@"context"] forKey:@"context"];
+    [d setValue:[obj valueForKey:@"detail"] forKey:@"detail"];
+    [d setValue:[obj valueForKey:@"target"] forKey:@"target"];
+    [d setValue:[obj valueForKey:@"translation"] forKey:@"translation"];
+    return d;
+}
+
 #pragma - mark create new
 
 - (void)setupNewDocBaseLocal:(TVBase *)doc
@@ -52,7 +68,7 @@
 }
 
 // dicInside is the dictionary standing for user/deviceInfo/card, etc.
-- (void)setupNewDocBaseServer:(TVBase *)doc fromRequest:(NSMutableDictionary *)dicInside
+- (void)setupNewDocBaseServer:(TVBase *)doc fromRequest:(NSDictionary *)dicInside
 {
     doc.serverId = [dicInside valueForKey:@"_id"];
     doc.lastUnsyncAction = [NSNumber numberWithInteger:TVDocNoAction];
@@ -63,7 +79,7 @@
 }
 
 // A new user must be from server. The info user inputs is not stored as local record in db but send to server and create a record based on the response from server.
-- (void)setupNewUserServer:(TVUser *)user withDic:(NSMutableDictionary *)dic
+- (void)setupNewUserServer:(TVUser *)user withDic:(NSDictionary *)dic
 {
     if ([dic valueForKey:@"user"]) {
         NSMutableDictionary *u = [dic valueForKey:@"user"];
@@ -83,7 +99,7 @@
 //    }
 }
 
-- (void)setupNewCard:(TVCard *)card withDic:(NSMutableDictionary *)dic
+- (void)setupNewCard:(TVCard *)card withDic:(NSDictionary *)dic
 {
     card.belongTo = [dic valueForKey:@"belongTo"];
     card.collectedAt = [NSDate date];
@@ -121,7 +137,7 @@
     reqId.lastModifiedAtLocal = [NSDate date];
 }
 
-- (void)updateDocBaseServer:(TVBase *)doc withDic:(NSMutableDictionary *)dicInside
+- (void)updateDocBaseServer:(TVBase *)doc withDic:(NSDictionary *)dicInside
 {
     if ([dicInside valueForKey:@"lastModified"]) {
         doc.lastModifiedAtServer = [dicInside valueForKey:@"lastModified"];
@@ -133,7 +149,7 @@
     doc.versionNo = [dicInside valueForKey:@"versionNo"];
 }
 
-- (void)updateUser:(TVUser *)user withDic:(NSMutableDictionary *)dic
+- (void)updateUser:(TVUser *)user withDic:(NSDictionary *)dic
 {
     if ([dic valueForKey:@"user"]) {
         user.activated = [[dic valueForKey:@"user"] valueForKey:@"activated"];
@@ -151,7 +167,7 @@
     }
 }
 
-- (void)updateCard:(TVCard *)card withDic:(NSMutableDictionary *)dicInside
+- (void)updateCard:(TVCard *)card withDic:(NSDictionary *)dicInside
 {
     if (!card.belongTo) {
         card.belongTo = [dicInside valueForKey:@"belongTo"];
@@ -203,6 +219,35 @@
     }
 }
 
+#pragma mark - fetch & save data process
+
+// Its return value indicates if the save operation is successful.
+- (BOOL)fetch:(NSFetchRequest *)r withCtx:(NSManagedObjectContext *)ctx outcome:(NSMutableArray *)outcome
+{
+    NSError *err;
+    NSArray *a = [ctx executeFetchRequest:r error:&err];
+    if (!err) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:tvFetchOrSaveErr object:self];
+        return NO;
+    } else {
+        outcome = [NSMutableArray arrayWithArray:a];
+        return YES;
+    }
+}
+
+// Its return value indicates if the save operation is successful.
+- (BOOL)saveWithCtx:(NSManagedObjectContext *)ctx
+{
+    NSError *err;
+    [ctx save:&err];
+    if (!err) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:tvFetchOrSaveErr object:self];
+        return NO;
+    } else {
+        return YES;
+    }
+}
+
 #pragma mark - refresh cards
 - (NSArray *)refreshCards:(NSString *)userId withCtx:(NSManagedObjectContext *)ctx
 {
@@ -245,7 +290,7 @@
 /*
  When communicate with server, only status matters.
  A requestID is triggered to be generated when there is new status since last sync. It is subject to serverID's existence and specific operation. We try to generate requestID as less as possible. So each scan only go through the full cycle of request/response for one sellected record. No matter whether resonse is successfully received by client, after a cycle finishes, scan again to meet any one of selected records. Repeat this till a scan returns no record and run sync request afterwards.
- RequestID for update operation is generated everytime record being updated in db. Use NSManagedObjectContextObjectsDidChangeNotification to do this before checking server availability. This is because we use RequestID to link each update with one unique requestID to setup a one to one relationship to make sure right content is submitted to server. For record with valid serverID, TVDocUpdated is set. For record empty serverID, TVDocNew is used.
+ RequestID for update operation is generated everytime record being updated in db. Use NSManagedObjectContextObjectsDidChangeNotification to do this before checking server availability. This is because we use RequestID to link each update with one unique requestID to setup a one to one relationship to make sure right content is submitted to server. For record with valid serverID, TVDocUpdated is set. For record with empty serverID, TVDocNew is used.
  lastUnsyncAction == TVDocDeleted and last requestID is for deletion block all attempt to add new requestID to list since there is no way to create/update/delete a deleted record.
  
  1. check server availability when:
@@ -258,7 +303,7 @@
  
  3. further analyze
  a. if serverID is empty
- In this case, only "TVDocNew" request has been sent since without a serverID, there is no way to update/delete a record on sever. There could be multiple "TVDocNew" requests sent due to local update operation after the initial local create operation. Without the serverID, local update operation is treated as creating a new record to the server each time. When user delete it locally, the delete operation could not be able to trigger any request due to its lack of the serverID. So the record has different version of records on server as many as the requests it sends to the server since each time a new record is created on server. When syncing, those records are delivered back to client and the local record is deleted accordingly. User has to delete the redundant records after the sync process. User also may find the deleted local record show up again since it is not deleted on server. The one on server is copied back to the client as a new record. User has to delete it again.
+ In this case, only "TVDocNew" request has been sent since, without a serverID, there is no way to update/delete a record on sever. There could be multiple "TVDocNew" requests sent due to local update operation after the initial local create operation. Without the serverID, local update operation is treated as creating a new record to the server each time. When user delete it locally, the delete operation could not be able to trigger any request due to its lack of the serverID. So the record has different version of records on server as many as the requests it sends to the server since each time a new record is created on server. When syncing, those records are delivered back to client and the local record is deleted accordingly. User has to delete the redundant records after the sync process. User also may find the deleted local record show up again since it is not deleted on server. The one on server is copied back to the client as a new record. User has to delete it again.
  i. no requestID in hasReqID
  No request has been generated and sent for this record. Generate a "TVDocNew" request and send. Add one requestID to the list.
  ii. requestID in hasReqID and last one done

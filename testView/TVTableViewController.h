@@ -55,4 +55,7 @@
 @property (strong, nonatomic) NSMutableArray *tableDataSources;
 @property (strong, nonatomic) NSMutableArray *snapshots;
 
+@property (strong, nonatomic) NSString *toDeleteServerId;
+@property (strong, nonatomic) NSString *toDeleteLocalId;
+
 @end

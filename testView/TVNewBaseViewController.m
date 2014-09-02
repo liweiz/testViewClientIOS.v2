@@ -7,10 +7,10 @@
 //
 
 #import "TVNewBaseViewController.h"
-#import "TVNewViewController.h"
 #import "UIViewController+InOutTransition.h"
 #import "TVAppRootViewController.h"
 #import "NSObject+DataHandler.h"
+#import "TVCRUDChannel.h"
 
 @interface TVNewBaseViewController ()
 
@@ -24,7 +24,8 @@
 @synthesize box;
 @synthesize createNewOnly;
 @synthesize saveViewCtl;
-@synthesize cardToUpdate;
+@synthesize cardToUpdateServerId;
+@synthesize cardToUpdateLocalId;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -112,25 +113,38 @@
 - (void)saveAsNew
 {
     if ([self checkIfTargetIsInContext]) {
-        TVCard *newCard = [NSEntityDescription insertNewObjectForEntityForName:@"TVCard" inManagedObjectContext:self.ctx];
-        [self setupNewDocBaseLocal:newCard];
-        [self setupNewCard:newCard withDic:[self getReadyForCard]];
-        [self.ctx save:nil];
-        [self dismissSaveView];
+        NSBlockOperation *o = [NSBlockOperation blockOperationWithBlock:^{
+            TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
+            [crud insertOneCard:[self getReadyForCard] fromServer:NO];
+            if ([crud saveWithCtx:crud.ctx]) {
+                [self dismissSaveView];
+            }
+        }];
+        [o setQueuePriority:NSOperationQueuePriorityVeryHigh];
+        [self.box.dbWorker addOperation:o];
     }
 }
 
 - (void)saveAsUpdate
 {
     if ([self checkIfTargetIsInContext]) {
-        if (self.cardToUpdate) {
-            [self updateDocBaseLocal:self.cardToUpdate];
-            [self updateCard:self.cardToUpdate withDic:[self getReadyForCard]];
-            [self.ctx save:nil];
-        } else {
-            [self saveAsNew];
-        }
-        [self dismissSaveView];
+        NSBlockOperation *o = [NSBlockOperation blockOperationWithBlock:^{
+            TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
+            NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
+            [d setObject:self.cardToUpdateServerId forKey:@"serverId"];
+            [d setObject:self.cardToUpdateLocalId forKey:@"localId"];
+            NSArray *a = [crud getObjs:[NSSet setWithObject:d] name:@"TVCard"];
+            if ([a count] > 0) {
+                [crud updateOneCard:a[0] by:[self getReadyForCard] fromServer:NO];
+                if ([crud saveWithCtx:crud.ctx]) {
+                    [self dismissSaveView];
+                }
+            } else {
+                [self saveAsNew];
+            }
+        }];
+        [o setQueuePriority:NSOperationQueuePriorityVeryHigh];
+        [self.box.dbWorker addOperation:o];
     }
 }
 

@@ -11,6 +11,7 @@
 #import "TVExpandedCard.h"
 #import "TVAppRootViewController.h"
 #import "NSObject+CoreDataStack.h"
+#import "TVCRUDChannel.h"
 
 @interface TVTableViewController ()
 
@@ -34,6 +35,8 @@
 @synthesize tableDataSources;
 @synthesize snapshots;
 @synthesize expandedCards;
+@synthesize toDeleteLocalId;
+@synthesize toDeleteServerId;
 
 /*
  Each snapshot includes two things:
@@ -85,13 +88,6 @@
 {
     [super viewDidLoad];
 }
-
-- (void)refreshCtx
-{
-    self.ctx = nil;
-    self.ctx = [self managedObjectContext:self.ctx coordinator:self.box.coordinator model:self.box.model];
-}
-
 
 #pragma mark - Process tableDataSource snapshot queue
 
@@ -319,7 +315,7 @@
     NSMutableArray *newArray = [NSMutableArray arrayWithCapacity:0];
     for (NSManagedObject *obj in self.rawDataSource) {
         if ([self.tableDataSources count] == 0) {
-            [newArray addObject:[self convertObjToDic:obj]];
+            [newArray addObject:[self convertCardObjToDic:obj]];
         } else {
             // Reuse the obj from existing current dataSources to reduce memory usage. Otherwise, there could be too many objs duplicatedly generated.
             NSString *serverId = [obj valueForKey:@"serverId"];
@@ -333,12 +329,11 @@
                 }
             }
             if (!found) {
-                [newArray addObject:[self convertObjToDic:obj]];
+                [newArray addObject:[self convertCardObjToDic:obj]];
             }
         }
     }
     self.rawDataSource = nil;
-    self.ctx = nil;
     [newArray sortUsingDescriptors:self.sortDescriptors];
     return newArray;
 }
@@ -372,19 +367,7 @@
     return nil;
 }
 
-- (NSDictionary *)convertObjToDic:(NSManagedObject *)obj
-{
-    NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
-    [d setValue:[obj valueForKey:@"localId"] forKey:@"localId"];
-    [d setValue:[obj valueForKey:@"serverId"] forKey:@"serverId"];
-    [d setValue:[obj valueForKey:@"versionNo"] forKey:@"versionNo"];
-    [d setValue:[obj valueForKey:@"lastModifiedAtLocal"] forKey:@"lastModifiedAtLocal"];
-    [d setValue:[obj valueForKey:@"context"] forKey:@"context"];
-    [d setValue:[obj valueForKey:@"detail"] forKey:@"detail"];
-    [d setValue:[obj valueForKey:@"target"] forKey:@"target"];
-    [d setValue:[obj valueForKey:@"translation"] forKey:@"translation"];
-    return d;
-}
+
 
 - (NSArray *)getRawDataSource
 {
@@ -475,10 +458,19 @@
 {
     UITapGestureRecognizer *tempSender = sender;
     if ([tempSender.view.superview.superview.superview.superview isKindOfClass:[UITableViewCell class]]) {
-        NSIndexPath *path = [self.tableView indexPathForCell:(UITableViewCell *)tempSender.view.superview.superview.superview.superview];
-        TVBase *objToDelete = [self.tableDataSources[0] objectAtIndex:path.row];
-        [self deleteDocBaseLocal:objToDelete];
-        [self.ctx save:nil];
+        NSBlockOperation *o = [NSBlockOperation blockOperationWithBlock:^{
+            TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
+            NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
+            [d setObject:self.toDeleteServerId forKey:@"serverId"];
+            [d setObject:self.toDeleteLocalId forKey:@"localId"];
+            NSArray *a = [crud getObjs:[NSSet setWithObject:d] name:@"TVCard"];
+            [crud deleteOneCard:a[0] fromServer:NO];
+            if ([crud saveWithCtx:crud.ctx]) {
+                // action after deletion
+            }
+        }];
+        [o setQueuePriority:NSOperationQueuePriorityVeryHigh];
+        [self.box.dbWorker addOperation:o];
     } else {
         // Handle error
     }

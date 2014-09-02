@@ -14,6 +14,7 @@
 #import "TVUser.h"
 #import "TVCard.h"
 #import "TVRequestId.h"
+#import "TVCRUDChannel.h"
 
 @implementation TVRequester
 
@@ -34,9 +35,6 @@
 
 @synthesize objectIdArray;
 @synthesize objectArray;
-
-@synthesize ctx;
-@synthesize model;
 
 @synthesize isUserTriggered;
 @synthesize fromVewTag;
@@ -378,7 +376,7 @@
     [NSURLConnection sendAsynchronousRequest:testRequest queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
      {
          if (self.box.numberOfUserTriggeredRequests <= 0) {
-             NSLog(@"number of requests in progress not right: %d", box.numberOfUserTriggeredRequests);
+             NSLog(@"number of requests in progress not right: %ld", (long)self.box.numberOfUserTriggeredRequests);
          }
          NSError *err;
          if ([(NSHTTPURLResponse *)response statusCode] == 200) {
@@ -402,8 +400,6 @@
              req.cardId = self.cardId;
              req.objectIdArray = self.objectIdArray;
              req.objectArray = self.objectArray;
-             req.ctx = self.ctx;
-             req.model = self.model;
              req.record = self.record;
              req.reqId = self.reqId;
              err = [req proceedToRequest];
@@ -427,7 +423,6 @@
         self.box.numberOfUserTriggeredRequests = self.box.numberOfUserTriggeredRequests + 1;
     }
     NSError *err;
-    self.ctx = [self managedObjectContext];
     err = [self getObjInCtx];
     if (!err) {
         // Setup request and send
@@ -438,14 +433,14 @@
         }
         [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
          {
-             NSLog(@"response code: %i", [(NSHTTPURLResponse *)response statusCode]);
+             NSLog(@"response code: %li", (long)[(NSHTTPURLResponse *)response statusCode]);
              
              if (error.code == -1004) {
                  // Error Domain=NSURLErrorDomain Code=-1004 "Could not connect to the server." https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Constants/Reference/reference.html
 //                 [ctler showSysMsg:@"Communication not successful"];
              }
              if (self.box.numberOfUserTriggeredRequests <= 0) {
-                 NSLog(@"number of requests in progress not right: %d", self.box.numberOfUserTriggeredRequests);
+                 NSLog(@"number of requests in progress not right: %ld", (long)self.box.numberOfUserTriggeredRequests);
              }
              if ([(NSHTTPURLResponse *)response statusCode] == 200) {
                  self.record.lastUnsyncAction = [NSNumber numberWithInteger:TVDocNoAction];
@@ -588,41 +583,6 @@
     [request setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forHTTPHeaderField:@"X-REMOLET-DEVICE-ID"];
     NSLog(@"X-REMOLET-DEVICE-ID: %@", [request valueForHTTPHeaderField:@"X-REMOLET-DEVICE-ID"]);
     return request;
-}
-
-
-
-#pragma mark - Core Data stack
-
-// Returns the managed object context for the application.
-// If the context doesn't already exist, it is created and bound to the persistent store coordinator for the application.
-- (NSManagedObjectContext *)managedObjectContext
-{
-    if (self.ctx) {
-        return self.ctx;
-    }
-    if (self.box.coordinator != nil) {
-        self.ctx = [[NSManagedObjectContext alloc] init];
-        [self.ctx setPersistentStoreCoordinator:self.box.coordinator];
-    }
-    return self.ctx;
-}
-
-// Returns the managed object model for the application.
-// If the model doesn't already exist, it is created from the application's model.
-- (NSManagedObjectModel *)managedObjectModel
-{
-    if (self.model) {
-        return self.model;
-    }
-    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"testView" withExtension:@"momd"];
-    self.model = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
-    return self.model;
-}
-
-- (NSURL *)applicationDocumentsDirectory
-{
-    return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
 }
 
 @end

@@ -23,7 +23,6 @@
 
 @synthesize myContextView, myDetailView, myNewView, myTargetView, myTranslationView;
 @synthesize createNewOnly;
-@synthesize ctx;
 @synthesize stopContextTarget, stopTargetTranslation, stopTranslationDetail, startPosition, targetPosition, dragStartPoint;
 
 @synthesize tempContext, tempTarget, tempTranslation, tempDetail, textBefore;
@@ -42,7 +41,6 @@
 
 - (void)loadView
 {
-    self.ctx = [self managedObjectContext:self.ctx coordinator:self.box.coordinator model:self.box.model];
     CGRect viewRect = CGRectMake(self.box.appRect.size.width * 0.0f, 0.0f, self.box.appRect.size.width, self.box.appRect.size.height);
     self.myNewView = [[TVScrollViewVertical alloc] initWithFrame:self.box.appRect];
     self.myNewView.contentSize = CGSizeMake(self.box.appRect.size.width, self.box.appRect.size.height * 2.0f + 500.0f);

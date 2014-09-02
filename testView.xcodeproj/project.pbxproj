@@ -48,12 +48,12 @@
 		D0A0AFAB1932CC0200C6E11E /* NSObject+NetworkHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = D098EE76192852830051B305 /* NSObject+NetworkHandler.m */; };
 		D0A0AFAC1932CC0400C6E11E /* TVRequester.m in Sources */ = {isa = PBXBuildFile; fileRef = D098EE79192854760051B305 /* TVRequester.m */; };
 		D0A0AFAD1932CC0B00C6E11E /* TVAppRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEE3ED0C18110AFE004A232C /* TVAppRootViewController.m */; };
-		D0AE0C5D1937756800514AD9 /* TVTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D0AE0C5C1937756800514AD9 /* TVTestViewController.m */; };
 		EE1327031988348700EAD11D /* TVContentRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EE1327021988348700EAD11D /* TVContentRootViewController.m */; };
 		EE1327071988364900EAD11D /* TVDraft.m in Sources */ = {isa = PBXBuildFile; fileRef = EE1327061988364900EAD11D /* TVDraft.m */; };
 		EE1997AE1816F5A400B5A993 /* langListShort.txt in Resources */ = {isa = PBXBuildFile; fileRef = EE1997AD1816F5A400B5A993 /* langListShort.txt */; };
 		EE1997B01816F60000B5A993 /* langListLong.txt in Resources */ = {isa = PBXBuildFile; fileRef = EE1997AF1816F60000B5A993 /* langListLong.txt */; };
 		EE5F3B5D197E2F890031749E /* TVRootViewCtlBox.m in Sources */ = {isa = PBXBuildFile; fileRef = EE5F3B5C197E2F890031749E /* TVRootViewCtlBox.m */; };
+		EE6BDACD19AFE5F000545DAF /* TVCRUDChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = EE6BDACC19AFE5F000545DAF /* TVCRUDChannel.m */; };
 		EE83C3C01991793B00269B0C /* TVTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EE83C3BF1991793B00269B0C /* TVTableViewController.m */; };
 		EE96665D198F47F800AA3A5C /* TVNewBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EE96665C198F47F800AA3A5C /* TVNewBaseViewController.m */; };
 		EE9FC51619A4EBF000F18D63 /* TVExpandedCard.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9FC51519A4EBF000F18D63 /* TVExpandedCard.m */; };
@@ -152,6 +152,8 @@
 		EE1997AF1816F60000B5A993 /* langListLong.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = langListLong.txt; sourceTree = "<group>"; };
 		EE5F3B5B197E2F890031749E /* TVRootViewCtlBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVRootViewCtlBox.h; sourceTree = "<group>"; };
 		EE5F3B5C197E2F890031749E /* TVRootViewCtlBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVRootViewCtlBox.m; sourceTree = "<group>"; };
+		EE6BDACB19AFE5F000545DAF /* TVCRUDChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVCRUDChannel.h; sourceTree = "<group>"; };
+		EE6BDACC19AFE5F000545DAF /* TVCRUDChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVCRUDChannel.m; sourceTree = "<group>"; };
 		EE83C3BE1991793B00269B0C /* TVTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVTableViewController.h; sourceTree = "<group>"; };
 		EE83C3BF1991793B00269B0C /* TVTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVTableViewController.m; sourceTree = "<group>"; };
 		EE96665B198F47F800AA3A5C /* TVNewBaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVNewBaseViewController.h; sourceTree = "<group>"; };
@@ -376,6 +378,8 @@
 				D09F1025192465AA00CDF21E /* NSObject+DataHandler.m */,
 				EEA1D21619AD7A52004BE5A9 /* NSObject+CoreDataStack.h */,
 				EEA1D21719AD7A52004BE5A9 /* NSObject+CoreDataStack.m */,
+				EE6BDACB19AFE5F000545DAF /* TVCRUDChannel.h */,
+				EE6BDACC19AFE5F000545DAF /* TVCRUDChannel.m */,
 			);
 			path = DataWorker;
 			sourceTree = "<group>";
@@ -657,6 +661,7 @@
 				D06A1A4E179DC6A3003346F4 /* TVAppDelegate.m in Sources */,
 				D06A1A4A179DC6A3003346F4 /* main.m in Sources */,
 				EE9FC51619A4EBF000F18D63 /* TVExpandedCard.m in Sources */,
+				EE6BDACD19AFE5F000545DAF /* TVCRUDChannel.m in Sources */,
 				EE1327031988348700EAD11D /* TVContentRootViewController.m in Sources */,
 				D096CE7F182F642D00D09446 /* TVRegularFont.m in Sources */,
 				D096CE79182F618500D09446 /* TVLabel.m in Sources */,
@@ -667,7 +672,6 @@
 				EEE3ED0D18110AFE004A232C /* TVAppRootViewController.m in Sources */,
 				EED30219198A8023007114C1 /* TVSaveViewController.m in Sources */,
 				EE83C3C01991793B00269B0C /* TVTableViewController.m in Sources */,
-				D0AE0C5D1937756800514AD9 /* TVTestViewController.m in Sources */,
 				D075DA4717F2B3C600F0DB0E /* testView.xcdatamodeld in Sources */,
 				EEB630531993B96200EDFD56 /* TVCellLabelTranslation.m in Sources */,
 				EEA889F21988A0E200F042EB /* TVScrollViewVertical.m in Sources */,

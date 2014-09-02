@@ -29,21 +29,25 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 - (void)resetTokens:(NSString *)userId;
 
 - (void)setupNewDocBaseLocal:(TVBase *)doc;
-- (void)setupNewDocBaseServer:(TVBase *)doc fromRequest:(NSMutableDictionary *)dicInside;
-- (void)setupNewUserServer:(TVUser *)user withDic:(NSMutableDictionary *)dic;
-- (void)setupNewCard:(TVCard *)card withDic:(NSMutableDictionary *)dic;
+- (void)setupNewDocBaseServer:(TVBase *)doc fromRequest:(NSDictionary *)dicInside;
+- (void)setupNewUserServer:(TVUser *)user withDic:(NSDictionary *)dic;
+- (void)setupNewCard:(TVCard *)card withDic:(NSDictionary *)dic;
 - (void)setupNewRequestId:(TVRequestId *)doc action:(NSInteger)a for:(TVBase *)base;
 
 - (void)updateDocBaseLocal:(TVBase *)doc;
 - (void)markRequestIdAsDone:(TVRequestId *)reqId;
-- (void)updateDocBaseServer:(TVBase *)doc withDic:(NSMutableDictionary *)dic;
-- (void)updateUser:(TVUser *)user withDic:(NSMutableDictionary *)dic;
-- (void)updateCard:(TVCard *)card withDic:(NSMutableDictionary *)dic;
+- (void)updateDocBaseServer:(TVBase *)doc withDic:(NSDictionary *)dic;
+- (void)updateUser:(TVUser *)user withDic:(NSDictionary *)dic;
+- (void)updateCard:(TVCard *)card withDic:(NSDictionary *)dic;
 
 - (void)deleteDocBaseLocal:(TVBase *)doc;
-
+- (void)deleteDocBaseServerWithServerId:(NSString *)serverId inCtx:(NSManagedObjectContext *)ctx;
+- (NSDictionary *)convertCardObjToDic:(NSManagedObject *)obj;
 - (NSArray *)refreshCards:(NSString *)userId withCtx:(NSManagedObjectContext *)ctx;
 
 - (NSInteger)getRequestIdOperationVersion:(TVBase *)base;
+
+- (BOOL)fetch:(NSFetchRequest *)r withCtx:(NSManagedObjectContext *)ctx outcome:(NSMutableArray *)outcome;
+- (BOOL)saveWithCtx:(NSManagedObjectContext *)ctx;
 
 @end

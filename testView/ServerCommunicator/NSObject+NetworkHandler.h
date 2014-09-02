@@ -57,7 +57,7 @@ typedef NS_ENUM(NSInteger, TVRequestType) {
 
 - (NSString *)getUrlBranchFor:(NSInteger)reqType userId:(NSString *)userId deviceInfoId:(NSString *)deviceInfoId cardId:(NSString *)cardId;
 
-- (TVRequestId *)analyzeOneUndone:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx error:(NSError **)err;
+- (TVRequestId *)analyzeOneUndone:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx;
 - (NSData *)getBody:(NSString *)reqId forRecord:(TVBase *)b err:(NSError **)err;
 
 @end

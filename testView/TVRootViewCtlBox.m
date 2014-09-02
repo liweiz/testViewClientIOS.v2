@@ -7,6 +7,7 @@
 //
 
 #import "TVRootViewCtlBox.h"
+#import "NSObject+DataHandler.h"
 
 @implementation TVRootViewCtlBox
 
@@ -25,8 +26,10 @@
 @synthesize user;
 @synthesize coordinator;
 @synthesize model;
-@synthesize ctx;
 @synthesize indicator;
+@synthesize dbWorker;
+@synthesize comWorker;
+@synthesize com;
 
 - (id)init
 {
@@ -37,6 +40,9 @@
         self.warning = [[NSMutableString alloc] init];
         self.sourceLang = [[NSMutableString alloc] init];
         self.targetLang = [[NSMutableString alloc] init];
+        self.dbWorker = [[NSOperationQueue alloc] init];
+        self.comWorker = [[NSOperationQueue alloc] init];
+        self.com = [[TVCommunicator alloc] init];
     }
     return self;
 }

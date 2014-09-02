@@ -31,9 +31,6 @@
 @property (strong, nonatomic) NSMutableArray *objectIdArray;
 @property (strong, nonatomic) NSMutableArray *objectArray;
 
-@property (strong, nonatomic) NSManagedObjectContext *ctx;
-@property (strong, nonatomic) NSManagedObjectModel *model;
-
 @property (assign, nonatomic) BOOL isUserTriggered;
 // Record the tag of the view that triggers the requester.
 @property (assign, nonatomic) NSInteger fromVewTag;
