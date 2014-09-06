@@ -99,7 +99,7 @@
     r.fromVewTag = self.view.tag;
     r.requestType = TVOneUser;
     r.isUserTriggered = YES;
-    r.userId = self.box.user.serverId;
+    r.userId = self.box.userServerId;
     r.isBearer = YES;
     r.method = @"GET";
     r.accessToken = [self getAccessTokenForAccount:self.box.user.serverId];

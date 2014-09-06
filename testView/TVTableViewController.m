@@ -12,6 +12,7 @@
 #import "TVAppRootViewController.h"
 #import "NSObject+CoreDataStack.h"
 #import "TVCRUDChannel.h"
+#import "TVQueueElement.h"
 
 @interface TVTableViewController ()
 
@@ -20,7 +21,6 @@
 @implementation TVTableViewController
 
 @synthesize changeIsUserDriven;
-@synthesize ctx;
 @synthesize box;
 
 @synthesize tableEntityName;
@@ -345,40 +345,7 @@
  rawDataSource and tableDataSource are two independent arrays. Instead of refreshing managedObjects one by one, We dealloc ctx and establish a new ctx to execute fetchRequest for the most recently data in local db.
  */
 
-- (NSDictionary *)findCard:(NSString *)serverId localId:(NSString *)localId inArray:(NSArray *)array
-{
-    if (serverId.length == 0) {
-        for (NSDictionary *c in array) {
-            NSString *lId = [c valueForKey:@"localId"];
-            if ([localId isEqualToString:lId]) {
-                // Same card located
-                return c;
-            }
-        }
-    } else {
-        for (NSDictionary *c in array) {
-            NSString *sId = [c valueForKey:@"serverId"];
-            if ([serverId isEqualToString:sId]) {
-                // Same card located
-                return c;
-            }
-        }
-    }
-    return nil;
-}
 
-
-
-- (NSArray *)getRawDataSource
-{
-    if (!self.fetchRequest) {
-        self.fetchRequest = [NSFetchRequest fetchRequestWithEntityName:self.tableEntityName];
-    }
-    NSPredicate *p = [NSPredicate predicateWithFormat:@"(belongToUser like %@) && !(lastUnsyncAction like TVDocDeleted)", self.box.user.serverId];
-    [self.fetchRequest setPredicate:p];
-    [self refreshCtx];
-    return [self.ctx executeFetchRequest:self.fetchRequest error:nil];
-}
 
 #pragma mark - Check new version of card
 
@@ -458,7 +425,7 @@
 {
     UITapGestureRecognizer *tempSender = sender;
     if ([tempSender.view.superview.superview.superview.superview isKindOfClass:[UITableViewCell class]]) {
-        NSBlockOperation *o = [NSBlockOperation blockOperationWithBlock:^{
+        TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
             NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
             [d setObject:self.toDeleteServerId forKey:@"serverId"];
@@ -469,8 +436,7 @@
                 // action after deletion
             }
         }];
-        [o setQueuePriority:NSOperationQueuePriorityVeryHigh];
-        [self.box.dbWorker addOperation:o];
+        [[NSOperationQueue mainQueue] addOperation:o];
     } else {
         // Handle error
     }

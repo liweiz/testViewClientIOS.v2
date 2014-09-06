@@ -15,6 +15,7 @@
 #import "TVCard.h"
 #import "TVRequestId.h"
 #import "TVCRUDChannel.h"
+#import "TVQueueElement.h"
 
 @implementation TVRequester
 
@@ -34,386 +35,48 @@
 @synthesize internetIsOn;
 
 @synthesize objectIdArray;
-@synthesize objectArray;
 
 @synthesize isUserTriggered;
 @synthesize fromVewTag;
 
-@synthesize record;
-@synthesize reqIdNeeded;
-@synthesize reqId;
-
 @synthesize box;
+@synthesize ids;
 
 - (id)init
 {
     self = [super init];
     if (self) {
         // Custom initialization
+        self.ids = [[TVIdCarrier alloc] init];
     }
     return self;
 }
 
-#pragma mark - request operation
-
-// Only successful request leads to response with
-- (NSError *)processResponseJSON:(NSMutableDictionary *)dict
+- (NSMutableURLRequest *)setupRequest
 {
-    BOOL toSave = NO;
-    switch (self.requestType) {
-        case TVSignUp:
-            // device specific settings is after successful signUp.
-        {
-            TVUser *newUser = [NSEntityDescription insertNewObjectForEntityForName:@"TVUser" inManagedObjectContext:self.ctx];
-            NSLog(@"self.ctx.registeredObjects: %lu", (unsigned long)[self.ctx.registeredObjects count]);
-            if ([dict valueForKey:@"user"]) {
-                [self setupNewDocBaseServer:newUser fromRequest:[dict valueForKey:@"user"]];
-                NSLog(@"userId: %@", newUser.serverId);
-                NSLog(@"user: %@", [dict valueForKey:@"user"]);
-                NSLog(@"tokens: %@", [dict valueForKey:@"tokens"]);
-                [self setupNewUserServer:newUser withDic:dict];
-                if ([dict valueForKey:@"tokens"]) {
-                    NSMutableDictionary *t = [dict valueForKey:@"tokens"];
-                    [self saveAccessToken:[t valueForKey:@"accessToken"] refreshToken:[t valueForKey:@"refreshToken"] toAccount:newUser.serverId];
-                    toSave = YES;
-                }
-            }
-            break;
-        }
-        case TVSignIn:
-            // A user has to sign in the first time the app is launched on a device. Internet access is needed at this time. There is no need to sign in again as long as the user does not sign out. The only situation user is blocked and promoted to sign in again is when internet is available and both tokens are not valid anymore. The principle here is that user only needs to sign in when communication with server is needed and app does not get in user's way for offline use.
-        {
-            TVUser *aUser;
-            if ([dict valueForKey:@"user"]) {
-                for (NSManagedObject *x in self.objectArray) {
-                    if ([x isKindOfClass:[TVUser class]]) {
-                        if ([[(TVUser *)x email] isEqualToString:[[dict valueForKey:@"user"] valueForKey:@"email"]]) {
-                            // TVUser exists already.
-                            aUser = (TVUser *)x;
-                            [self updateDocBaseServer:aUser withDic:[dict valueForKey:@"user"]];
-                            [self updateUser:aUser withDic:dict];
-                            break;
-                        }
-                    }
-                }
-                if (!aUser) {
-                    aUser = [NSEntityDescription insertNewObjectForEntityForName:@"TVUser" inManagedObjectContext:self.ctx];
-                    [self setupNewDocBaseServer:aUser fromRequest:[dict valueForKey:@"user"]];
-                    [self setupNewUserServer:aUser withDic:dict];
-                }
-                if ([dict valueForKey:@"tokens"]) {
-                    NSMutableDictionary *t = [dict valueForKey:@"tokens"];
-                    [self saveAccessToken:[t valueForKey:@"accessToken"] refreshToken:[t valueForKey:@"refreshToken"] toAccount:aUser.serverId];
-                    toSave = YES;
-                    // Proceed to sync immediately after signIn to get the deviceInfo and rest info.
-                }
-            }
-            break;
-        }
-        case TVForgotPassword:
-            // code 200 means email has been successfully sent by server, show user a message.
-            break;
-        case TVRenewTokens:
-            if ([dict valueForKey:@"userId"]) {
-                if ([dict valueForKey:@"tokens"]) {
-                    NSMutableDictionary *t = [dict valueForKey:@"tokens"];
-                    [self saveAccessToken:[t valueForKey:@"accessToken"] refreshToken:[t valueForKey:@"refreshToken"] toAccount:[dict valueForKey:@"userId"]];
-                    toSave = YES;
-                }
-            }
-            break;
-        case TVOneUser:
-        {
-            TVUser *aUser;
-            if ([dict valueForKey:@"user"]) {
-                NSMutableDictionary *d = [dict valueForKey:@"user"];
-                for (NSManagedObject *x in self.objectArray) {
-                    if ([x isKindOfClass:[TVUser class]]) {
-                        if ([[(TVUser *)x serverId] isEqualToString:[d valueForKey:@"_id"]]) {
-                            // TVUser exists already.
-                            aUser = (TVUser *)x;
-                            [self updateUser:aUser withDic:dict];
-                            toSave = YES;
-                            break;
-                        }
-                    }
-                }
-            }
-            break;
-        }
-        case TVNewDeviceInfo:
-        {
-            TVUser *aUser;
-            if ([dict valueForKey:@"deviceInfo"]) {
-                NSMutableDictionary *d = [dict valueForKey:@"deviceInfo"];
-                for (NSManagedObject *x in self.objectArray) {
-                    if ([x isKindOfClass:[TVUser class]]) {
-                        if ([[(TVUser *)x serverId] isEqualToString:[d valueForKey:@"belongTo"]]) {
-                            // TVUser exists already.
-                            aUser = (TVUser *)x;
-                            [self updateUser:aUser withDic:dict];
-                            NSLog(@"aUser.objectID: %@", aUser.objectID);
-                            NSLog(@"aUser: %@", aUser);
-                            toSave = YES;
-                            break;
-                        }
-                    }
-                }
-            }
-            break;
-        }
-        case TVOneDeviceInfo:
-        {
-            TVUser *aUser;
-            if ([dict valueForKey:@"deviceInfo"]) {
-                NSMutableDictionary *d = [dict valueForKey:@"deviceInfo"];
-                for (NSManagedObject *x in self.objectArray) {
-                    if ([x isKindOfClass:[TVUser class]]) {
-                        if ([[(TVUser *)x serverId] isEqualToString:[d valueForKey:@"belongTo"]]) {
-                            // TVUser exists already.
-                            aUser = (TVUser *)x;
-                            [self updateUser:aUser withDic:dict];
-                            toSave = YES;
-                            break;
-                        }
-                    }
-                }
-            }
-            break;
-        }
-        case TVEmailForActivation:
-            // code 200 means email has been successfully sent by server, show user a message.
-            break;
-        case TVEmailForPasswordResetting:
-            // code 200 means email has been successfully sent by server, show user a message.
-            break;
-        case TVNewCard:
-        {
-            TVCard *aCard;
-            if ([dict valueForKey:@"cards"]) {
-                NSMutableArray *c = [dict valueForKey:@"cards"];
-                for (NSManagedObject *x in self.objectArray) {
-                    if ([x isKindOfClass:[TVCard class]]) {
-                        aCard = (TVCard *)x;
-                        if ([c count] == 1) {
-                            [self updateDocBaseServer:aCard withDic:c[0]];
-                            [self updateCard:aCard withDic:c[0]];
-                            toSave = YES;
-                        }
-                    }
-                }
-            }
-            break;
-        }
-        case TVOneCard:
-        {
-            TVCard *xCard;
-            if ([dict valueForKey:@"cards"]) {
-                NSMutableArray *c = [dict valueForKey:@"cards"];
-                for (NSManagedObject *x in self.objectArray) {
-                    if ([x isKindOfClass:[TVCard class]]) {
-                        xCard = (TVCard *)x;
-                        if ([c count] == 1) {
-                            [self updateDocBaseServer:xCard withDic:c[0]];
-                            [self updateCard:xCard withDic:c[0]];
-                            toSave = YES;
-                        } else if ([c count] == 2) {
-                            NSMutableDictionary *aCard;
-                            if ([[c[0] valueForKey:@"serverId"] isEqualToString:xCard.serverId]) {
-                                aCard = c[0];
-                            } else {
-                                aCard = c[1];
-                            }
-                            [self updateDocBaseServer:xCard withDic:aCard];
-                            [self updateCard:xCard withDic:aCard];
-                            toSave = YES;
-                        }
-                    }
-                }
-            }
-            break;
-        }
-        case TVSync:
-        {
-            TVUser *aUser;
-            for (NSManagedObject *x in self.objectArray) {
-                if ([x isKindOfClass:[TVUser class]]) {
-                    if ([[(TVUser *)x email] isEqualToString:[[dict valueForKey:@"user"] valueForKey:@"email"]]) {
-                        // TVUser exists already.
-                        aUser = (TVUser *)x;
-                        break;
-                    }
-                }
-            }
-            [self updateDocBaseServer:aUser withDic:[dict valueForKey:@"user"]];
-            [self updateUser:aUser withDic:dict];
-            
-            if ([dict valueForKey:@"cardList"]) {
-                NSMutableArray *c = [dict valueForKey:@"cardList"];
-                if ([c count] > 0) {
-                    BOOL found = NO;
-                    for (NSMutableDictionary *x in c) {
-                        for (NSManagedObject *y in self.objectArray) {
-                            if ([[x valueForKey:@"serverId"] isEqualToString:[(TVCard *)y serverId]]) {
-                                [self updateDocBaseServer:(TVBase *)y withDic:x];
-                                [self updateCard:(TVCard *)y withDic:x];
-                                found = YES;
-                                break;
-                            }
-                        }
-                        if (found) {
-                            break;
-                        } else {
-                            TVCard *newCard = [NSEntityDescription insertNewObjectForEntityForName:@"TVCard" inManagedObjectContext:self.ctx];
-                            [self setupNewDocBaseServer:newCard fromRequest:x];
-                            [self setupNewCard:newCard withDic:x];
-                        }
-                    }
-                }
-            }
-            if ([dict valueForKey:@"cardToDelete"]) {
-                NSMutableArray *c = [dict valueForKey:@"cardToDelete"];
-                if ([c count] > 0) {
-                    for (NSString *i in c) {
-                        for (NSManagedObject *y in self.objectArray) {
-                            if ([i isEqualToString:[(TVCard *)y serverId]]) {
-                                [self.ctx deleteObject:y];
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            toSave = YES;
-            break;
-        }
-        default:
-            break;
+    self.urlBranch = [self getUrlBranchFor:self.requestType userId:self.userId deviceInfoId:self.deviceInfoId cardId:self.cardId];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[tvServerUrl stringByAppendingString:self.urlBranch]]];
+    [request setHTTPMethod:self.method];
+    if (self.contentType) {
+        [request setValue:self.contentType forHTTPHeaderField:@"Content-type"];
     }
-    NSError *err;
-    if (toSave) {
-        [self.ctx save:&err];
-//        [self printUser];
-        [self actionAfterSaveToDB];
+    if (self.body) {
+        [request setHTTPBody:self.body];
     }
-    return err;
-}
-
-- (void)actionAfterSaveToDB
-{
-    switch (self.requestType) {
-        case TVSignUp:
-            if ([self getLatestUserInDB].activated.integerValue == 1) {
-                
-            } else {
-                // Show view to ask user to activate
-                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowActivation object:self];
-            }
-            
-        case TVSignIn:
-            if ([self getLatestUserInDB].activated.integerValue == 1) {
-                
-            } else {
-                // Show view to ask user to activate
-                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowActivation object:self];
-            };
-//        case TVOneUser:
-//            if (self.box.ctlOnDuty == TVActivationCtl) {
-//                if ([self getLatestUserInDB].activated.integerValue == 1) {
-//                    [[NSNotificationCenter defaultCenter] postNotificationName:tvShowLangPick object:self];
-//                } else {
-//                    // Show message that user is still not activated
-//                }
-//            };
-//        case TVSync:
-//            if (self.box.ctlOnDuty == TVLangPickCtl) {
-//                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowAfterActivated object:self];
-//            };
-    }
-}
-
-- (TVUser *)getLatestUserInDB
-{
-    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
-    NSPredicate *pUser = [NSPredicate predicateWithFormat:@"email like %@", self.email];
-    [fetchRequest setPredicate:pUser];
-    NSArray *r = [self.managedObjectContext executeFetchRequest:fetchRequest error:nil];
-    if (r[0]) {
-        return r[0];
+    NSString *auth;
+    if (self.requestType == TVEmailForPasswordResetting) {
+        // No need to set auth here
     } else {
-        return nil;
+        if (self.isBearer) {
+            auth = [self authenticationStringWithToken:self.accessToken];
+        } else {
+            auth = [self authenticationStringWithEmail:self.email password:self.password];
+        }
+        [request setValue:auth forHTTPHeaderField:@"Authorization"];
     }
-}
-
-//- (void)printUser
-//{
-//    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
-//    NSPredicate *pUser = [NSPredicate predicateWithFormat:@"email like 'matt.z.lw@gmail.com'"];
-//    [fetchRequest setPredicate:pUser];
-//    NSArray *r = [self.managedObjectContext executeFetchRequest:fetchRequest error:nil];
-//    if (r[0]) {
-//        NSLog(@"[self.ctx objectWithID:k] count: %lu", (unsigned long)[r count]);
-//        NSLog(@"[self.ctx objectWithID:k] serverId: %@", [r[0] serverId]);
-//        NSLog(@"[self.ctx objectWithID:k]: %@", r[0]);
-//    }
-//}
-
-// Error in response is in text/plain
-- (NSString *)processResponseText:(NSURLResponse *)response data:(NSData *)data
-{
-    if ([(NSHTTPURLResponse *)response statusCode] != 200 && data.length > 0) {
-        return [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-    }
-    return nil;
-}
-
-- (void)checkServerAvailToProceed
-{
-    if (self.isUserTriggered) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:tvAddAndCheckReqNo object:self];
-    }
-    NSMutableURLRequest *testRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://www.google.com/"]];
-    [NSURLConnection sendAsynchronousRequest:testRequest queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
-     {
-         if (self.box.numberOfUserTriggeredRequests <= 0) {
-             NSLog(@"number of requests in progress not right: %ld", (long)self.box.numberOfUserTriggeredRequests);
-         }
-         NSError *err;
-         if ([(NSHTTPURLResponse *)response statusCode] == 200) {
-             TVRequester *req = [[TVRequester alloc] init];
-             // Pass all properties
-             req.fromVewTag = self.fromVewTag;
-             req.box = self.box;
-             req.urlBranch = self.urlBranch;
-             req.contentType = self.contentType;
-             req.method = self.method;
-             req.body = self.body;
-             req.email = self.email;
-             req.password = self.password;
-             req.accessToken = self.accessToken;
-             req.isBearer = self.isBearer;
-             req.internetIsOn = self.internetIsOn;
-             req.requestType = self.requestType;
-             req.userId = self.userId;
-             req.deviceInfoId = self.deviceInfoId;
-             req.deviceUuid = self.deviceUuid;
-             req.cardId = self.cardId;
-             req.objectIdArray = self.objectIdArray;
-             req.objectArray = self.objectArray;
-             req.record = self.record;
-             req.reqId = self.reqId;
-             err = [req proceedToRequest];
-         } else {
-             // For user triggered connecting attempt, show a notice to mention the unavailability of network.
-//             if (!self.indicator.indicator.isAnimating) {
-//                 [self hideIndicator];
-//             }
-//             [ctler showSysMsg:@"Network not available."];
-         }
-         if (self.isUserTriggered) {
-             [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
-         }
-     }];
+    // Setup request "X-REMOLET-DEVICE-ID" in header
+    [request setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forHTTPHeaderField:@"X-REMOLET-DEVICE-ID"];
+    return request;
 }
 
 // No batch operation so far. each time, we handle only a single step operation for one record only.
@@ -434,7 +97,6 @@
         [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
          {
              NSLog(@"response code: %li", (long)[(NSHTTPURLResponse *)response statusCode]);
-             
              if (error.code == -1004) {
                  // Error Domain=NSURLErrorDomain Code=-1004 "Could not connect to the server." https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Constants/Reference/reference.html
 //                 [ctler showSysMsg:@"Communication not successful"];
@@ -443,17 +105,13 @@
                  NSLog(@"number of requests in progress not right: %ld", (long)self.box.numberOfUserTriggeredRequests);
              }
              if ([(NSHTTPURLResponse *)response statusCode] == 200) {
-                 self.record.lastUnsyncAction = [NSNumber numberWithInteger:TVDocNoAction];
-                 if (self.reqId) {
-                     self.reqId.done = [NSNumber numberWithBool:YES];
-                 }
-                 [self.ctx save:nil];
+                 [[NSNotificationCenter defaultCenter] postNotificationName:tvMarkReqIdDone object:self];
                  if (data.length > 0) {
                      NSError *aErr;
                      NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&aErr];
                      if (!aErr) {
-                         aErr = [self processResponseJSON:dict];
                          NSLog(@"JSON of response %li: %@", (long)self.requestType, dict);
+                         
                      } else {
                          // For non-sync request, mark requestId as done, wait for the sync request to do the job. Sync returns with a body every time. So even a failure here deos not stop the next try.
                      }
@@ -475,22 +133,13 @@
     return err;
 }
 
-- (NSError *)getObjInCtx
+// Error in response is in text/plain
+- (NSString *)processResponseText:(NSURLResponse *)response data:(NSData *)data
 {
-    NSError *err;
-    if ([self.objectIdArray count] > 0) {
-        for (NSManagedObjectID *i in self.objectIdArray) {
-            NSManagedObject *x = [self.ctx existingObjectWithID:i error:&err];
-            if (err) {
-                return err;
-            }
-            if (!self.objectArray) {
-                self.objectArray = [NSMutableArray arrayWithCapacity:0];
-            }
-            [self.objectArray addObject:x];
-        }
+    if ([(NSHTTPURLResponse *)response statusCode] != 200 && data.length > 0) {
+        return [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
     }
-    return err;
+    return nil;
 }
 
 - (void)processResponseErrMsg:(NSString *)errMsg
@@ -555,34 +204,6 @@
     } else if ([errMsg isEqualToString:@"Previous change was successful or the link is expired."]) {
         // from UrlCodeChecker
     }
-}
-
-- (NSMutableURLRequest *)setupRequest
-{
-    self.urlBranch = [self getUrlBranchFor:self.requestType userId:self.userId deviceInfoId:self.deviceInfoId cardId:self.cardId];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[tvServerUrl stringByAppendingString:self.urlBranch]]];
-    [request setHTTPMethod:self.method];
-    if (self.contentType) {
-        [request setValue:self.contentType forHTTPHeaderField:@"Content-type"];
-    }
-    if (self.body) {
-        [request setHTTPBody:self.body];
-    }
-    NSString *auth;
-    if (self.requestType == TVEmailForPasswordResetting) {
-        // No need to set auth here
-    } else {
-        if (self.isBearer) {
-            auth = [self authenticationStringWithToken:self.accessToken];
-        } else {
-            auth = [self authenticationStringWithEmail:self.email password:self.password];
-        }
-        [request setValue:auth forHTTPHeaderField:@"Authorization"];
-    }
-    // Setup request "X-REMOLET-DEVICE-ID" in header
-    [request setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forHTTPHeaderField:@"X-REMOLET-DEVICE-ID"];
-    NSLog(@"X-REMOLET-DEVICE-ID: %@", [request valueForHTTPHeaderField:@"X-REMOLET-DEVICE-ID"]);
-    return request;
 }
 
 @end

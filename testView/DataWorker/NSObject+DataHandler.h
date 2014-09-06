@@ -11,6 +11,7 @@
 #import "TVUser.h"
 #import "TVCard.h"
 #import "TVRequestId.h"
+#import "TVIdCarrier.h"
 
 typedef NS_ENUM(NSInteger, TVDocEditCode) {
     TVDocNoAction,
@@ -21,7 +22,7 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 
 @interface NSObject (DataHandler)
 
-- (NSMutableArray *)getUndoneSet:(NSManagedObjectContext *)ctx user:(TVUser *)user;
+- (NSMutableArray *)getUndoneSet:(NSManagedObjectContext *)ctx userId:(NSString *)userServerId;
 
 - (void)saveAccessToken:(NSString *)aToken refreshToken:(NSString *)rToken toAccount:(NSString *)email;
 - (NSString *)getAccessTokenForAccount:(NSString *)email;
@@ -43,11 +44,19 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 - (void)deleteDocBaseLocal:(TVBase *)doc;
 - (void)deleteDocBaseServerWithServerId:(NSString *)serverId inCtx:(NSManagedObjectContext *)ctx;
 - (NSDictionary *)convertCardObjToDic:(NSManagedObject *)obj;
-- (NSArray *)refreshCards:(NSString *)userId withCtx:(NSManagedObjectContext *)ctx;
 
 - (NSInteger)getRequestIdOperationVersion:(TVBase *)base;
 
+- (TVRequestId *)analyzeOneUndone:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx;
+- (NSArray *)getCards:(NSString *)userServerId inCtx:(NSManagedObjectContext *)ctx;
+- (TVCard *)getOneCard:(NSString *)cardServerId inCtx:(NSManagedObjectContext *)ctx;
+- (NSArray *)getObjs:(NSSet *)ids name:(NSString *)entityName inCtx:(NSManagedObjectContext *)ctx;
+- (NSDictionary *)findCard:(NSString *)serverId localId:(NSString *)localId inArray:(NSArray *)array;
+
 - (BOOL)fetch:(NSFetchRequest *)r withCtx:(NSManagedObjectContext *)ctx outcome:(NSMutableArray *)outcome;
 - (BOOL)saveWithCtx:(NSManagedObjectContext *)ctx;
+
+- (TVUser *)getLoggedInUser:(NSManagedObjectContext *)ctx;
+- (NSDictionary *)getObjInCarrier:(TVIdCarrier *)ids inCtx:(NSManagedObjectContext *)ctx;
 
 @end

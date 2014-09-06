@@ -13,6 +13,7 @@
 #import "TVCard.h"
 #import "TVAppRootViewController.h"
 
+
 @implementation NSObject (NetworkHandler)
 
 #pragma mark - prepare JSON for requests
@@ -144,6 +145,18 @@
     return m;
 }
 
+#pragma mark - load to com queue
+
+- (TVQueueElement *)setupAndLoadToQueue:(NSOperationQueue *)q req:(TVRequester *)r
+{
+    TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
+        [r proceedToRequest];
+    }];
+    [q addOperation:o];
+    return o;
+}
+
+
 #pragma mark - setup request authentication
 - (NSString *)encodeStringWithBase64:(NSString *)string
 {
@@ -214,80 +227,30 @@
     return urlBranch;
 }
 
-#pragma mark - sync
+#pragma mark - check server availability
 
-// The user in sync cycle is for deviceInfo
-// When nil is returned, which indicates no requestId for next steps, we don't need to proceed further since the client has already got the message from server that the request has been successfully processed on server.
-- (TVRequestId *)analyzeOneUndone:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx
+- (void)checkServerAvail:(BOOL)isUserTriggered inQueue:(NSOperationQueue *)q flagToSet:(BOOL)flag
 {
-    NSSet *bSet = b.hasReqId;
-    NSSortDescriptor *s = [NSSortDescriptor sortDescriptorWithKey:@"operationVersion" ascending:YES];
-    NSArray *reqIds = [bSet sortedArrayUsingDescriptors:@[s]];
-    TVRequestId *x = reqIds.lastObject;
-    TVRequestId *rId;
-    // TVDocNew is only possible as the value for lastUnsyncAction when the local record has no serverId since a successful response will clear lastUnsyncAction and the later value will only be TVDocUpdated or TVDocDeleted. So No need to have lastUnsyncAction == TVDocNew checked here.
-    // lastUnsyncAction is only a reference to decide TVRequestId's type and which kind of request to send.
-    if ([b.serverId isEqualToString:@""]) {
-        // No valid serverID
-        if ([bSet count] == 0) {
-            // 1. no requestID in hasReqID
-            // No request has been generated and sent for this record. Generate a "TVDocNew" request and send. Add one requestID to the list.
-            rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:ctx];
-            [self setupNewRequestId:rId action:TVDocNew for:b];
-            if (![self saveWithCtx:ctx]) {
-                return nil;
-            }
-        } else {
-            if (x.done == [NSNumber numberWithBool:YES]) {
-                // 2. requestID in hasReqID and last one done
-                // Because we only care about the latest content of the record, only latest requestID needs to be checked. Last request has been handled by server successfully, which indicates there is an updated record for it on server already. Wait for the next sync to get that record.
-            } else {
-                // 3. requestID in hasReqID and last one undone
-                // Send request again.
-                rId = x;
-            }
-        }
-    } else {
-        // Valid serverID
-        if ([bSet count] == 0) {
-            // 1. no requestID in hasReqID
-            // Generate a request based on lastUnsyncAction and send. Add one requestID to the list.
-            rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:ctx];
-            [self setupNewRequestId:rId action:b.lastUnsyncAction.integerValue for:b];
-            if (![self saveWithCtx:ctx]) {
-                return nil;
-            }
-        } else {
-            if (x.done == [NSNumber numberWithBool:YES]) {
-                // 2. requestID in hasReqID and last one done
-                // All current status is submitted to server successfully. Nothing to do.
-            } else {
-                // 3. requestID in hasReqID and last one undone
-                // Since we only care about the latest content, so:
-                if (b.lastUnsyncAction.integerValue == TVDocUpdated) {
-                    // a. lastUnsyncAction == TVDocUpdated, which is to update, and last requestID is undone, only send update request with the last requestIDs.
-                    rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:ctx];
-                    [self setupNewRequestId:rId action:b.lastUnsyncAction.integerValue for:b];
-                    if (![self saveWithCtx:ctx]) {
-                        return nil;
-                    }
-                } else if (b.lastUnsyncAction.integerValue == TVDocDeleted) {
-                    // b. lastUnsyncAction == TVDocDeleted, which is to delete, if the last requestID is not for deletion, add one, then send delete request.
-                    if (x.editAction.integerValue != TVDocDeleted) {
-                        rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:ctx];
-                        [self setupNewRequestId:rId action:TVDocDeleted for:b];
-                        if (![self saveWithCtx:ctx]) {
-                            return nil;
-                        }
-                    } else {
-                        rId = x;
-                    }
-                }
-            }
-        }
+    // Use itIsUserTriggered as the parameter to avoid future change of self.isUserTriggered.
+    // Check indicator
+    if (isUserTriggered) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:tvAddAndCheckReqNo object:self];
     }
-    return rId;
+    NSMutableURLRequest *testRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://www.google.com/"]];
+    [NSURLConnection sendAsynchronousRequest:testRequest queue:q completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
+     {
+         if ([(NSHTTPURLResponse *)response statusCode] == 200) {
+             __block flag = YES;
+         } else {
+             __block flag = NO;
+         }
+         if (isUserTriggered) {
+             [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
+         }
+     }];
 }
+
+
 
 - (NSData *)getBody:(NSString *)reqId forRecord:(TVBase *)b err:(NSError **)err
 {

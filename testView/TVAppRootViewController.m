@@ -51,6 +51,8 @@ NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
 NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 
 NSString *const tvFetchOrSaveErr = @"tvFetchOrSaveErr";
+NSString *const tvRemoveOperation = @"tvRemoveOperation";
+NSString *const tvMarkReqIdDone = @"tvMarkReqIdDone";
 
 @interface TVAppRootViewController ()
 
@@ -157,7 +159,7 @@ NSString *const tvFetchOrSaveErr = @"tvFetchOrSaveErr";
     if (isUserTriggered) {
         r.isUserTriggered = YES;
     }
-    r.userId = self.box.user.serverId;
+    r.userId = self.box.userServerId;
     r.isBearer = YES;
     r.method = @"GET";
     r.accessToken = [self getAccessTokenForAccount:self.box.user.serverId];

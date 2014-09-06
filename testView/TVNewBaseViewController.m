@@ -11,6 +11,7 @@
 #import "TVAppRootViewController.h"
 #import "NSObject+DataHandler.h"
 #import "TVCRUDChannel.h"
+#import "TVQueueElement.h"
 
 @interface TVNewBaseViewController ()
 
@@ -113,22 +114,21 @@
 - (void)saveAsNew
 {
     if ([self checkIfTargetIsInContext]) {
-        NSBlockOperation *o = [NSBlockOperation blockOperationWithBlock:^{
+        TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
             [crud insertOneCard:[self getReadyForCard] fromServer:NO];
             if ([crud saveWithCtx:crud.ctx]) {
                 [self dismissSaveView];
             }
         }];
-        [o setQueuePriority:NSOperationQueuePriorityVeryHigh];
-        [self.box.dbWorker addOperation:o];
+        [[NSOperationQueue mainQueue] addOperation:o];
     }
 }
 
 - (void)saveAsUpdate
 {
     if ([self checkIfTargetIsInContext]) {
-        NSBlockOperation *o = [NSBlockOperation blockOperationWithBlock:^{
+        TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
             NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
             [d setObject:self.cardToUpdateServerId forKey:@"serverId"];
@@ -143,8 +143,7 @@
                 [self saveAsNew];
             }
         }];
-        [o setQueuePriority:NSOperationQueuePriorityVeryHigh];
-        [self.box.dbWorker addOperation:o];
+        [[NSOperationQueue mainQueue] addOperation:o];
     }
 }
 

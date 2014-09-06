@@ -10,6 +10,7 @@
 #import "NSObject+NetworkHandler.h"
 #import "TVRequestId.h"
 #import "TVRootViewCtlBox.h"
+#import "TVIdCarrier.h"
 
 @interface TVRequester : NSObject
 
@@ -23,25 +24,21 @@
 @property (assign, nonatomic) BOOL isBearer;
 @property (assign, nonatomic) BOOL internetIsOn;
 @property (assign, nonatomic) NSInteger requestType;
+// These four are used to setup request url.
 @property (strong, nonatomic) NSString *userId;
 @property (strong, nonatomic) NSString *deviceInfoId;
 @property (strong, nonatomic) NSString *deviceUuid;
 @property (strong, nonatomic) NSString *cardId;
 
 @property (strong, nonatomic) NSMutableArray *objectIdArray;
-@property (strong, nonatomic) NSMutableArray *objectArray;
 
 @property (assign, nonatomic) BOOL isUserTriggered;
 // Record the tag of the view that triggers the requester.
 @property (assign, nonatomic) NSInteger fromVewTag;
 
-@property (strong, nonatomic) TVBase *record;
-@property (assign, nonatomic) BOOL reqIdNeeded;
-@property (strong, nonatomic) TVRequestId *reqId;
-
 @property (strong, nonatomic) TVRootViewCtlBox *box;
+@property (strong, nonatomic) TVIdCarrier *ids;
 
 - (NSError *)proceedToRequest;
-- (void)checkServerAvailToProceed;
 
 @end

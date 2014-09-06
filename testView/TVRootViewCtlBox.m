@@ -8,6 +8,8 @@
 
 #import "TVRootViewCtlBox.h"
 #import "NSObject+DataHandler.h"
+#import "TVQueueElement.h"
+#import "TVAppRootViewController.h"
 
 @implementation TVRootViewCtlBox
 
@@ -23,13 +25,15 @@
 @synthesize labelWidth;
 @synthesize gapY;
 
-@synthesize user;
+@synthesize userServerId;
 @synthesize coordinator;
 @synthesize model;
 @synthesize indicator;
 @synthesize dbWorker;
 @synthesize comWorker;
-@synthesize com;
+@synthesize deviceInfoId;
+
+@synthesize taskArray;
 
 - (id)init
 {
@@ -43,6 +47,8 @@
         self.dbWorker = [[NSOperationQueue alloc] init];
         self.comWorker = [[NSOperationQueue alloc] init];
         self.com = [[TVCommunicator alloc] init];
+        self.taskArray = [NSMutableArray arrayWithCapacity:0];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeFromTaskArray:) name:tvRemoveOperation object:nil];
     }
     return self;
 }
@@ -52,6 +58,12 @@
     self.originX = self.appRect.size.width * 0.05f;
     self.labelWidth = self.appRect.size.width * 0.9f;
     self.gapY = 5.0f;
+}
+
+- (void)removeFromTaskArray:(NSNotification *)n
+{
+    TVQueueElement *q = (TVQueueElement *)n;
+    [self.taskArray removeObject:q];
 }
 
 @end

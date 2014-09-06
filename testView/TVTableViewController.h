@@ -14,8 +14,6 @@
 
 @property (assign, nonatomic) BOOL changeIsUserDriven;
 
-@property (strong, nonatomic) NSManagedObjectContext *ctx;
-
 @property (strong, nonatomic) TVRootViewCtlBox *box;
 
 @property (strong, nonatomic) NSFetchRequest *fetchRequest;

@@ -13,6 +13,10 @@
 #import "TVCard.h"
 #import "TVRequestId.h"
 #import "TVAppRootViewController.h"
+#import "TVQueueElement.h"
+#import "TVCRUDChannel.h"
+
+#import "TVIdPair.h"
 
 @implementation NSObject (DataHandler)
 
@@ -21,22 +25,26 @@
 // First find undone records one by one, and after all are clear, send sync request. The process can be disrupted at any time when local db changes.
 
 // Get all unsync records for further process
-- (NSMutableArray *)getUndoneSet:(NSManagedObjectContext *)ctx user:(TVUser *)user
+- (NSMutableArray *)getUndoneSet:(NSManagedObjectContext *)ctx userId:(NSString *)userServerId
 {
     NSMutableArray *r = [NSMutableArray arrayWithCapacity:0];
     NSFetchRequest *fetchUser = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
-    NSPredicate *pUser = [NSPredicate predicateWithFormat:@"serverId == %@ && lastUnsyncAction != %d", user.serverId, TVDocNoAction];
+    NSPredicate *pUser = [NSPredicate predicateWithFormat:@"serverId == %@ && lastUnsyncAction != %d", userServerId, TVDocNoAction];
     fetchUser.predicate = pUser;
     NSFetchRequest *fetchCard = [NSFetchRequest fetchRequestWithEntityName:@"TVCard"];
-    NSPredicate *pCard = [NSPredicate predicateWithFormat:@"belongToUser == %@ && lastUnsyncAction != %d", user.serverId, TVDocNoAction];
+    NSPredicate *pCard = [NSPredicate predicateWithFormat:@"belongToUser == %@ && lastUnsyncAction != %d", userServerId, TVDocNoAction];
     fetchCard.predicate = pCard;
-    NSArray *users = [ctx executeFetchRequest:fetchUser error:nil];
-    if ([users count] > 0) {
-        [r addObject:users[0]];
-    }
-    NSArray *cards = [ctx executeFetchRequest:fetchCard error:nil];
-    if ([cards count] > 0) {
-        [r addObjectsFromArray:cards];
+    NSMutableArray *r1;
+    if ([self fetch:fetchUser withCtx:ctx outcome:r1]) {
+        if ([r1 count] > 0) {
+            [r addObject:r1[0]];
+        }
+        NSMutableArray *r2;
+        if ([self fetch:fetchCard withCtx:ctx outcome:r2]) {
+            if ([r2 count] > 0) {
+                [r addObjectsFromArray:r2];
+            }
+        }
     }
     return r;
 }
@@ -54,6 +62,20 @@
     [d setValue:[obj valueForKey:@"detail"] forKey:@"detail"];
     [d setValue:[obj valueForKey:@"target"] forKey:@"target"];
     [d setValue:[obj valueForKey:@"translation"] forKey:@"translation"];
+    return d;
+}
+
+- (NSDictionary *)convertUserObjToDic:(NSManagedObject *)obj
+{
+    NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
+    [d setValue:[obj valueForKey:@"serverId"] forKey:@"serverId"];
+    [d setValue:[obj valueForKey:@"activated"] forKey:@"activated"];
+    [d setValue:[obj valueForKey:@"isSharing"] forKey:@"isSharing"];
+    [d setValue:[obj valueForKey:@"isLoggedIn"] forKey:@"isLoggedIn"];
+    [d setValue:[obj valueForKey:@"sourceLang"] forKey:@"sourceLang"];
+    [d setValue:[obj valueForKey:@"targetLang"] forKey:@"targetLang"];
+    [d setValue:[obj valueForKey:@"deviceInfoId"] forKey:@"deviceInfoId"];
+    [d setValue:[obj valueForKey:@"deviceUUID"] forKey:@"deviceUUID"];
     return d;
 }
 
@@ -208,15 +230,170 @@
     }
 }
 
-#pragma mark - user triggered save
+#pragma mark - read
 
-// Post a notification after successful save
-- (void)userSave:(NSError **)err inCtx:(NSManagedObjectContext *)ctx
+- (TVUser *)getLoggedInUser:(NSManagedObjectContext *)ctx
 {
-    [ctx save:err];
-    if (!err) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:tvUserChangedLocalDb object:self];
+    NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
+    NSMutableArray *r;
+    if ([ctx fetch:fr withCtx:ctx outcome:r]) {
+        if ([r count] != 0) {
+            for (TVUser *u in r) {
+                NSString *s = [self getRefreshTokenForAccount:u.serverId];
+                if (s.length != 0) {
+                    return u;
+                }
+            }
+        }
     }
+    return nil;
+}
+
+- (NSArray *)getCards:(NSString *)userServerId inCtx:(NSManagedObjectContext *)ctx
+{
+    NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:@"TVCard"];
+    NSPredicate *p = [NSPredicate predicateWithFormat:@"(belongToUser like %@) && !(lastUnsyncAction like TVDocDeleted)", userServerId];
+    [fr setPredicate:p];
+    NSMutableArray *r;
+    if ([self fetch:fr withCtx:ctx outcome:r]) {
+        return r;
+    }
+    return nil;
+}
+
+- (TVCard *)getOneCard:(NSString *)cardServerId inCtx:(NSManagedObjectContext *)ctx
+{
+    NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:@"TVCard"];
+    NSPredicate *p = [NSPredicate predicateWithFormat:@"serverId like %@", cardServerId];
+    [fr setPredicate:p];
+    NSMutableArray *r;
+    if ([self fetch:fr withCtx:ctx outcome:r]) {
+        return r[0];
+    }
+    return nil;
+}
+
+#pragma mark - idCarrier
+
+- (NSDictionary *)getObjInCarrier:(TVIdCarrier *)ids inCtx:(NSManagedObjectContext *)ctx
+{
+    NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
+    if (ids.userServerId.length > 0) {
+        NSFetchRequest *fr = [[NSFetchRequest alloc] initWithEntityName:@"TVUser"];
+        NSPredicate *p = [NSPredicate predicateWithFormat:@"serverId == %@", ids.userServerId];
+        [fr setPredicate:p];
+        NSMutableArray *a;
+        if ([self fetch:fr withCtx:ctx outcome:a]) {
+            if ([a count] > 0) {
+                [d setObject:a[0] forKey:@"user"];
+            }
+        }
+    }
+    if ([ids.cardIds count] > 0) {
+        NSFetchRequest *fr = [[NSFetchRequest alloc] initWithEntityName:@"TVCard"];
+        NSMutableSet *s = [NSMutableSet setWithCapacity:0];
+        [d setObject:s forKey:@"cards"];
+        for (TVIdPair *pair in ids.cardIds) {
+            if (pair.serverId.length > 0) {
+                NSPredicate *p1 = [NSPredicate predicateWithFormat:@"serverId == %@", pair.serverId];
+                [fr setPredicate:p1];
+                NSMutableArray *a1;
+                if ([self fetch:fr withCtx:ctx outcome:a1]) {
+                    if ([a1 count] > 0) {
+                        [s addObject:a1[0]];
+                        NSLog(@"s count: %lu", (unsigned long)[[d objectForKey:@"cards"] count]);
+                    }
+                }
+                if ([a1 count] == 0) {
+                    // No serverId matched before, look up with localId
+                    if (pair.localId.length > 0) {
+                        NSPredicate *p2 = [NSPredicate predicateWithFormat:@"localId == %@", pair.localId];
+                        [fr setPredicate:p2];
+                        NSMutableArray *a2;
+                        if ([self fetch:fr withCtx:ctx outcome:a2]) {
+                            if ([a2 count] > 0) {
+                                [s addObject:a2[0]];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return d;
+}
+
+#pragma mark - find a card from array
+
+// ids has NSDictionary values like this: 1. @"serverId": store the serverId 2. @"localId": store the localId
+- (NSArray *)getObjs:(NSSet *)ids name:(NSString *)entityName inCtx:(NSManagedObjectContext *)ctx
+{
+    NSMutableSet *serverIdToProcess = [NSMutableSet setWithCapacity:0];
+    NSMutableSet *localIdToProcess = [NSMutableSet setWithCapacity:0];
+    for (NSDictionary *d in ids) {
+        NSString *serverId = [d valueForKey:@"serverId"];
+        NSString *localId = [d valueForKey:@"localId"];
+        // Only add non-empty ones.
+        if (serverId.length > 0) {
+            [serverIdToProcess addObject:serverId];
+        }
+        if (localId.length > 0) {
+            [localIdToProcess addObject:localId];
+        }
+    }
+    NSFetchRequest *r = [NSFetchRequest fetchRequestWithEntityName:entityName];
+    NSPredicate *p1 = [NSPredicate predicateWithFormat:@"serverId in %@",
+                       serverIdToProcess];
+    NSPredicate *p2 = [NSPredicate predicateWithFormat:@"localId in %@",
+                       localIdToProcess];
+    [r setPredicate:p1];
+    NSMutableArray *a1;
+    if ([self fetch:r withCtx:ctx outcome:a1]) {
+        // Remove localId corresponding to serverId that has been fetched.
+        for (TVBase *b in a1) {
+            for (NSDictionary *obj in ids) {
+                NSString *serverId = [obj valueForKey:@"serverId"];
+                NSString *localId = [obj valueForKey:@"localId"];
+                if ([serverId isEqualToString:b.serverId]) {
+                    for (NSString *l in localIdToProcess) {
+                        if ([l isEqualToString:localId]) {
+                            [localIdToProcess removeObject:l];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        NSMutableArray *a2;
+        [r setPredicate:p2];
+        if ([self fetch:r withCtx:ctx outcome:a2]) {
+            [a1 addObjectsFromArray:a2];
+            return a1;
+        }
+    }
+    return nil;
+}
+
+- (NSDictionary *)findCard:(NSString *)serverId localId:(NSString *)localId inArray:(NSArray *)array
+{
+    if (serverId.length == 0) {
+        for (NSDictionary *c in array) {
+            NSString *lId = [c valueForKey:@"localId"];
+            if ([localId isEqualToString:lId]) {
+                // Same card located
+                return c;
+            }
+        }
+    } else {
+        for (NSDictionary *c in array) {
+            NSString *sId = [c valueForKey:@"serverId"];
+            if ([serverId isEqualToString:sId]) {
+                // Same card located
+                return c;
+            }
+        }
+    }
+    return nil;
 }
 
 #pragma mark - fetch & save data process
@@ -248,13 +425,82 @@
     }
 }
 
-#pragma mark - refresh cards
-- (NSArray *)refreshCards:(NSString *)userId withCtx:(NSManagedObjectContext *)ctx
+
+
+#pragma mark - sync
+
+// The user in sync cycle is for deviceInfo
+// When nil is returned, which indicates no requestId for next steps, we don't need to proceed further since the client has already got the message from server that the request has been successfully processed on server.
+- (TVRequestId *)analyzeOneUndone:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx
 {
-    NSFetchRequest *fRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVCard"];
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"belongTo like %@", userId];
-    fRequest.predicate = predicate;
-    return [ctx executeFetchRequest:fRequest error:nil];
+    NSSet *bSet = b.hasReqId;
+    NSSortDescriptor *s = [NSSortDescriptor sortDescriptorWithKey:@"operationVersion" ascending:YES];
+    NSArray *reqIds = [bSet sortedArrayUsingDescriptors:@[s]];
+    TVRequestId *x = reqIds.lastObject;
+    TVRequestId *rId;
+    // TVDocNew is only possible as the value for lastUnsyncAction when the local record has no serverId since a successful response will clear lastUnsyncAction and the later value will only be TVDocUpdated or TVDocDeleted. So No need to have lastUnsyncAction == TVDocNew checked here.
+    // lastUnsyncAction is only a reference to decide TVRequestId's type and which kind of request to send.
+    if ([b.serverId isEqualToString:@""]) {
+        // No valid serverID
+        if ([bSet count] == 0) {
+            // 1. no requestID in hasReqID
+            // No request has been generated and sent for this record. Generate a "TVDocNew" request and send. Add one requestID to the list.
+            
+            rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:ctx];
+            [self setupNewRequestId:rId action:TVDocNew for:b];
+            if (![self saveWithCtx:ctx]) {
+                return nil;
+            }
+        } else {
+            if (x.done == [NSNumber numberWithBool:YES]) {
+                // 2. requestID in hasReqID and last one done
+                // Because we only care about the latest content of the record, only latest requestID needs to be checked. Last request has been handled by server successfully, which indicates there is an updated record for it on server already. Wait for the next sync to get that record.
+            } else {
+                // 3. requestID in hasReqID and last one undone
+                // Send request again.
+                rId = x;
+            }
+        }
+    } else {
+        // Valid serverID
+        if ([bSet count] == 0) {
+            // 1. no requestID in hasReqID
+            // Generate a request based on lastUnsyncAction and send. Add one requestID to the list.
+            rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:ctx];
+            [self setupNewRequestId:rId action:b.lastUnsyncAction.integerValue for:b];
+            if (![self saveWithCtx:ctx]) {
+                return nil;
+            }
+        } else {
+            if (x.done == [NSNumber numberWithBool:YES]) {
+                // 2. requestID in hasReqID and last one done
+                // All current status is submitted to server successfully. Nothing to do.
+            } else {
+                // 3. requestID in hasReqID and last one undone
+                // Since we only care about the latest content, so:
+                if (b.lastUnsyncAction.integerValue == TVDocUpdated) {
+                    // a. lastUnsyncAction == TVDocUpdated, which is to update, and last requestID is undone, only send update request with the last requestIDs.
+                    rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:ctx];
+                    [self setupNewRequestId:rId action:b.lastUnsyncAction.integerValue for:b];
+                    if (![self saveWithCtx:ctx]) {
+                        return nil;
+                    }
+                } else if (b.lastUnsyncAction.integerValue == TVDocDeleted) {
+                    // b. lastUnsyncAction == TVDocDeleted, which is to delete, if the last requestID is not for deletion, add one, then send delete request.
+                    if (x.editAction.integerValue != TVDocDeleted) {
+                        rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:ctx];
+                        [self setupNewRequestId:rId action:TVDocDeleted for:b];
+                        if (![self saveWithCtx:ctx]) {
+                            return nil;
+                        }
+                    } else {
+                        rId = x;
+                    }
+                }
+            }
+        }
+    }
+    return rId;
 }
 
 #pragma mark - requestID related process

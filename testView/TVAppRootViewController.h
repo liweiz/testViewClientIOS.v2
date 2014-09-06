@@ -13,7 +13,7 @@
 #import "KeychainItemWrapper.h"
 #import "TVLangPickViewController.h"
 #import "TVActivationViewController.h"
-#import "TVCommunicator.h"
+
 #import "TVRootViewCtlBox.h"
 #import "TVContentRootViewController.h"
 
@@ -75,6 +75,9 @@ extern NSString *const tvDismissSaveViewOnly;
 extern NSString *const tvHideExpandedCard;
 
 extern NSString *const tvFetchOrSaveErr;
+extern NSString *const tvRemoveOperation;
+
+extern NSString *const tvMarkReqIdDone;
 
 @interface TVAppRootViewController : UIViewController
 
