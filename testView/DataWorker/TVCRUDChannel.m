@@ -267,24 +267,10 @@
     }
 }
 
-#pragma mark - load to main queue
-
-- (TVQueueElement *)setupAndLoadDataProcess:(NSMutableDictionary *)dict reqType:(NSInteger)t objArray:(NSArray *)a
-{
-    TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
-        TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-        if (![crud processResponseJSON:dict reqType:t objArray:a]) {
-            // Process unsuccessful
-        }
-    }];
-    [[NSOperationQueue mainQueue] addOperation:o];
-    return o;
-}
-
 #pragma mark - process response
 
 // Only successful request leads to response with
-- (BOOL)processResponseJSON:(NSMutableDictionary *)dict reqType:(NSInteger)t objArray:(NSArray *)a
+- (BOOL)processResponseJSON:(NSMutableDictionary *)dict reqType:(NSInteger)t objDic:(NSDictionary *)od
 {
     BOOL toSave = NO;
     switch (t) {
@@ -306,27 +292,22 @@
         case TVSignIn:
             // A user has to sign in the first time the app is launched on a device. Internet access is needed at this time. There is no need to sign in again as long as the user does not sign out. The only situation user is blocked and promoted to sign in again is when internet is available and both tokens are not valid anymore. The principle here is that user only needs to sign in when communication with server is needed and app does not get in user's way for offline use.
         {
-            TVUser *aUser;
             if ([dict valueForKey:@"user"]) {
-                for (NSManagedObject *x in a) {
-                    if ([x isKindOfClass:[TVUser class]]) {
-                        if ([[(TVUser *)x email] isEqualToString:[[dict valueForKey:@"user"] valueForKey:@"email"]]) {
-                            // TVUser exists already.
-                            aUser = (TVUser *)x;
-                            [self updateDocBaseServer:aUser withDic:[dict valueForKey:@"user"]];
-                            [self updateUser:aUser withDic:dict];
-                            break;
-                        }
-                    }
+                TVUser *u = [od valueForKey:@"user"];
+                if ([u.email isEqualToString:[[dict valueForKey:@"user"] valueForKey:@"email"]]) {
+                    // TVUser exists already.
+                    [self updateDocBaseServer:u withDic:[dict valueForKey:@"user"]];
+                    [self updateUser:u withDic:dict];
+                    break;
                 }
-                if (!aUser) {
-                    aUser = [NSEntityDescription insertNewObjectForEntityForName:@"TVUser" inManagedObjectContext:self.ctx];
-                    [self setupNewDocBaseServer:aUser fromRequest:[dict valueForKey:@"user"]];
-                    [self setupNewUserServer:aUser withDic:dict];
+                if (!u) {
+                    u = [NSEntityDescription insertNewObjectForEntityForName:@"TVUser" inManagedObjectContext:self.ctx];
+                    [self setupNewDocBaseServer:u fromRequest:[dict valueForKey:@"user"]];
+                    [self setupNewUserServer:u withDic:dict];
                 }
                 if ([dict valueForKey:@"tokens"]) {
                     NSMutableDictionary *t = [dict valueForKey:@"tokens"];
-                    [self saveAccessToken:[t valueForKey:@"accessToken"] refreshToken:[t valueForKey:@"refreshToken"] toAccount:aUser.serverId];
+                    [self saveAccessToken:[t valueForKey:@"accessToken"] refreshToken:[t valueForKey:@"refreshToken"] toAccount:u.serverId];
                     toSave = YES;
                     // Proceed to sync immediately after signIn to get the deviceInfo and rest info.
                 }
@@ -347,59 +328,42 @@
             break;
         case TVOneUser:
         {
-            TVUser *aUser;
+            TVUser *u = [od valueForKey:@"user"];
             if ([dict valueForKey:@"user"]) {
                 NSMutableDictionary *d = [dict valueForKey:@"user"];
-                for (NSManagedObject *x in a) {
-                    if ([x isKindOfClass:[TVUser class]]) {
-                        if ([[(TVUser *)x serverId] isEqualToString:[d valueForKey:@"_id"]]) {
-                            // TVUser exists already.
-                            aUser = (TVUser *)x;
-                            [self updateUser:aUser withDic:dict];
-                            toSave = YES;
-                            break;
-                        }
-                    }
+                if ([u.serverId isEqualToString:[d valueForKey:@"_id"]]) {
+                    // TVUser exists already.
+                    [self updateUser:u withDic:dict];
+                    toSave = YES;
+                    break;
                 }
             }
             break;
         }
         case TVNewDeviceInfo:
         {
-            TVUser *aUser;
+            TVUser *u = [od valueForKey:@"user"];
             if ([dict valueForKey:@"deviceInfo"]) {
                 NSMutableDictionary *d = [dict valueForKey:@"deviceInfo"];
-                for (NSManagedObject *x in a) {
-                    if ([x isKindOfClass:[TVUser class]]) {
-                        if ([[(TVUser *)x serverId] isEqualToString:[d valueForKey:@"belongTo"]]) {
-                            // TVUser exists already.
-                            aUser = (TVUser *)x;
-                            [self updateUser:aUser withDic:dict];
-                            NSLog(@"aUser.objectID: %@", aUser.objectID);
-                            NSLog(@"aUser: %@", aUser);
-                            toSave = YES;
-                            break;
-                        }
-                    }
+                if ([u.serverId isEqualToString:[d valueForKey:@"belongTo"]]) {
+                    // TVUser exists already.
+                    [self updateUser:u withDic:dict];
+                    toSave = YES;
+                    break;
                 }
             }
             break;
         }
         case TVOneDeviceInfo:
         {
-            TVUser *aUser;
+            TVUser *u = [od valueForKey:@"user"];
             if ([dict valueForKey:@"deviceInfo"]) {
                 NSMutableDictionary *d = [dict valueForKey:@"deviceInfo"];
-                for (NSManagedObject *x in a) {
-                    if ([x isKindOfClass:[TVUser class]]) {
-                        if ([[(TVUser *)x serverId] isEqualToString:[d valueForKey:@"belongTo"]]) {
-                            // TVUser exists already.
-                            aUser = (TVUser *)x;
-                            [self updateUser:aUser withDic:dict];
-                            toSave = YES;
-                            break;
-                        }
-                    }
+                if ([u.serverId isEqualToString:[d valueForKey:@"belongTo"]]) {
+                    // TVUser exists already.
+                    [self updateUser:u withDic:dict];
+                    toSave = YES;
+                    break;
                 }
             }
             break;
@@ -412,74 +376,61 @@
             break;
         case TVNewCard:
         {
-            TVCard *aCard;
+            NSSet *s = [od valueForKey:@"cards"];
             if ([dict valueForKey:@"cards"]) {
                 NSMutableArray *c = [dict valueForKey:@"cards"];
-                for (NSManagedObject *x in a) {
-                    if ([x isKindOfClass:[TVCard class]]) {
-                        aCard = (TVCard *)x;
-                        if ([c count] == 1) {
-                            [self updateDocBaseServer:aCard withDic:c[0]];
-                            [self updateCard:aCard withDic:c[0]];
-                            toSave = YES;
-                        }
-                    }
+                if ([s count] == 1) {
+                    TVCard *aCard = [s anyObject];
+                    [self updateDocBaseServer:aCard withDic:c[0]];
+                    [self updateCard:aCard withDic:c[0]];
+                    toSave = YES;
                 }
             }
             break;
         }
         case TVOneCard:
         {
-            TVCard *xCard;
+            NSSet *s = [od valueForKey:@"cards"];
             if ([dict valueForKey:@"cards"]) {
                 NSMutableArray *c = [dict valueForKey:@"cards"];
-                for (NSManagedObject *x in a) {
-                    if ([x isKindOfClass:[TVCard class]]) {
-                        xCard = (TVCard *)x;
-                        if ([c count] == 1) {
-                            [self updateDocBaseServer:xCard withDic:c[0]];
-                            [self updateCard:xCard withDic:c[0]];
-                            toSave = YES;
-                        } else if ([c count] == 2) {
-                            NSMutableDictionary *aCard;
-                            if ([[c[0] valueForKey:@"serverId"] isEqualToString:xCard.serverId]) {
-                                aCard = c[0];
-                            } else {
-                                aCard = c[1];
-                            }
-                            [self updateDocBaseServer:xCard withDic:aCard];
-                            [self updateCard:xCard withDic:aCard];
-                            toSave = YES;
-                        }
+                TVCard *aCard = [s anyObject];
+                if ([c count] == 1) {
+                    [self updateDocBaseServer:aCard withDic:c[0]];
+                    [self updateCard:aCard withDic:c[0]];
+                    toSave = YES;
+                } else if ([c count] == 2) {
+                    NSMutableDictionary *dCard;
+                    if ([[c[0] valueForKey:@"serverId"] isEqualToString:aCard.serverId]) {
+                        dCard = c[0];
+                    } else {
+                        dCard = c[1];
                     }
+                    [self updateDocBaseServer:aCard withDic:dCard];
+                    [self updateCard:aCard withDic:dCard];
+                    toSave = YES;
                 }
             }
             break;
         }
         case TVSync:
         {
-            TVUser *aUser;
-            for (NSManagedObject *x in a) {
-                if ([x isKindOfClass:[TVUser class]]) {
-                    if ([[(TVUser *)x email] isEqualToString:[[dict valueForKey:@"user"] valueForKey:@"email"]]) {
-                        // TVUser exists already.
-                        aUser = (TVUser *)x;
-                        break;
-                    }
-                }
+            TVUser *u = [od valueForKey:@"user"];
+            NSSet *cards = [od valueForKey:@"cards"];
+            if (![u.email isEqualToString:[[dict valueForKey:@"user"] valueForKey:@"email"]]) {
+                break;
             }
-            [self updateDocBaseServer:aUser withDic:[dict valueForKey:@"user"]];
-            [self updateUser:aUser withDic:dict];
+            [self updateDocBaseServer:u withDic:[dict valueForKey:@"user"]];
+            [self updateUser:u withDic:dict];
             
             if ([dict valueForKey:@"cardList"]) {
                 NSMutableArray *c = [dict valueForKey:@"cardList"];
                 if ([c count] > 0) {
                     BOOL found = NO;
                     for (NSMutableDictionary *x in c) {
-                        for (NSManagedObject *y in a) {
-                            if ([[x valueForKey:@"serverId"] isEqualToString:[(TVCard *)y serverId]]) {
-                                [self updateDocBaseServer:(TVBase *)y withDic:x];
-                                [self updateCard:(TVCard *)y withDic:x];
+                        for (TVCard *y in cards) {
+                            if ([[x valueForKey:@"serverId"] isEqualToString:y.serverId]) {
+                                [self updateDocBaseServer:y withDic:x];
+                                [self updateCard:y withDic:x];
                                 found = YES;
                                 break;
                             }
@@ -498,8 +449,8 @@
                 NSMutableArray *c = [dict valueForKey:@"cardToDelete"];
                 if ([c count] > 0) {
                     for (NSString *i in c) {
-                        for (NSManagedObject *y in a) {
-                            if ([i isEqualToString:[(TVCard *)y serverId]]) {
+                        for (TVCard *y in cards) {
+                            if ([i isEqualToString:y.serverId]) {
                                 [self.ctx deleteObject:y];
                                 break;
                             }

@@ -80,57 +80,61 @@
 }
 
 // No batch operation so far. each time, we handle only a single step operation for one record only.
-- (NSError *)proceedToRequest
+- (void)proceedToRequest
 {
     if (self.isUserTriggered) {
         self.box.numberOfUserTriggeredRequests = self.box.numberOfUserTriggeredRequests + 1;
     }
-    NSError *err;
-    err = [self getObjInCtx];
-    if (!err) {
-        // Setup request and send
-        NSMutableURLRequest *request = [self setupRequest];
-        // Start the indicator if it is not showing.
-        if (self.isUserTriggered) {
-            [[NSNotificationCenter defaultCenter] postNotificationName:tvAddAndCheckReqNo object:self];
-        }
-        [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
-         {
-             NSLog(@"response code: %li", (long)[(NSHTTPURLResponse *)response statusCode]);
-             if (error.code == -1004) {
-                 // Error Domain=NSURLErrorDomain Code=-1004 "Could not connect to the server." https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Constants/Reference/reference.html
-//                 [ctler showSysMsg:@"Communication not successful"];
-             }
-             if (self.box.numberOfUserTriggeredRequests <= 0) {
-                 NSLog(@"number of requests in progress not right: %ld", (long)self.box.numberOfUserTriggeredRequests);
-             }
-             if ([(NSHTTPURLResponse *)response statusCode] == 200) {
-                 [[NSNotificationCenter defaultCenter] postNotificationName:tvMarkReqIdDone object:self];
-                 if (data.length > 0) {
-                     NSError *aErr;
-                     NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&aErr];
-                     if (!aErr) {
-                         NSLog(@"JSON of response %li: %@", (long)self.requestType, dict);
-                         
-                     } else {
-                         // For non-sync request, mark requestId as done, wait for the sync request to do the job. Sync returns with a body every time. So even a failure here deos not stop the next try.
-                     }
+    // Setup request and send
+    NSMutableURLRequest *request = [self setupRequest];
+    // Start the indicator if it is not showing.
+    if (self.isUserTriggered) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:tvAddAndCheckReqNo object:self];
+    }
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
+     {
+         NSLog(@"response code: %li", (long)[(NSHTTPURLResponse *)response statusCode]);
+         if (error.code == -1004) {
+             // Error Domain=NSURLErrorDomain Code=-1004 "Could not connect to the server." https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Constants/Reference/reference.html
+             //                 [ctler showSysMsg:@"Communication not successful"];
+         }
+         if (self.box.numberOfUserTriggeredRequests <= 0) {
+             NSLog(@"number of requests in progress not right: %ld", (long)self.box.numberOfUserTriggeredRequests);
+         }
+         if ([(NSHTTPURLResponse *)response statusCode] == 200) {
+             [[NSNotificationCenter defaultCenter] postNotificationName:tvMarkReqIdDone object:self];
+             if (data.length > 0) {
+                 NSError *aErr;
+                 NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&aErr];
+                 if (!aErr) {
+                     NSLog(@"JSON of response %li: %@", (long)self.requestType, dict);
+                     TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
+                         TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
+                         NSDictionary *d = [crud getObjInCarrier:self.ids inCtx:crud.ctx];
+                         if (![crud processResponseJSON:dict reqType:self.requestType objDic:d]) {
+                             // Process unsuccessful
+                             // WHAT'S NEXT????????????
+                         }
+                     }];
+                     [o setQueuePriority:NSOperationQueuePriorityVeryLow];
+                     [[NSOperationQueue mainQueue] addOperation:o];
                  } else {
-                     // Request has been successfully processed on server previously. Set related requestId to done.
-                     // Post notification to let others react.
-                     [[NSNotificationCenter defaultCenter] postNotificationName:@"TVRequestOKOnly" object:self];
+                     // For non-sync request, mark requestId as done, wait for the sync request to do the job. Sync returns with a body every time. So even a failure here deos not stop the next try.
                  }
              } else {
-                 NSString *errMsg = [self processResponseText:response data:data];
-                 // Need a module to handle unsuccessful requests.
-                 [self processResponseErrMsg:errMsg];
+                 // Request has been successfully processed on server previously. Set related requestId to done.
+                 // Post notification to let others react.
+                 [[NSNotificationCenter defaultCenter] postNotificationName:@"TVRequestOKOnly" object:self];
              }
-             if (self.isUserTriggered) {
-                 [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
-             }
-         }];
-    }
-    return err;
+         } else {
+             NSString *errMsg = [self processResponseText:response data:data];
+             // Need a module to handle unsuccessful requests.
+             [self processResponseErrMsg:errMsg];
+         }
+         if (self.isUserTriggered) {
+             [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
+         }
+     }];
 }
 
 // Error in response is in text/plain

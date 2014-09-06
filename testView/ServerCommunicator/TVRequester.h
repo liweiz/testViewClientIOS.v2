@@ -39,6 +39,6 @@
 @property (strong, nonatomic) TVRootViewCtlBox *box;
 @property (strong, nonatomic) TVIdCarrier *ids;
 
-- (NSError *)proceedToRequest;
+- (void)proceedToRequest;
 
 @end

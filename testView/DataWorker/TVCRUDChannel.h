@@ -29,7 +29,7 @@
 - (void)updateOneCard:(TVCard *)cardToUpdate by:(NSDictionary *)card fromServer:(BOOL)isFromServer;
 - (void)updateOneUserd:(TVUser *)userToUpdate by:(NSDictionary *)user fromServer:(BOOL)isFromServer;
 - (void)deleteOneCard:(TVCard *)cardToDelete fromServer:(BOOL)isFromServer;
-- (BOOL)processResponseJSON:(NSMutableDictionary *)dict reqType:(NSInteger)t objArray:(NSArray *)a;
+- (BOOL)processResponseJSON:(NSMutableDictionary *)dict reqType:(NSInteger)t objDic:(NSDictionary *)od;
 - (void)signOut;
 
 
