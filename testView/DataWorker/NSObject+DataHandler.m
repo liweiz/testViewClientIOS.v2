@@ -11,7 +11,7 @@
 #import "TVBase.h"
 #import "TVUser.h"
 #import "TVCard.h"
-#import "TVRequestId.h"
+#import "TVRequestIdCandidate.h"
 #import "TVAppRootViewController.h"
 #import "TVQueueElement.h"
 #import "TVCRUDChannel.h"
@@ -85,7 +85,7 @@
 {
     doc.serverId = @"";
     doc.localId = [[NSUUID UUID] UUIDString];
-    doc.lastUnsyncAction = [NSNumber numberWithInteger:TVDocNew];
+    doc.locallyDeleted = [NSNumber numberWithBool:NO];
     doc.lastModifiedAtLocal = [NSDate date];
 }
 
@@ -93,7 +93,7 @@
 - (void)setupNewDocBaseServer:(TVBase *)doc fromRequest:(NSDictionary *)dicInside
 {
     doc.serverId = [dicInside valueForKey:@"_id"];
-    doc.lastUnsyncAction = [NSNumber numberWithInteger:TVDocNoAction];
+    doc.locallyDeleted = [NSNumber numberWithBool:NO];
     if ([dicInside valueForKey:@"lastModified"]) {
         doc.lastModifiedAtServer = [dicInside valueForKey:@"lastModified"];
     }
@@ -133,26 +133,31 @@
     card.targetLang = [dic valueForKey:@"targetLang"];
 }
 
-- (void)setupNewRequestId:(TVRequestId *)doc action:(NSInteger)a for:(TVBase *)base
+- (void)setupNewRequestIdCandidate:(TVRequestIdCandidate *)doc action:(NSInteger)a for:(TVBase *)base
 {
     doc.editAction = [NSNumber numberWithInteger:a];
     doc.requestId = [[NSUUID UUID] UUIDString];
     doc.done = [NSNumber numberWithBool:NO];
     doc.createdAtLocal = [NSDate date];
     doc.lastModifiedAtLocal = [NSDate date];
-    doc.operationVersion = [NSNumber numberWithInteger:[self getRequestIdOperationVersion:base]];
+    doc.operationVersion = [NSNumber numberWithInteger:[self getRequestIdCandidateOperationVersion:base]];
+    doc.belongTo = base;
 }
 
 #pragma - mark update
 
 - (void)updateDocBaseLocal:(TVBase *)doc
 {
-    // requestID is not processed here
-    doc.lastUnsyncAction = [NSNumber numberWithInteger:TVDocUpdated];
     doc.lastModifiedAtLocal = [NSDate date];
 }
 
-- (void)markRequestIdAsDone:(TVRequestId *)reqId
+- (void)generateRequestInfoForRequestIdCandidate:(TVRequestIdCandidate *)doc
+{
+    doc.requestId = [[NSUUID UUID] UUIDString];
+    doc.lastModifiedAtLocal = [NSDate date];
+}
+
+- (void)markRequestIdAsDone:(TVRequestIdCandidate *)reqId
 {
     // change in requestID does not change time modified
     reqId.done = [NSNumber numberWithBool:YES];
@@ -214,7 +219,7 @@
 - (void)deleteDocBaseLocal:(TVBase *)doc
 {
     // requestID is not processed here
-    doc.lastUnsyncAction = [NSNumber numberWithInteger:TVDocDeleted];
+    doc.locallyDeleted = [NSNumber numberWithBool:YES];
     doc.lastModifiedAtLocal = [NSDate date];
 }
 
@@ -252,7 +257,7 @@
 - (NSArray *)getCards:(NSString *)userServerId inCtx:(NSManagedObjectContext *)ctx
 {
     NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:@"TVCard"];
-    NSPredicate *p = [NSPredicate predicateWithFormat:@"(belongToUser like %@) && !(lastUnsyncAction like TVDocDeleted)", userServerId];
+    NSPredicate *p = [NSPredicate predicateWithFormat:@"(belongToUser like %@) && !(locallyDeleted like NO)", userServerId];
     [fr setPredicate:p];
     NSMutableArray *r;
     if ([self fetch:fr withCtx:ctx outcome:r]) {
@@ -430,98 +435,101 @@
 #pragma mark - sync
 
 // The user in sync cycle is for deviceInfo
-// When nil is returned, which indicates no requestId for next steps, we don't need to proceed further since the client has already got the message from server that the request has been successfully processed on server.
-- (TVRequestId *)analyzeOneUndone:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx
+/*
+ We have to fulfill two goals:
+ A. push latest local content change to server.
+ B. get most updated content from server after all.
+ 
+ For A, we need:
+ (1) the specific type of crud operation to generate correct url.
+ (2) a way to find out which records to be pushed to server.
+ (3) something to record each request's completion status.
+ For (1) keep all the operations for a record in an array.
+ For (2) add a flag to each record.
+ For (3) create an obj for each request to record the completion status.
+ 
+ Regarding (2) above, due to the async nature of push operation, there could be new operation done to the local record after the request for previous change is sent. The 200 response can only indicates previous operation is pushed, not that there is nothing to push to server for this record now. So a straightforward flag may not be the simple answer to this. An easy way is to append the request info in the array as well. Because a request is specificly corresponding to a crud operation, it's better to have crud operation and request info in on objin the array. Thus, (3) is fulfilled,too.
+ Based on the reasons above, we create TVRequestIdCandidate as the element for the array. A TVRequestIdCandidate contains: (a) the info of crud operation type (b) a flag to mark a request is done if needed, which is marked done when 200 response is received. (c) the requestId to identify any potential request both on client and server (d) operationVersion to store the order number to indicate the sequence of each element to form the array. A non-nil requestId indicates it's an element having corresponding request sent.
+ 
+ 
+ When nil is returned, which indicates no requestId for next steps, we don't need to proceed further since the client has already got the message from server that the request has been successfully processed on server.
+*/
+- (TVRequestIdCandidate *)analyzeOneRecord:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx serverIsAvailable:(BOOL)isAvail
 {
-    NSSet *bSet = b.hasReqId;
-    NSSortDescriptor *s = [NSSortDescriptor sortDescriptorWithKey:@"operationVersion" ascending:YES];
-    NSArray *reqIds = [bSet sortedArrayUsingDescriptors:@[s]];
-    TVRequestId *x = reqIds.lastObject;
-    TVRequestId *rId;
-    // TVDocNew is only possible as the value for lastUnsyncAction when the local record has no serverId since a successful response will clear lastUnsyncAction and the later value will only be TVDocUpdated or TVDocDeleted. So No need to have lastUnsyncAction == TVDocNew checked here.
-    // lastUnsyncAction is only a reference to decide TVRequestId's type and which kind of request to send.
-    if ([b.serverId isEqualToString:@""]) {
-        // No valid serverID
-        if ([bSet count] == 0) {
-            // 1. no requestID in hasReqID
-            // No request has been generated and sent for this record. Generate a "TVDocNew" request and send. Add one requestID to the list.
-            
-            rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:ctx];
-            [self setupNewRequestId:rId action:TVDocNew for:b];
-            if (![self saveWithCtx:ctx]) {
-                return nil;
-            }
-        } else {
-            if (x.done == [NSNumber numberWithBool:YES]) {
-                // 2. requestID in hasReqID and last one done
-                // Because we only care about the latest content of the record, only latest requestID needs to be checked. Last request has been handled by server successfully, which indicates there is an updated record for it on server already. Wait for the next sync to get that record.
-            } else {
-                // 3. requestID in hasReqID and last one undone
-                // Send request again.
-                rId = x;
-            }
-        }
+    // Get array with descending order to loop from the last obj.
+    NSMutableArray *ids = [self getRequestIdCandidatesForRecord:b ascending:NO];
+    if ([ids count] == 0) {
+        // No local operation for this record, pass.
+        return nil;
     } else {
-        // Valid serverID
-        if ([bSet count] == 0) {
-            // 1. no requestID in hasReqID
-            // Generate a request based on lastUnsyncAction and send. Add one requestID to the list.
-            rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:ctx];
-            [self setupNewRequestId:rId action:b.lastUnsyncAction.integerValue for:b];
-            if (![self saveWithCtx:ctx]) {
-                return nil;
-            }
-        } else {
-            if (x.done == [NSNumber numberWithBool:YES]) {
-                // 2. requestID in hasReqID and last one done
-                // All current status is submitted to server successfully. Nothing to do.
-            } else {
-                // 3. requestID in hasReqID and last one undone
-                // Since we only care about the latest content, so:
-                if (b.lastUnsyncAction.integerValue == TVDocUpdated) {
-                    // a. lastUnsyncAction == TVDocUpdated, which is to update, and last requestID is undone, only send update request with the last requestIDs.
-                    rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:ctx];
-                    [self setupNewRequestId:rId action:b.lastUnsyncAction.integerValue for:b];
-                    if (![self saveWithCtx:ctx]) {
-                        return nil;
-                    }
-                } else if (b.lastUnsyncAction.integerValue == TVDocDeleted) {
-                    // b. lastUnsyncAction == TVDocDeleted, which is to delete, if the last requestID is not for deletion, add one, then send delete request.
-                    if (x.editAction.integerValue != TVDocDeleted) {
-                        rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:ctx];
-                        [self setupNewRequestId:rId action:TVDocDeleted for:b];
-                        if (![self saveWithCtx:ctx]) {
-                            return nil;
-                        }
-                    } else {
-                        rId = x;
-                    }
+        // Check last obj first
+        TVRequestIdCandidate *lastObj = ids[0];
+        if (lastObj.requestId.length == 0) {
+            // Lastest operation not being pushed before, push it now if server is available
+            if (isAvail) {
+                [self generateRequestInfoForRequestIdCandidate:lastObj];
+                if ([self saveWithCtx:ctx]) {
+                    return lastObj;
                 }
+            }
+            // Not able to proceed, wait for next time to retry
+            return nil;
+        } else {
+            // Lastest operation has been pushed
+            if (lastObj.done) {
+                // Successfully pushed
+                return nil;
+            } else {
+                // Push again
+                return lastObj;
             }
         }
     }
-    return rId;
 }
 
-#pragma mark - requestID related process
-- (NSInteger)getRequestIdOperationVersion:(TVBase *)base
+#pragma mark - requestIdCandidate related process
+- (TVRequestIdCandidate *)findReqCandidate:(TVBase *)b byReqId:(NSString *)reqId
 {
-    if ([base.hasReqId count] == 0) {
+    NSArray *a = [self getRequestIdCandidatesForRecord:b ascending:NO];
+    for (TVRequestIdCandidate *c in a) {
+        if (c.requestId.length > 0) {
+            if ([reqId isEqualToString:c.requestId]) {
+                return c;
+            }
+        }
+    }
+    return nil;
+}
+
+- (NSInteger)getRequestIdCandidateOperationVersion:(TVBase *)base
+{
+    if ([base.hasReqIdCandidate count] == 0) {
+        // operationVersion starts from 1.
         return 1;
     } else {
         NSSortDescriptor *s = [NSSortDescriptor sortDescriptorWithKey:@"operationVersion" ascending:YES];
-        return [[[base.hasReqId sortedArrayUsingDescriptors:@[s]].lastObject operationVersion] integerValue] + 1;
+        return [[[base.hasReqIdCandidate sortedArrayUsingDescriptors:@[s]].lastObject operationVersion] integerValue] + 1;
     }
 }
 
-- (BOOL)dismissChangeToDBRecord:(TVBase *)base requestIdObj:(TVRequestId *)d
+- (NSMutableArray *)getRequestIdCandidatesForRecord:(TVBase *)b ascending:(BOOL)ascending
+{
+    NSSet *bSet = b.hasReqIdCandidate;
+    NSSortDescriptor *s = [NSSortDescriptor sortDescriptorWithKey:@"operationVersion" ascending:ascending];
+    NSArray *reqIds = [bSet sortedArrayUsingDescriptors:@[s]];
+    NSMutableArray *a = [[NSMutableArray alloc] init];
+    [a addObjectsFromArray:reqIds];
+    return a;
+}
+
+- (BOOL)dismissChangeToDBRecord:(TVBase *)base requestIdObj:(TVRequestIdCandidate *)d
 {
     // For given record in local db base, check response for request identified by d if the change should be dismissed.
     NSSortDescriptor *s = [NSSortDescriptor sortDescriptorWithKey:@"operationVersion" ascending:NO];
-    NSArray *a = [base.hasReqId sortedArrayUsingDescriptors:@[s]];
+    NSArray *a = [base.hasReqIdCandidate sortedArrayUsingDescriptors:@[s]];
     NSInteger i = [a indexOfObject:d];
     NSInteger j = [a indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-        if ([[(TVRequestId *)obj done] boolValue] == YES) {
+        if ([[(TVRequestIdCandidate *)obj done] boolValue] == YES) {
             return YES;
         }
         return NO;

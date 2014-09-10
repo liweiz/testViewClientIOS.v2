@@ -34,6 +34,8 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (assign, nonatomic) CGFloat labelWidth;
 @property (assign, nonatomic) CGFloat gapY;
 
+@property (assign, nonatomic) BOOL serverIsAvailable;
+
 @property (strong, nonatomic) NSString *userServerId;
 @property (strong, nonatomic) NSString *deviceInfoId;
 @property (strong, nonatomic) NSPersistentStoreCoordinator *coordinator;

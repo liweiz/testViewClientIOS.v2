@@ -2,22 +2,22 @@
 //  TVBase.m
 //  testView
 //
-//  Created by Liwei on 2014-05-17.
+//  Created by Liwei Zhang on 2014-09-08.
 //  Copyright (c) 2014 Liwei. All rights reserved.
 //
 
 #import "TVBase.h"
-#import "TVRequestId.h"
+#import "TVRequestIdCandidate.h"
 
 
 @implementation TVBase
 
 @dynamic lastModifiedAtLocal;
 @dynamic lastModifiedAtServer;
-@dynamic lastUnsyncAction;
 @dynamic localId;
+@dynamic locallyDeleted;
 @dynamic serverId;
 @dynamic versionNo;
-@dynamic hasReqId;
+@dynamic hasReqIdCandidate;
 
 @end

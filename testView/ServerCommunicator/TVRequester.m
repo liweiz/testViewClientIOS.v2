@@ -13,7 +13,7 @@
 #import "TVBase.h"
 #import "TVUser.h"
 #import "TVCard.h"
-#import "TVRequestId.h"
+#import "TVRequestIdCandidate.h"
 #import "TVCRUDChannel.h"
 #import "TVQueueElement.h"
 
@@ -33,7 +33,7 @@
 @synthesize deviceUuid;
 @synthesize cardId;
 @synthesize internetIsOn;
-
+@synthesize reqId;
 @synthesize objectIdArray;
 
 @synthesize isUserTriggered;
@@ -102,24 +102,36 @@
              NSLog(@"number of requests in progress not right: %ld", (long)self.box.numberOfUserTriggeredRequests);
          }
          if ([(NSHTTPURLResponse *)response statusCode] == 200) {
-             [[NSNotificationCenter defaultCenter] postNotificationName:tvMarkReqIdDone object:self];
+             // Mark requestId done
+             TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
+                 TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
+                 NSDictionary *d = [crud getObjInCarrier:self.ids inCtx:crud.ctx];
+                 TVUser *u = [d valueForKey:@"user"];
+                 if (u) {
+                     if ([crud markReqDone:u.serverId localId:u.localId reqId:self.reqId entityName:@"TVUser"]) {
+                         //
+                     }
+                 }
+             }];
+             // No need to set queuePriority here since it's a normal one.
+             [[NSOperationQueue mainQueue] addOperation:o];
              if (data.length > 0) {
                  NSError *aErr;
                  NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&aErr];
                  if (!aErr) {
                      NSLog(@"JSON of response %li: %@", (long)self.requestType, dict);
-                     TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
+                     TVQueueElement *o1 = [TVQueueElement blockOperationWithBlock:^{
                          TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-                         NSDictionary *d = [crud getObjInCarrier:self.ids inCtx:crud.ctx];
-                         if (![crud processResponseJSON:dict reqType:self.requestType objDic:d]) {
+                         NSDictionary *d1 = [crud getObjInCarrier:self.ids inCtx:crud.ctx];
+                         if (![crud processResponseJSON:dict reqType:self.requestType objDic:d1]) {
                              // Process unsuccessful
                              // WHAT'S NEXT????????????
                          }
                      }];
-                     [o setQueuePriority:NSOperationQueuePriorityVeryLow];
-                     [[NSOperationQueue mainQueue] addOperation:o];
+                     [o1 setQueuePriority:NSOperationQueuePriorityVeryLow];
+                     [[NSOperationQueue mainQueue] addOperation:o1];
                  } else {
-                     // For non-sync request, mark requestId as done, wait for the sync request to do the job. Sync returns with a body every time. So even a failure here deos not stop the next try.
+                     // For non-sync request, mark requestId as done, wait for the sync request to do the job. Sync returns with a body every time. So even a failure here does not stop the next try.
                  }
              } else {
                  // Request has been successfully processed on server previously. Set related requestId to done.
@@ -208,6 +220,17 @@
     } else if ([errMsg isEqualToString:@"Previous change was successful or the link is expired."]) {
         // from UrlCodeChecker
     }
+}
+
+#pragma mark - load to com queue
+
+- (TVQueueElement *)setupAndLoadToQueue:(NSOperationQueue *)q
+{
+    TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
+        [self proceedToRequest];
+    }];
+    [q addOperation:o];
+    return o;
 }
 
 @end

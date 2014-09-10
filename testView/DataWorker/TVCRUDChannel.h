@@ -16,21 +16,37 @@
 @interface TVCRUDChannel : NSObject
 
 @property (strong, nonatomic) NSManagedObjectContext *ctx;
-@property (strong, nonatomic) NSManagedObjectModel *model;
-@property (strong, nonatomic) NSPersistentStoreCoordinator *coordinator;
-@property (strong, nonatomic) NSFetchRequest *fetchReq;
 
 @property (strong, nonatomic) TVRootViewCtlBox *box;
 @property (strong, nonatomic) TVIdCarrier *ids;
 
-- (void)insertOneCard:(NSDictionary *)card fromServer:(BOOL)isFromServer;
+#pragma mark - create new
+- (TVCard *)insertOneCard:(NSDictionary *)card fromServer:(BOOL)isFromServer;
 - (void)insertOneReqId:(NSInteger)action for:(TVBase *)base;
 - (void)insertOneUser:(NSDictionary *)user;
-- (void)updateOneCard:(TVCard *)cardToUpdate by:(NSDictionary *)card fromServer:(BOOL)isFromServer;
-- (void)updateOneUserd:(TVUser *)userToUpdate by:(NSDictionary *)user fromServer:(BOOL)isFromServer;
-- (void)deleteOneCard:(TVCard *)cardToDelete fromServer:(BOOL)isFromServer;
-- (BOOL)processResponseJSON:(NSMutableDictionary *)dict reqType:(NSInteger)t objDic:(NSDictionary *)od;
-- (void)signOut;
+- (void)userCreateOneCard:(NSDictionary *)card;
 
+#pragma mark - update
+- (void)updateOneCard:(TVCard *)cardToUpdate by:(NSDictionary *)card fromServer:(BOOL)isFromServer;
+- (void)updateOneUser:(TVUser *)userToUpdate by:(NSDictionary *)user fromServer:(BOOL)isFromServer;
+- (void)userUpdateOneCard:(TVCard *)cardToUpdate by:(NSDictionary *)card;
+- (void)userUpdateOneUser:(TVUser *)userToUpdate by:(NSDictionary *)user;
+
+#pragma mark - delete
+- (void)deleteOneCard:(TVCard *)cardToDelete fromServer:(BOOL)isFromServer;
+- (void)userDeleteOneCard:(TVCard *)cardToDelete;
+
+#pragma mark - mark requestIdDone
+- (BOOL)markReqDone:(NSString *)recordServerId localId:(NSString *)recordLocalId reqId:(NSString *)reqId entityName:(NSString *)name;
+
+#pragma mark - sync cycle
+- (void)syncCycle:(BOOL)isUserTriggered;
+
+#pragma mark - process response
+- (BOOL)processResponseJSON:(NSMutableDictionary *)dict reqType:(NSInteger)t objDic:(NSDictionary *)od;
+- (void)actionAfterReqToDbDone:(NSInteger)reqType;
+
+#pragma mark - user management
+- (void)signOut;
 
 @end

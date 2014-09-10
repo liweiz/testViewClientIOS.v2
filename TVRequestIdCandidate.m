@@ -1,16 +1,16 @@
 //
-//  TVRequestId.m
+//  TVRequestIdCandidate.m
 //  testView
 //
-//  Created by Liwei on 2014-05-17.
+//  Created by Liwei Zhang on 2014-09-08.
 //  Copyright (c) 2014 Liwei. All rights reserved.
 //
 
-#import "TVRequestId.h"
+#import "TVRequestIdCandidate.h"
 #import "TVBase.h"
 
 
-@implementation TVRequestId
+@implementation TVRequestIdCandidate
 
 @dynamic createdAtLocal;
 @dynamic done;

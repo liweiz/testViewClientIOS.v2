@@ -2,7 +2,7 @@
 //  TVUser.h
 //  testView
 //
-//  Created by Liwei on 2014-05-20.
+//  Created by Liwei Zhang on 2014-09-08.
 //  Copyright (c) 2014 Liwei. All rights reserved.
 //
 
@@ -15,14 +15,15 @@
 @interface TVUser : TVBase
 
 @property (nonatomic, retain) NSNumber * activated;
+@property (nonatomic, retain) NSString * deviceInfoId;
 @property (nonatomic, retain) NSString * deviceUUID;
 @property (nonatomic, retain) NSString * email;
 @property (nonatomic, retain) NSNumber * isLoggedIn;
 @property (nonatomic, retain) NSNumber * isSharing;
 @property (nonatomic, retain) NSNumber * rememberMe;
+@property (nonatomic, retain) NSString * sortOption;
 @property (nonatomic, retain) NSString * sourceLang;
 @property (nonatomic, retain) NSString * targetLang;
-@property (nonatomic, retain) NSString * deviceInfoId;
 @property (nonatomic, retain) TVCard *hasCards;
 
 @end

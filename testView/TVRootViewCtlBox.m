@@ -24,7 +24,7 @@
 @synthesize originX;
 @synthesize labelWidth;
 @synthesize gapY;
-
+@synthesize serverIsAvailable;
 @synthesize userServerId;
 @synthesize coordinator;
 @synthesize model;
@@ -46,7 +46,7 @@
         self.targetLang = [[NSMutableString alloc] init];
         self.dbWorker = [[NSOperationQueue alloc] init];
         self.comWorker = [[NSOperationQueue alloc] init];
-        self.com = [[TVCommunicator alloc] init];
+        self.serverIsAvailable = NO;
         self.taskArray = [NSMutableArray arrayWithCapacity:0];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeFromTaskArray:) name:tvRemoveOperation object:nil];
     }

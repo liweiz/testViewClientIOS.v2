@@ -116,7 +116,7 @@
     if ([self checkIfTargetIsInContext]) {
         TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-            [crud insertOneCard:[self getReadyForCard] fromServer:NO];
+            [crud userCreateOneCard:[self getReadyForCard]];
             if ([crud saveWithCtx:crud.ctx]) {
                 [self dismissSaveView];
             }

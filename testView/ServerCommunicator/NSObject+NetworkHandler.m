@@ -8,7 +8,7 @@
 
 #import "NSObject+NetworkHandler.h"
 #import "NSObject+DataHandler.h"
-#import "TVRequester.h"
+
 #import "TVUser.h"
 #import "TVCard.h"
 #import "TVAppRootViewController.h"
@@ -145,16 +145,7 @@
     return m;
 }
 
-#pragma mark - load to com queue
 
-- (TVQueueElement *)setupAndLoadToQueue:(NSOperationQueue *)q req:(TVRequester *)r
-{
-    TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
-        [r proceedToRequest];
-    }];
-    [q addOperation:o];
-    return o;
-}
 
 
 #pragma mark - setup request authentication
@@ -240,9 +231,9 @@
     [NSURLConnection sendAsynchronousRequest:testRequest queue:q completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
      {
          if ([(NSHTTPURLResponse *)response statusCode] == 200) {
-             __block flag = YES;
+             __block BOOL flag = YES;
          } else {
-             __block flag = NO;
+             __block BOOL flag = NO;
          }
          if (isUserTriggered) {
              [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];

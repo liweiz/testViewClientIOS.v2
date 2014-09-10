@@ -16,6 +16,9 @@
 @implementation TVCRUDChannel
 
 @synthesize ctx;
+@synthesize model;
+@synthesize coordinator;
+@synthesize fetchReq;
 
 @synthesize box;
 @synthesize ids;
@@ -24,9 +27,8 @@
 {
     self = [super init];
     if (self) {
+        self.ctx = [self managedObjectContext:self.ctx coordinator:self.coordinator model:self.model];
         self.ids = [[TVIdCarrier alloc] init];
-        self.box = ((TVAppRootViewController *)[UIApplication sharedApplication].keyWindow.rootViewController).box;
-        self.ctx = [self managedObjectContext:self.ctx coordinator:self.box.coordinator model:self.box.model];
     }
     return self;
 }
@@ -117,6 +119,21 @@
     [self insertOneReqId:TVDocDeleted for:cardToDelete];
 }
 
+#pragma mark - save
+
+- (BOOL)save:(BOOL)isUserTriggered
+{
+    if (isUserTriggered) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(actionAfterUserChange:) name:NSManagedObjectContextDidSaveNotification object:self.ctx];
+    } else {
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+    }
+    if ([self saveWithCtx:self.ctx]) {
+        return YES;
+    }
+    return NO;
+}
+
 #pragma mark - mark requestIdDone
 
 - (BOOL)markReqDone:(NSString *)recordServerId localId:(NSString *)recordLocalId reqId:(NSString *)reqId entityName:(NSString *)name
@@ -178,19 +195,17 @@
         req.isUserTriggered = isUserTriggered;
         req.isBearer = YES;
         TVRequestIdCandidate *r = [self analyzeOneRecord:u inCtx:self.ctx serverIsAvailable:self.box.serverIsAvailable];
-        // requestId is generated in analyzeOneRecord
-        req.reqId = r.requestId;
         if (r) {
             readyToSyncUser = NO;
             // DeviceInfo
             if (r.editAction.integerValue == TVDocNew) {
                 req.requestType = TVNewDeviceInfo;
                 req.urlBranch = [self getUrlBranchFor:TVNewDeviceInfo userId:self.box.userServerId deviceInfoId:nil cardId:nil];
-                [req setupAndLoadToQueue:self.box.comWorker];
+                [self setupAndLoadToQueue:self.box.comWorker req:req];
             } else if (r.editAction.integerValue == TVDocUpdated) {
                 req.requestType = TVOneDeviceInfo;
                 req.urlBranch = [self getUrlBranchFor:TVOneDeviceInfo userId:self.box.userServerId deviceInfoId:self.box.deviceInfoId cardId:nil];
-                [req setupAndLoadToQueue:self.box.comWorker];
+                [self setupAndLoadToQueue:self.box.comWorker req:req];
             }
         }
     }
@@ -204,13 +219,12 @@
                 req.box = self.box;
                 req.isUserTriggered = isUserTriggered;
                 req.isBearer = YES;
-                req.reqId = r.requestId;
                 if (r.editAction.integerValue == TVDocDeleted) {
                     req.method = @"DELETE";
                     // No way to delete deviceInfo from client, so the only thing to delete is card.
                     req.requestType = TVOneCard;
                     req.urlBranch = [self getUrlBranchFor:TVOneCard userId:self.box.userServerId deviceInfoId:nil cardId:c.serverId];
-                    [req setupAndLoadToQueue:self.box.comWorker];
+                    [self setupAndLoadToQueue:self.box.comWorker req:req];
                 } else {
                     NSError *e;
                     req.body = [self getBody:r.requestId forRecord:c err:&e];
@@ -220,11 +234,11 @@
                         if (r.editAction.integerValue == TVDocNew) {
                             req.requestType = TVNewCard;
                             req.urlBranch = [self getUrlBranchFor:TVNewCard userId:self.box.userServerId deviceInfoId:nil cardId:nil];
-                            [req setupAndLoadToQueue:self.box.comWorker];
+                            [self setupAndLoadToQueue:self.box.comWorker req:req];
                         } else if (r.editAction.integerValue == TVDocUpdated) {
                             req.requestType = TVOneCard;
                             req.urlBranch = [self getUrlBranchFor:TVOneCard userId:self.box.userServerId deviceInfoId:nil cardId:c.serverId];
-                            [req setupAndLoadToQueue:self.box.comWorker];
+                            [self setupAndLoadToQueue:self.box.comWorker req:req];
                         }
                     }
                 }
@@ -233,7 +247,6 @@
                 if (r.editAction.integerValue == TVDocNew || r.editAction.integerValue == TVDocUpdated) {
                     readyToSyncCard = NO;
                     TVRequester *req = [[TVRequester alloc] init];
-                    req.reqId = r.requestId;
                     req.box = self.box;
                     req.isUserTriggered = isUserTriggered;
                     req.isBearer = YES;
@@ -242,7 +255,7 @@
                     if (!e) {
                         req.requestType = TVNewCard;
                         req.urlBranch = [self getUrlBranchFor:TVNewCard userId:self.box.userServerId deviceInfoId:nil cardId:nil];
-                        [req setupAndLoadToQueue:self.box.comWorker];
+                        [self setupAndLoadToQueue:self.box.comWorker req:req];
                     }
                 }
             }
@@ -261,7 +274,7 @@
         req.urlBranch = [self getUrlBranchFor:TVSync userId:self.box.userServerId deviceInfoId:nil cardId:nil];
         NSMutableArray *m = [self getCardVerList:self.box.userServerId withCtx:self.ctx];
         req.body = [self getJSONSyncWithCardVerList:m err:nil];
-        [req setupAndLoadToQueue:self.box.comWorker];
+        [self setupAndLoadToQueue:self.box.comWorker req:req];
     }
 }
 
@@ -534,5 +547,10 @@
  3. user in a dictionary: read user from local db
  4.
  */
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 
 @end

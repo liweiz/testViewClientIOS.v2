@@ -9,7 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "TVUser.h"
 #import "TVCard.h"
-#import "TVQueueElement.h"
+
+
 
 typedef NS_ENUM(NSInteger, TVRequestType) {
     TVSignUp,
@@ -58,7 +59,7 @@ typedef NS_ENUM(NSInteger, TVRequestType) {
 
 - (NSString *)getUrlBranchFor:(NSInteger)reqType userId:(NSString *)userId deviceInfoId:(NSString *)deviceInfoId cardId:(NSString *)cardId;
 
-- (TVQueueElement *)setupAndLoadToQueue:(NSOperationQueue *)q req:(TVRequester *)r;
+
 - (NSData *)getBody:(NSString *)reqId forRecord:(TVBase *)b err:(NSError **)err;
 
 @end

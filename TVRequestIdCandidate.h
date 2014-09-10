@@ -1,8 +1,8 @@
 //
-//  TVRequestId.h
+//  TVRequestIdCandidate.h
 //  testView
 //
-//  Created by Liwei on 2014-05-17.
+//  Created by Liwei Zhang on 2014-09-08.
 //  Copyright (c) 2014 Liwei. All rights reserved.
 //
 
@@ -11,7 +11,7 @@
 
 @class TVBase;
 
-@interface TVRequestId : NSManagedObject
+@interface TVRequestIdCandidate : NSManagedObject
 
 @property (nonatomic, retain) NSDate * createdAtLocal;
 @property (nonatomic, retain) NSNumber * done;

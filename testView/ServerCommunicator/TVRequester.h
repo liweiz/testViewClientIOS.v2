@@ -8,15 +8,18 @@
 
 #import <Foundation/Foundation.h>
 #import "NSObject+NetworkHandler.h"
-#import "TVRequestId.h"
+#import "TVRequestIdCandidate.h"
 #import "TVRootViewCtlBox.h"
 #import "TVIdCarrier.h"
+#import "TVQueueElement.h"
 
 @interface TVRequester : NSObject
 
 @property (strong, nonatomic) NSString *urlBranch;
 @property (strong, nonatomic) NSString *contentType;
 @property (strong, nonatomic) NSString *method;
+// Sync request does not have requestId.
+@property (strong, nonatomic) NSString *reqId;
 @property (strong, nonatomic) NSData *body;
 @property (strong, nonatomic) NSString *email;
 @property (strong, nonatomic) NSString *password;
@@ -40,5 +43,7 @@
 @property (strong, nonatomic) TVIdCarrier *ids;
 
 - (void)proceedToRequest;
+- (NSMutableURLRequest *)setupRequest;
+- (TVQueueElement *)setupAndLoadToQueue:(NSOperationQueue *)q;
 
 @end

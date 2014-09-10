@@ -148,22 +148,17 @@ NSString *const tvMarkReqIdDone = @"tvMarkReqIdDone";
     }];
 }
 
-- (void)sendActivationEmail:(BOOL)isUserTriggered
+- (void)sendActivationEmail:(BOOL)isUserTriggered forUserId:(NSString *)userServerId
 {
-    if (!self.box.user) {
-        [self.box refreshUser];
-    }
     TVRequester *r = [[TVRequester alloc] init];
     r.box = self.box;
     r.requestType = TVEmailForActivation;
-    if (isUserTriggered) {
-        r.isUserTriggered = YES;
-    }
-    r.userId = self.box.userServerId;
+    r.isUserTriggered = isUserTriggered;
+    r.userId = userServerId;
     r.isBearer = YES;
     r.method = @"GET";
-    r.accessToken = [self getAccessTokenForAccount:self.box.user.serverId];
-    [r checkServerAvailToProceed];
+    r.accessToken = [self getAccessTokenForAccount:userServerId];
+    [r setupAndLoadToQueue:self.box.comWorker];
 }
 
 #pragma mark - indicator on/off

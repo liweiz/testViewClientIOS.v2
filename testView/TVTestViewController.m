@@ -261,7 +261,7 @@
     [d setValue:self.user.sourceLang forKey:@"sourceLang"];
     [d setValue:self.user.targetLang forKey:@"targetLang"];
     [self setupNewCard:aCard withDic:d];
-    TVRequestId *rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:self.managedObjectContext];
+    TVRequestIdCandidate *rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:self.managedObjectContext];
     [self setupNewRequestId:rId action:TVDocNew for:(TVBase *)aCard];
     [self.managedObjectContext save:nil];
 }
@@ -330,7 +330,7 @@
 
 - (void)newDeviceInfo
 {
-    TVRequestId *rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:self.managedObjectContext];
+    TVRequestIdCandidate *rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:self.managedObjectContext];
     [self setupNewRequestId:rId action:TVDocNew for:(TVBase *)self.user];
     [self.managedObjectContext save:nil];
     TVRequester *reqster = [[TVRequester alloc] init];
@@ -351,7 +351,7 @@
 
 - (void)oneDeviceInfo
 {
-    TVRequestId *rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:self.managedObjectContext];
+    TVRequestIdCandidate *rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:self.managedObjectContext];
     [self setupNewRequestId:rId action:TVDocUpdated for:(TVBase *)self.user];
     [self.managedObjectContext save:nil];
     TVRequester *reqster = [[TVRequester alloc] init];
@@ -373,7 +373,7 @@
 
 - (void)newCard
 {
-    TVRequestId *rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:self.managedObjectContext];
+    TVRequestIdCandidate *rId = [NSEntityDescription insertNewObjectForEntityForName:@"TVRequestId" inManagedObjectContext:self.managedObjectContext];
     [self setupNewRequestId:rId action:TVDocNew for:(TVBase *)self.user];
     [self.managedObjectContext save:nil];
     TVRequester *reqster = [[TVRequester alloc] init];
