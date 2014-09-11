@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "TVIndicator.h"
+#import "TVIdCarrier.h"
 
 typedef NS_ENUM(NSInteger, TVCtl) {
     TVNoCtl,
@@ -35,6 +36,7 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (assign, nonatomic) CGFloat gapY;
 
 @property (assign, nonatomic) BOOL serverIsAvailable;
+@property (assign, nonatomic) BOOL isCheckingServer;
 
 @property (strong, nonatomic) NSString *userServerId;
 @property (strong, nonatomic) NSString *deviceInfoId;
@@ -46,6 +48,7 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (strong, nonatomic) NSOperationQueue *comWorker;
 
 @property (strong, nonatomic) NSMutableArray *taskArray;
+@property (strong, nonatomic) TVIdCarrier *ids;
 
 - (void)setupBox;
 

@@ -265,24 +265,6 @@
     }
 }
 
-#pragma mark - user management
-
-- (void)signOut
-{
-    NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
-    NSMutableArray *r;
-    if ([ctx fetch:fr withCtx:ctx outcome:r]) {
-        if ([r count] != 0) {
-            for (TVUser *u in r) {
-                NSString *s = [self getRefreshTokenForAccount:u.serverId];
-                if (s.length != 0) {
-                    [self resetTokens:u.serverId];
-                }
-            }
-        }
-    }
-}
-
 #pragma mark - process response
 
 // Only successful request leads to response with

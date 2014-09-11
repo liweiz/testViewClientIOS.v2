@@ -59,7 +59,7 @@ typedef NS_ENUM(NSInteger, TVRequestType) {
 
 - (NSString *)getUrlBranchFor:(NSInteger)reqType userId:(NSString *)userId deviceInfoId:(NSString *)deviceInfoId cardId:(NSString *)cardId;
 
-
+- (void)checkServerAvail:(BOOL)isUserTriggered inQueue:(NSOperationQueue *)q flagToSet:(BOOL)flag noCurrentCheck:(BOOL)noOtherCheckInQueue;
 - (NSData *)getBody:(NSString *)reqId forRecord:(TVBase *)b err:(NSError **)err;
 
 @end

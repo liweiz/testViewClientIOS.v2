@@ -32,8 +32,9 @@
 @synthesize dbWorker;
 @synthesize comWorker;
 @synthesize deviceInfoId;
-
+@synthesize ids;
 @synthesize taskArray;
+@synthesize isCheckingServer;
 
 - (id)init
 {
@@ -47,7 +48,9 @@
         self.dbWorker = [[NSOperationQueue alloc] init];
         self.comWorker = [[NSOperationQueue alloc] init];
         self.serverIsAvailable = NO;
+        self.isCheckingServer = NO;
         self.taskArray = [NSMutableArray arrayWithCapacity:0];
+        self.ids = [[TVIdCarrier alloc] init];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeFromTaskArray:) name:tvRemoveOperation object:nil];
     }
     return self;

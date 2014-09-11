@@ -61,4 +61,6 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 - (TVUser *)getLoggedInUser:(NSManagedObjectContext *)ctx;
 - (NSDictionary *)getObjInCarrier:(TVIdCarrier *)ids inCtx:(NSManagedObjectContext *)ctx;
 
+- (void)signOut:(NSString *)userId;
+
 @end

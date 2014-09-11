@@ -46,7 +46,4 @@
 - (BOOL)processResponseJSON:(NSMutableDictionary *)dict reqType:(NSInteger)t objDic:(NSDictionary *)od;
 - (void)actionAfterReqToDbDone:(NSInteger)reqType;
 
-#pragma mark - user management
-- (void)signOut;
-
 @end

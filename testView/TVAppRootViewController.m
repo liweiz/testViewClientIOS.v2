@@ -15,7 +15,7 @@
 #import "TVLangPickViewController.h"
 #import "TVActivationViewController.h"
 #import "TVLayerBaseViewController.h"
-
+#import "TVCRUDChannel.h"
 #import "TVRootViewCtlBox.h"
 
 NSString *const tvEnglishFontName = @"TimesNewRomanPSMT";
@@ -53,6 +53,8 @@ NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
 NSString *const tvFetchOrSaveErr = @"tvFetchOrSaveErr";
 NSString *const tvRemoveOperation = @"tvRemoveOperation";
 NSString *const tvMarkReqIdDone = @"tvMarkReqIdDone";
+
+NSString *const tvSignOut = @"tvSignOut";
 
 @interface TVAppRootViewController ()
 
@@ -148,16 +150,15 @@ NSString *const tvMarkReqIdDone = @"tvMarkReqIdDone";
     }];
 }
 
-- (void)sendActivationEmail:(BOOL)isUserTriggered forUserId:(NSString *)userServerId
+- (void)sendActivationEmail:(BOOL)isUserTriggered
 {
     TVRequester *r = [[TVRequester alloc] init];
     r.box = self.box;
     r.requestType = TVEmailForActivation;
     r.isUserTriggered = isUserTriggered;
-    r.userId = userServerId;
     r.isBearer = YES;
     r.method = @"GET";
-    r.accessToken = [self getAccessTokenForAccount:userServerId];
+    r.accessToken = [self getAccessTokenForAccount:self.box.ids.userServerId];
     [r setupAndLoadToQueue:self.box.comWorker];
 }
 
@@ -260,12 +261,12 @@ NSString *const tvMarkReqIdDone = @"tvMarkReqIdDone";
 - (void)pinchToShowAbove:(NSNotification *)note
 {
     TVLayerBaseViewController *c = note.object;
-    int n = c.view.tag;
+    NSInteger n = c.view.tag;
     if (n == 1002 || n == 1003) {
         [self loadLoginCtl];
         [self showViewAbove:self.loginViewController.view currentView:c.view baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
         if (n == 1002) {
-            [self.box signOut];
+            [self signOut:self.box.userServerId];
         }
     } else if (n == 1004) {
         [self loadNativePickCtl];
@@ -322,44 +323,59 @@ NSString *const tvMarkReqIdDone = @"tvMarkReqIdDone";
 - (void)loadController
 {
     // When sync with server, isLoggedIn is not processed on server. The response in turn is always true. So when user signs out, isLoggedIn is set to be false. Once user signs in it set to be the value in response, which is alwasy true.
-    [self.box refreshUser];
-    if (self.box.user) {
-        if (self.box.user.activated.boolValue == YES) {
-            [self loadContentCtl];
+    TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
+        TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
+        TVUser *u = [crud getLoggedInUser:crud.ctx];
+        if (u) {
+            [self.box.ids.userServerId setString:u.serverId];
+            if (u.activated.boolValue == YES) {
+                [self loadContentCtl];
+            } else {
+                [self loadActivationCtl:YES];
+            }
         } else {
-            [self loadActivationCtl:YES];
+            [self loadLoginCtl];
         }
-    } else {
-        [self loadLoginCtl];
-    }
+    }];
+    // No need to set queuePriority here since it's a normal one.
+    [[NSOperationQueue mainQueue] addOperation:o];
 }
 
 - (void)actionAfterActivationDone
 {
-    if ([self.box.user.sourceLang isEqualToString:@""]) {
-        // This indicates that there is no data on this device previously, the app is the first time to be installed here or it's a reinstall after previous deletion. Start a sync cycle to get all from server.
-        // Show langPicker and indicator since a request is sent anyway to get the deviceInfo status from server and user has to wait for the response.
-        // 1. If no response received, let user pick lang pair so that user can keep use the app.
-        // 2. If server side error, let user pick lang pair so that user can keep use the app.
-        // 3. If there is existing deviceInfo on server(either specific for this device or fetched as default, see more details in server files), sync data from server and show content right away.
-        // 4. If there is no existing deviceInfo on server, let user pick lang pair so that user can keep use the app.
-        // Show langPick first. At the mean time, send request show indicator accordingly.
-        // Prepare request
-        TVRequester *r = [[TVRequester alloc] init];
-        r.box = self.box;
-        // We need user wait for the result from server
-        r.isUserTriggered = YES;
-        r.requestType = TVSync;
-        r.isBearer = YES;
-        r.method = @"GET";
-        r.urlBranch = [self getUrlBranchFor:TVOneDeviceInfo userId:self.box.user.serverId deviceInfoId:nil cardId:nil];
-        NSMutableArray *m = [self getCardVerList:self.box.user.serverId withCtx:self.box.ctx];
-        r.body = [self getJSONSyncWithCardVerList:m err:nil];
-        [r checkServerAvailToProceed];
-    } else {
-        // Show content
-        [self loadContentCtl];
-    }
+    TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
+        TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
+        TVUser *u = [crud getLoggedInUser:crud.ctx];
+        if (u.sourceLang.length == 0) {
+            // This indicates that there is no data on this device previously, the app is the first time to be installed here or it's a reinstall after previous deletion. Start a sync cycle to get all from server.
+            // Show langPicker and indicator since a request is sent anyway to get the deviceInfo status from server and user has to wait for the response.
+            // 1. If no response received, let user pick lang pair so that user can keep use the app.
+            // 2. If server side error, let user pick lang pair so that user can keep use the app.
+            // 3. If there is existing deviceInfo on server(either specific for this device or fetched as default, see more details in server files), sync data from server and show content right away.
+            // 4. If there is no existing deviceInfo on server, let user pick lang pair so that user can keep use the app.
+            // Show langPick first. At the mean time, send request show indicator accordingly.
+            // Prepare request
+            
+            
+            [self checkServerAvail:YES inQueue:self.box.comWorker flagToSet:self.box.serverIsAvailable noCurrentCheck:(!self.box.isCheckingServer)];
+            TVRequester *r = [[TVRequester alloc] init];
+            r.box = self.box;
+            // We need user wait for the result from server
+            r.isUserTriggered = YES;
+            r.requestType = TVSync;
+            r.isBearer = YES;
+            r.method = @"GET";
+            [r setupRequest];
+            NSMutableArray *m = [self getCardVerList:self.box.ids.userServerId withCtx:crud.ctx];
+            r.body = [self getJSONSyncWithCardVerList:m err:nil];
+            [r setupAndLoadToQueue:self.box.comWorker];
+        } else {
+            // Show content
+            [self loadContentCtl];
+        }
+    }];
+    // No need to set queuePriority here since it's a normal one.
+    [[NSOperationQueue mainQueue] addOperation:o];
 }
 
 - (void)loadLoginCtl

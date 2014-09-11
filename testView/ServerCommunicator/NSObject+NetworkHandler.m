@@ -8,7 +8,7 @@
 
 #import "NSObject+NetworkHandler.h"
 #import "NSObject+DataHandler.h"
-
+#import "TVQueueElement.h"
 #import "TVUser.h"
 #import "TVCard.h"
 #import "TVAppRootViewController.h"
@@ -145,7 +145,16 @@
     return m;
 }
 
-
+- (NSData *)getBody:(NSString *)reqId forRecord:(TVBase *)b err:(NSError **)err
+{
+    if ([b isKindOfClass:[TVUser class]]) {
+        return [self getJSONDeviceInfo:(TVUser *)b requestId:reqId err:err];
+    } else if ([b isKindOfClass:[TVCard class]]) {
+        return [self getJSONCard:(TVCard *)b requestId:reqId err:err];
+    } else {
+        return nil;
+    }
+}
 
 
 #pragma mark - setup request authentication
@@ -220,39 +229,47 @@
 
 #pragma mark - check server availability
 
-- (void)checkServerAvail:(BOOL)isUserTriggered inQueue:(NSOperationQueue *)q flagToSet:(BOOL)flag
+// Only initial app launch and user crud operations such as load a tableView trigger this. We do not set a timer-based regular check since user tends to use the app in a short peroid and it is highly impossible to have the app on without any user operation.
+- (void)checkServerAvail:(BOOL)isUserTriggered inQueue:(NSOperationQueue *)q flagToSet:(BOOL)flag noCurrentCheck:(BOOL)noOtherCheckInQueue
 {
-    // Use itIsUserTriggered as the parameter to avoid future change of self.isUserTriggered.
-    // Check indicator
-    if (isUserTriggered) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:tvAddAndCheckReqNo object:self];
+    // Only check when flag indicates server is not available.
+    if (flag == NO) {
+        // Only add when there is no other check in queue already. We don't need multiple checks to run.
+        if (noOtherCheckInQueue == YES) {
+            TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
+                // Use itIsUserTriggered as the parameter to avoid future change of self.isUserTriggered.
+                // Check indicator
+                if (isUserTriggered) {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:tvAddAndCheckReqNo object:self];
+                }
+                NSMutableURLRequest *testRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://www.google.com/"]];
+                [NSURLConnection sendAsynchronousRequest:testRequest queue:q completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
+                 {
+                     if ([(NSHTTPURLResponse *)response statusCode] == 200) {
+                         __block BOOL flag = YES;
+                     } else {
+                         __block BOOL flag = NO;
+                         // Internet is not available, clear the queue since it's impossible to have the rest ones successfully processed.
+                         [q cancelAllOperations];
+                     }
+                     if (isUserTriggered) {
+                         [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
+                     }
+                 }];
+            }];
+            // Jump the queue, always.
+            [o setQueuePriority:NSOperationQueuePriorityVeryHigh];
+            [q addOperation:o];
+        }
+        
     }
-    NSMutableURLRequest *testRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://www.google.com/"]];
-    [NSURLConnection sendAsynchronousRequest:testRequest queue:q completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
-     {
-         if ([(NSHTTPURLResponse *)response statusCode] == 200) {
-             __block BOOL flag = YES;
-         } else {
-             __block BOOL flag = NO;
-         }
-         if (isUserTriggered) {
-             [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
-         }
-     }];
+    
+    
 }
 
 
 
-- (NSData *)getBody:(NSString *)reqId forRecord:(TVBase *)b err:(NSError **)err
-{
-    if ([b isKindOfClass:[TVUser class]]) {
-        return [self getJSONDeviceInfo:(TVUser *)b requestId:reqId err:err];
-    } else if ([b isKindOfClass:[TVCard class]]) {
-        return [self getJSONCard:(TVCard *)b requestId:reqId err:err];
-    } else {
-        return nil;
-    }
-}
+
 
 // Check connection error, if no error, proceed to handle specific response by returning YES
 //- (BOOL)handleBasicResponse:(NSHTTPURLResponse *)response withJSONData:(NSData *)data error:(NSError *)error

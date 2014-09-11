@@ -78,6 +78,7 @@ extern NSString *const tvFetchOrSaveErr;
 extern NSString *const tvRemoveOperation;
 
 extern NSString *const tvMarkReqIdDone;
+extern NSString *const tvSignOut;
 
 @interface TVAppRootViewController : UIViewController
 

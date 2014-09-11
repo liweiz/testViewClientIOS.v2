@@ -28,7 +28,6 @@
 @property (assign, nonatomic) BOOL internetIsOn;
 @property (assign, nonatomic) NSInteger requestType;
 // These four are used to setup request url.
-@property (strong, nonatomic) NSString *userId;
 @property (strong, nonatomic) NSString *deviceInfoId;
 @property (strong, nonatomic) NSString *deviceUuid;
 @property (strong, nonatomic) NSString *cardId;

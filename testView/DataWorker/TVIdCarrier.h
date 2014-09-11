@@ -11,7 +11,7 @@
 @interface TVIdCarrier : NSObject
 
 // TVUser must come with serverId since it is created on server first and sync back to client afterwards.
-@property (strong, nonatomic) NSString *userServerId;
+@property (strong, nonatomic) NSMutableString *userServerId;
 @property (strong, nonatomic) NSMutableSet *cardIds;
 
 @end

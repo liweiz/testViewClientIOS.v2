@@ -627,4 +627,16 @@
     [itemR resetKeychainItem];
 }
 
+#pragma mark - user management
+
+- (void)signOut:(NSString *)userId
+{
+    NSString *s = [self getRefreshTokenForAccount:userId];
+    if (s.length != 0) {
+        [self resetTokens:userId];
+    }
+    // Need to clear box.userServerId
+    [[NSNotificationCenter defaultCenter] postNotificationName:tvSignOut object:self];
+}
+
 @end

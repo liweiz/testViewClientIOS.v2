@@ -28,7 +28,7 @@
 @synthesize accessToken;
 @synthesize isBearer;
 @synthesize requestType;
-@synthesize userId;
+
 @synthesize deviceInfoId;
 @synthesize deviceUuid;
 @synthesize cardId;
@@ -54,7 +54,7 @@
 
 - (NSMutableURLRequest *)setupRequest
 {
-    self.urlBranch = [self getUrlBranchFor:self.requestType userId:self.userId deviceInfoId:self.deviceInfoId cardId:self.cardId];
+    self.urlBranch = [self getUrlBranchFor:self.requestType userId:self.box.ids.userServerId deviceInfoId:self.deviceInfoId cardId:self.cardId];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[tvServerUrl stringByAppendingString:self.urlBranch]]];
     [request setHTTPMethod:self.method];
     if (self.contentType) {
