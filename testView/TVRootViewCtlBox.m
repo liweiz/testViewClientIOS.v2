@@ -35,6 +35,7 @@
 @synthesize ids;
 @synthesize taskArray;
 @synthesize isCheckingServer;
+@synthesize cardIdInEditing;
 
 - (id)init
 {
@@ -50,7 +51,7 @@
         self.serverIsAvailable = NO;
         self.isCheckingServer = NO;
         self.taskArray = [NSMutableArray arrayWithCapacity:0];
-        self.ids = [[TVIdCarrier alloc] init];
+        self.ids = [[NSMutableSet alloc] init];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeFromTaskArray:) name:tvRemoveOperation object:nil];
     }
     return self;

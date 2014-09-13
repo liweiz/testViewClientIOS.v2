@@ -8,7 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import "TVIndicator.h"
-#import "TVIdCarrier.h"
+
+#import "TVIdPair.h"
 
 typedef NS_ENUM(NSInteger, TVCtl) {
     TVNoCtl,
@@ -38,7 +39,8 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (assign, nonatomic) BOOL serverIsAvailable;
 @property (assign, nonatomic) BOOL isCheckingServer;
 
-@property (strong, nonatomic) NSString *userServerId;
+@property (strong, nonatomic) NSMutableString *userServerId;
+@property (strong, nonatomic) TVIdPair *cardIdInEditing;
 @property (strong, nonatomic) NSString *deviceInfoId;
 @property (strong, nonatomic) NSPersistentStoreCoordinator *coordinator;
 @property (strong, nonatomic) NSManagedObjectModel *model;
@@ -48,7 +50,7 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (strong, nonatomic) NSOperationQueue *comWorker;
 
 @property (strong, nonatomic) NSMutableArray *taskArray;
-@property (strong, nonatomic) TVIdCarrier *ids;
+@property (strong, nonatomic) NSMutableSet *ids;
 
 - (void)setupBox;
 

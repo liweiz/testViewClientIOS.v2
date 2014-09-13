@@ -263,13 +263,7 @@
         }
         
     }
-    
-    
 }
-
-
-
-
 
 // Check connection error, if no error, proceed to handle specific response by returning YES
 //- (BOOL)handleBasicResponse:(NSHTTPURLResponse *)response withJSONData:(NSData *)data error:(NSError *)error

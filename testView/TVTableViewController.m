@@ -263,14 +263,19 @@
 
 - (void)finalizeTableDataSource
 {
-    [self.rawDataSource setArray:[self getRawDataSource]];
-    NSMutableArray *snapshot = [self takeSnapshotOfTableDataSource];
-    [self addBlankRowsToTableDataSource:snapshot];
-    NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
-    [d setObject:snapshot forKey:@"dataSource"];
-    [d setObject:self.expandedCards forKey:@"expandedCards"];
-    [self.snapshots addObject:d];
-    [self.tableDataSources addObject:snapshot];
+    TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
+        TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
+        NSArray *a = [self getCards:self.box.userServerId inCtx:crud.ctx];
+        [self.rawDataSource setArray:a];
+        NSMutableArray *snapshot = [self takeSnapshotOfTableDataSource];
+        [self addBlankRowsToTableDataSource:snapshot];
+        NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
+        [d setObject:snapshot forKey:@"dataSource"];
+        [d setObject:self.expandedCards forKey:@"expandedCards"];
+        [self.snapshots addObject:d];
+        [self.tableDataSources addObject:snapshot];
+    }];
+    [[NSOperationQueue mainQueue] addOperation:o];
 }
 
 - (void)addBlankRowsToTableDataSource:(NSMutableArray *)dataSource
@@ -385,7 +390,10 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     // Return the number of rows in the section.
-    return [self.tableDataSources[0] count];
+    if ([self.tableDataSources count] > 0) {
+        return [self.tableDataSources[0] count];
+    }
+    return 0;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -425,15 +433,15 @@
 {
     UITapGestureRecognizer *tempSender = sender;
     if ([tempSender.view.superview.superview.superview.superview isKindOfClass:[UITableViewCell class]]) {
+        // For single deletion, we currently locate the option in save menu. User has to choose to edit a card and pinch to show the menu. The option is on that menu.
         TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-            NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
-            [d setObject:self.toDeleteServerId forKey:@"serverId"];
-            [d setObject:self.toDeleteLocalId forKey:@"localId"];
-            NSArray *a = [crud getObjs:[NSSet setWithObject:d] name:@"TVCard"];
-            [crud deleteOneCard:a[0] fromServer:NO];
-            if ([crud saveWithCtx:crud.ctx]) {
-                // action after deletion
+            NSArray *a = [crud getObjs:[NSSet setWithObject:self.box.cardIdInEditing] name:@"TVCard" inCtx:crud.ctx];
+            if (a) {
+                [crud userDeleteOneCard:a[0]];
+                if ([crud saveWithCtx:crud.ctx]) {
+                    // action after deletion
+                }
             }
         }];
         [[NSOperationQueue mainQueue] addOperation:o];

@@ -20,6 +20,34 @@
                ReferencedContainer = "container:testView.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "EED76F4919C4C8EC00FD15E0"
+               BuildableName = "testView Tests.xctest"
+               BlueprintName = "testView Tests"
+               ReferencedContainer = "container:testView.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "EED76F5819C4C97000FD15E0"
+               BuildableName = "UITests.xctest"
+               BlueprintName = "UITests"
+               ReferencedContainer = "container:testView.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -35,6 +63,26 @@
                BlueprintIdentifier = "D06A1A57179DC6A3003346F4"
                BuildableName = "testViewTests.xctest"
                BlueprintName = "testViewTests"
+               ReferencedContainer = "container:testView.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "EED76F4919C4C8EC00FD15E0"
+               BuildableName = "testView Tests.xctest"
+               BlueprintName = "testView Tests"
+               ReferencedContainer = "container:testView.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "EED76F5819C4C97000FD15E0"
+               BuildableName = "UITests.xctest"
+               BlueprintName = "UITests"
                ReferencedContainer = "container:testView.xcodeproj">
             </BuildableReference>
          </TestableReference>

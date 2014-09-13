@@ -37,7 +37,7 @@
 @synthesize objectIdArray;
 
 @synthesize isUserTriggered;
-@synthesize fromVewTag;
+
 
 @synthesize box;
 @synthesize ids;
@@ -47,14 +47,14 @@
     self = [super init];
     if (self) {
         // Custom initialization
-        self.ids = [[TVIdCarrier alloc] init];
+        self.ids = [[NSMutableSet alloc] init];
     }
     return self;
 }
 
 - (NSMutableURLRequest *)setupRequest
 {
-    self.urlBranch = [self getUrlBranchFor:self.requestType userId:self.box.ids.userServerId deviceInfoId:self.deviceInfoId cardId:self.cardId];
+    self.urlBranch = [self getUrlBranchFor:self.requestType userId:self.box.userServerId deviceInfoId:self.deviceInfoId cardId:self.cardId];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[tvServerUrl stringByAppendingString:self.urlBranch]]];
     [request setHTTPMethod:self.method];
     if (self.contentType) {
@@ -105,8 +105,7 @@
              // Mark requestId done
              TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
                  TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-                 NSDictionary *d = [crud getObjInCarrier:self.ids inCtx:crud.ctx];
-                 TVUser *u = [d valueForKey:@"user"];
+                 TVUser *u = [self getLoggedInUser:crud.ctx];
                  if (u) {
                      if ([crud markReqDone:u.serverId localId:u.localId reqId:self.reqId entityName:@"TVUser"]) {
                          //
@@ -122,7 +121,11 @@
                      NSLog(@"JSON of response %li: %@", (long)self.requestType, dict);
                      TVQueueElement *o1 = [TVQueueElement blockOperationWithBlock:^{
                          TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-                         NSDictionary *d1 = [crud getObjInCarrier:self.ids inCtx:crud.ctx];
+                         TVUser *u1 = [self getLoggedInUser:crud.ctx];
+                         NSSet *s = [crud getObjInCarrier:self.ids entityName:@"TVCard" inCtx:crud.ctx];
+                         NSMutableDictionary *d1 = [NSMutableDictionary dictionaryWithCapacity:0];
+                         [d1 setValue:u1 forKey:@"user"];
+                         [d1 setValue:s forKey:@"cards"];
                          if (![crud processResponseJSON:dict reqType:self.requestType objDic:d1]) {
                              // Process unsuccessful
                              // WHAT'S NEXT????????????

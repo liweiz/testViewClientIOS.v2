@@ -54,7 +54,6 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(proceed:) name:@"TVRequestOKOnly" object:nil];
     btnHeight = 44.0f;
     gap = 20.0f;
     topIntroHeight = (460.0f - btnHeight) * 0.5f - gap * 2.0f;
@@ -67,7 +66,7 @@
     self.connectBtn.textAlignment = NSTextAlignmentCenter;
     self.connectBtn.text = @"Continue";
     self.connectBtn.textColor = [UIColor whiteColor];
-    self.connectBtnTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(checkUserAgain)];
+    self.connectBtnTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(proceed)];
     [self.connectBtn addGestureRecognizer:self.connectBtnTap];
     
     self.connectIntro = [[UILabel alloc] initWithFrame:CGRectMake(self.connectBtn.frame.origin.x, self.connectBtn.frame.origin.y - gap - topIntroHeight, self.connectBtn.frame.size.width, topIntroHeight)];
@@ -90,20 +89,18 @@
     [self.view addSubview:self.sendBtn];
 }
 
-- (void)checkUserAgain
+- (void)proceed
 {
-    self.box.transitionPointInRoot = [self.connectBtnTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
-    // Get user from server and check activation again
-    TVRequester *r = [[TVRequester alloc] init];
-    r.box = self.box;
-    r.fromVewTag = self.view.tag;
-    r.requestType = TVOneUser;
-    r.isUserTriggered = YES;
-    r.userId = self.box.userServerId;
-    r.isBearer = YES;
-    r.method = @"GET";
-    r.accessToken = [self getAccessTokenForAccount:self.box.user.serverId];
-    [r checkServerAvailToProceed];
+    // Check server availability
+    [self checkServerAvail:YES inQueue:self.box.comWorker flagToSet:self.box.serverIsAvailable noCurrentCheck:(!self.box.isCheckingServer)];
+    TVRequester *req = [[TVRequester alloc] init];
+    req.box = self.box;
+    req.isUserTriggered = YES;
+    req.isBearer = YES;
+    req.method = @"GET";
+    req.requestType = TVOneUser;
+    [req setupRequest];
+    [req setupAndLoadToQueue:self.box.comWorker];
 }
 
 - (void)sendEmail
@@ -111,21 +108,6 @@
     self.box.transitionPointInRoot = [self.sendBtnTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     TVAppRootViewController *t = (TVAppRootViewController *)[[UIApplication sharedApplication] keyWindow].rootViewController;
     [t sendActivationEmail:YES];
-}
-
-- (void)proceed:(NSNotification *)note
-{
-    TVRequester *r = (TVRequester *)note;
-    if (r.requestType == TVEmailForActivation) {
-        // Show email sent msg to user
-    } else if (r.requestType == TVOneUser) {
-        // Check the user in local db to know the activation status
-        [self.box.ctx refreshObject:self.box.user mergeChanges:NO];
-        if (self.box.user.activated) {
-            
-//            [[NSNotificationCenter defaultCenter] postNotificationName: object:r];
-        }
-    }
 }
 
 - (void)didReceiveMemoryWarning

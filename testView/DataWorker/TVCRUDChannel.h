@@ -11,14 +11,15 @@
 #import "TVBase.h"
 #import "TVCard.h"
 #import "TVUser.h"
-#import "TVIdCarrier.h"
 
 @interface TVCRUDChannel : NSObject
 
 @property (strong, nonatomic) NSManagedObjectContext *ctx;
 
 @property (strong, nonatomic) TVRootViewCtlBox *box;
-@property (strong, nonatomic) TVIdCarrier *ids;
+@property (strong, nonatomic) NSMutableSet *ids;
+// Record the tag of the view that triggers the requester.
+@property (assign, nonatomic) NSInteger fromVewTag;
 
 #pragma mark - create new
 - (TVCard *)insertOneCard:(NSDictionary *)card fromServer:(BOOL)isFromServer;

@@ -266,39 +266,38 @@
     return nil;
 }
 
-- (TVCard *)getOneCard:(NSString *)cardServerId inCtx:(NSManagedObjectContext *)ctx
+- (TVCard *)getOneCard:(TVIdPair *)cardIds inCtx:(NSManagedObjectContext *)ctx
 {
     NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:@"TVCard"];
-    NSPredicate *p = [NSPredicate predicateWithFormat:@"serverId like %@", cardServerId];
-    [fr setPredicate:p];
+    if (cardIds.serverId.length > 0) {
+        NSPredicate *p1 = [NSPredicate predicateWithFormat:@"serverId like %@", cardIds.serverId];
+        [fr setPredicate:p1];
+    }
     NSMutableArray *r;
     if ([self fetch:fr withCtx:ctx outcome:r]) {
-        return r[0];
+        if ([r count] > 0) {
+            return r[0];
+        } else {
+            NSPredicate *p2 = [NSPredicate predicateWithFormat:@"localId like %@", cardIds.localId];
+            [fr setPredicate:p2];
+            if ([self fetch:fr withCtx:ctx outcome:r]) {
+                if ([r count] > 0) {
+                    return r[0];
+                }
+            }
+        }
     }
     return nil;
 }
 
 #pragma mark - idCarrier
 
-- (NSDictionary *)getObjInCarrier:(TVIdCarrier *)ids inCtx:(NSManagedObjectContext *)ctx
+- (NSSet *)getObjInCarrier:(NSSet *)ids entityName:(NSString *)name inCtx:(NSManagedObjectContext *)ctx
 {
-    NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
-    if (ids.userServerId.length > 0) {
-        NSFetchRequest *fr = [[NSFetchRequest alloc] initWithEntityName:@"TVUser"];
-        NSPredicate *p = [NSPredicate predicateWithFormat:@"serverId == %@", ids.userServerId];
-        [fr setPredicate:p];
-        NSMutableArray *a;
-        if ([self fetch:fr withCtx:ctx outcome:a]) {
-            if ([a count] > 0) {
-                [d setObject:a[0] forKey:@"user"];
-            }
-        }
-    }
-    if ([ids.cardIds count] > 0) {
-        NSFetchRequest *fr = [[NSFetchRequest alloc] initWithEntityName:@"TVCard"];
-        NSMutableSet *s = [NSMutableSet setWithCapacity:0];
-        [d setObject:s forKey:@"cards"];
-        for (TVIdPair *pair in ids.cardIds) {
+    NSMutableSet *s = [NSMutableSet setWithCapacity:0];
+    if ([ids count] > 0) {
+        NSFetchRequest *fr = [[NSFetchRequest alloc] initWithEntityName:name];
+        for (TVIdPair *pair in ids) {
             if (pair.serverId.length > 0) {
                 NSPredicate *p1 = [NSPredicate predicateWithFormat:@"serverId == %@", pair.serverId];
                 [fr setPredicate:p1];
@@ -306,7 +305,6 @@
                 if ([self fetch:fr withCtx:ctx outcome:a1]) {
                     if ([a1 count] > 0) {
                         [s addObject:a1[0]];
-                        NSLog(@"s count: %lu", (unsigned long)[[d objectForKey:@"cards"] count]);
                     }
                 }
                 if ([a1 count] == 0) {
@@ -325,10 +323,10 @@
             }
         }
     }
-    return d;
+    return s;
 }
 
-#pragma mark - find a card from array
+#pragma mark - get objs by given ids
 
 // ids has NSDictionary values like this: 1. @"serverId": store the serverId 2. @"localId": store the localId
 - (NSArray *)getObjs:(NSSet *)ids name:(NSString *)entityName inCtx:(NSManagedObjectContext *)ctx
@@ -378,6 +376,8 @@
     }
     return nil;
 }
+
+#pragma mark - find a card from array
 
 - (NSDictionary *)findCard:(NSString *)serverId localId:(NSString *)localId inArray:(NSArray *)array
 {

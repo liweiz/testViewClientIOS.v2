@@ -130,12 +130,9 @@
     if ([self checkIfTargetIsInContext]) {
         TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-            NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
-            [d setObject:self.cardToUpdateServerId forKey:@"serverId"];
-            [d setObject:self.cardToUpdateLocalId forKey:@"localId"];
-            NSArray *a = [crud getObjs:[NSSet setWithObject:d] name:@"TVCard"];
-            if ([a count] > 0) {
-                [crud updateOneCard:a[0] by:[self getReadyForCard] fromServer:NO];
+            TVCard *c = [crud getOneCard:self.box.cardIdInEditing inCtx:crud.ctx];
+            if (c) {
+                [crud userUpdateOneCard:c by:[self getReadyForCard]];
                 if ([crud saveWithCtx:crud.ctx]) {
                     [self dismissSaveView];
                 }
@@ -154,9 +151,9 @@
     [d setObject:self.myNewViewCtl.myTargetView.text forKey:@"target"];
     [d setObject:self.myNewViewCtl.myTranslationView.text forKey:@"translation"];
     [d setObject:self.myNewViewCtl.myDetailView.text forKey:@"detail"];
-    [d setObject:self.box.user.serverId forKey:@"belongTo"];
-    [d setObject:self.box.user.sourceLang forKey:@"sourceLang"];
-    [d setObject:self.box.user.targetLang forKey:@"targetLang"];
+    [d setObject:self.box.userServerId forKey:@"belongTo"];
+    [d setObject:self.box.sourceLang forKey:@"sourceLang"];
+    [d setObject:self.box.targetLang forKey:@"targetLang"];
     return d;
 }
 

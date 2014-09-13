@@ -186,25 +186,16 @@
     self.box.transitionPointInRoot = [self.signInButtonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     TVRequester *reqster = [[TVRequester alloc] init];
     reqster.box = self.box;
-    reqster.fromVewTag = self.view.tag;
     reqster.requestType = TVSignIn;
     
-    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
-    NSPredicate *pUser = [NSPredicate predicateWithFormat:@"email like %@", self.emailInput.text];
-    [fetchRequest setPredicate:pUser];
-    NSArray *r = [self.box.ctx executeFetchRequest:fetchRequest error:nil];
-    if ([r count] > 0) {
-        reqster.objectIdArray = [NSMutableArray arrayWithCapacity:0];
-        [reqster.objectIdArray addObject:r[0]];
-    }
     reqster.isUserTriggered = YES;
     reqster.email = self.emailInput.text;
     reqster.password = self.passwordInput.text;
     reqster.isBearer = NO;
-    reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
+    //    reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    [reqster checkServerAvailToProceed];
+    [reqster setupAndLoadToQueue:self.box.comWorker];
 }
 
 - (void)showSwitchToSignUp
@@ -338,7 +329,6 @@
 {
     TVRequester *reqster = [[TVRequester alloc] init];
     reqster.box = self.box;
-    reqster.fromVewTag = self.view.tag;
     reqster.requestType = TVSignUp;
     reqster.email = self.emailInput.text;
     reqster.password = self.passwordInput.text;
@@ -353,11 +343,11 @@
     }
     NSLog(@"sLang: %@", self.box.sourceLang);
     NSLog(@"tLang: %@", self.box.targetLang);
-    reqster.body = [self getJSONSignUpWithSource:self.box.sourceLang target:self.box.targetLang err:nil];
+//    reqster.body = [self getJSONSignUpWithSource:self.box.sourceLang target:self.box.targetLang err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
     reqster.isUserTriggered = YES;
-    [reqster checkServerAvailToProceed];
+    [reqster setupAndLoadToQueue:self.box.comWorker];
 }
 
 - (void)goToSignIn
@@ -389,6 +379,11 @@
     if (self.switchToSignUp) {
         [UIView animateWithDuration:self.animationSec animations:^{
             self.switchToSignUp.alpha = 0.0f;
+        }];
+    }
+    if (self.nextButton) {
+        [UIView animateWithDuration:self.animationSec animations:^{
+            self.nextButton.alpha = 0.0f;
         }];
     }
     if (!self.forgotPasswordButton) {
@@ -475,7 +470,7 @@
     
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    [reqster checkServerAvailToProceed];
+    [reqster setupAndLoadToQueue:self.box.comWorker];
 }
 
 #pragma mark - keyboard
@@ -504,19 +499,19 @@
 {
     // Validate email
     if (self.emailInput.text.length == 0) {
-        self.box.warning = @"Email should not be empty.";
+        [self.box.warning setString:@"Email should not be empty."];
         [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
         return NO;
     }
     // Validate password
     if (self.passwordInput.alpha == 1.0f) {
         if (self.passwordInput.text.length == 0) {
-            self.box.warning = @"Password should not be empty.";
+            [self.box.warning setString:@"Password should not be empty."];
             [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
             return NO;
         } else if (self.passwordInput.text.length < 6 || self.passwordInput.text.length > 20) {
             // Password's length has to be no less than 6 and no more than 20.
-            self.box.warning = @"Password's length has to be between 6 and 20.";
+            [self.box.warning setString:@"Password's length has to be between 6 and 20."];
             [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
             return NO;
         }

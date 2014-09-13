@@ -112,12 +112,12 @@ NSString *const tvSignOut = @"tvSignOut";
     self.sysMsg.textColor = [UIColor whiteColor];
     self.sysMsg.backgroundColor = [UIColor greenColor];
     
-//    [self loadController];
-    [self loadContentCtl];
+    [self loadController];
+
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showActivationBelow:) name:tvShowActivation object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showNativePickBelow:) name:tvShowNative object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTargetPickBelow:) name:tvShowTarget object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showActivationBelow) name:tvShowActivation object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showNativePickBelow) name:tvShowNative object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTargetPickBelow) name:tvShowTarget object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addAndCheckReqNo) name:tvAddAndCheckReqNo object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(minusAndCheckReqNo) name:tvMinusAndCheckReqNo object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showWarningWithText:) name:tvShowWarning object:nil];
@@ -134,7 +134,7 @@ NSString *const tvSignOut = @"tvSignOut";
  In both 1 and 2, launch a user triggered sync cycle, which leads to the indicator to show up and user has to wait.
  If no language pair returned from server, show lang pick view and use "POST" deivceInfo to create one on server.
  */
-// 1. sign up/in: get from "POST" user response.  check activation status when updated user available.
+// 1. sign up/in: get from "POST" user response. check activation status when updated user available.
 // 2. before being activated:
 // 3. after being activated: get user settings and cards through sync cycle.
 
@@ -158,7 +158,7 @@ NSString *const tvSignOut = @"tvSignOut";
     r.isUserTriggered = isUserTriggered;
     r.isBearer = YES;
     r.method = @"GET";
-    r.accessToken = [self getAccessTokenForAccount:self.box.ids.userServerId];
+    r.accessToken = [self getAccessTokenForAccount:self.box.userServerId];
     [r setupAndLoadToQueue:self.box.comWorker];
 }
 
@@ -201,9 +201,9 @@ NSString *const tvSignOut = @"tvSignOut";
 
 // view layers from upper to bottom: login/activation/langPicker/content
 // Compare main view layer index
-- (UIView *)getCurrentView:(NSInteger)tag
+- (UIView *)getCurrentView:(NSInteger)ctlOnDuty
 {
-    switch (tag) {
+    switch (ctlOnDuty) {
         case 1001:
             return self.loginViewController.view;
         case 1002:
@@ -212,50 +212,65 @@ NSString *const tvSignOut = @"tvSignOut";
             return self.nativeViewController.view;
         case 1004:
             return self.targetViewController.view;
-//        case TVContentCtl:
-//            return nil;
+        case 1009:
+            return self.contentViewController.view;
         default:
             return nil;
     }
 }
 
-- (void)showActivationBelow:(NSNotification *)note
+- (UIView *)getViewOnDuty
 {
-    TVRequester *r = note.object;
+    switch (self.box.ctlOnDuty) {
+        case TVLoginCtl:
+            return self.loginViewController.view;
+        case TVActivationCtl:
+            return self.activationViewController.view;
+        case TVNativePickCtl:
+            return self.nativeViewController.view;
+        case TVTargetPickCtl:
+            return self.targetViewController.view;
+        case TVContentCtl:
+            return self.contentViewController.view;
+        default:
+            return nil;
+    }
+}
+
+- (void)showActivationBelow
+{
     [self loadActivationCtl:NO];
-    [self showViewBelow:self.activationViewController.view currentView:[self getCurrentView:r.fromVewTag] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+    [self showViewBelow:self.activationViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+    self.box.ctlOnDuty = TVActivationCtl;
 }
 
-- (void)showAfterActivated:(NSNotification *)note
+- (void)showNativePickBelow
 {
-    TVRequester *r = note.object;
-    // If user
-}
-
-- (void)showNativePickBelow:(NSNotification *)note
-{
-    TVLoginViewController *c = note.object;
     [self loadNativePickCtl];
-    [self showViewBelow:self.nativeViewController.view currentView:[self getCurrentView:c.view.tag] baseView:self.view pointInBaseView:c.box.transitionPointInRoot];
+    [self showViewBelow:self.nativeViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+    self.box.ctlOnDuty = TVNativePickCtl;
 }
 
-- (void)showNativePickAbove:(NSNotification *)note
+- (void)showNativePickAbove
 {
-    TVLangPickViewController *c = note.object;
     [self loadNativePickCtl];
-    [self showViewAbove:self.nativeViewController.view currentView:[self getCurrentView:c.view.tag] baseView:self.view pointInBaseView:c.box.transitionPointInRoot];
+    [self showViewAbove:self.nativeViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+    self.box.ctlOnDuty = TVNativePickCtl;
 }
 
-- (void)showTargetPickBelow:(NSNotification *)note
+- (void)showTargetPickBelow
 {
-    TVLangPickViewController *c = note.object;
     [self loadTargetPickCtl];
-    [self showViewBelow:self.targetViewController.view currentView:[self getCurrentView:c.view.tag] baseView:self.view pointInBaseView:c.box.transitionPointInRoot];
+    [self showViewBelow:self.targetViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+    self.box.ctlOnDuty = TVTargetPickCtl;
 }
 
-- (void)showContentBelow:(NSNotification *)note
+//
+- (void)showContentBelow
 {
-    TVRequester *r = note.object;
+    [self loadContentCtl];
+    [self showViewBelow:self.contentViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+    self.box.ctlOnDuty = TVContentCtl;
 }
 
 - (void)pinchToShowAbove:(NSNotification *)note
@@ -264,22 +279,29 @@ NSString *const tvSignOut = @"tvSignOut";
     NSInteger n = c.view.tag;
     if (n == 1002 || n == 1003) {
         [self loadLoginCtl];
-        [self showViewAbove:self.loginViewController.view currentView:c.view baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+        [self showViewAbove:self.loginViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
         if (n == 1002) {
             [self signOut:self.box.userServerId];
         }
     } else if (n == 1004) {
         [self loadNativePickCtl];
-        [self showViewAbove:self.nativeViewController.view currentView:c.view baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+        [self showViewAbove:self.nativeViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
     }
 }
 
-// viewController hierarchy
-// root/content/activation/login
-// login: target/native/signInOrUp
-// content 1 new card: compose/action
-// content 2 card list: list/menu
-// content 3 dic: context/contextList/detail/DetailList/translation/translationList/searchInput
+/*
+ viewController hierarchy
+ root/content/activation/login
+ login: target/native/signInOrUp
+ content 1 new card: compose/action
+ content 2 card list: list/menu
+ content 3 dic: context/contextList/detail/DetailList/translation/translationList/searchInput
+ 
+ view layers from upmost to the bottom:
+ signInOrUp=>activation=>targetLang=>nativeLang
+ ==>>
+ content
+ */
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
 {
@@ -327,7 +349,7 @@ NSString *const tvSignOut = @"tvSignOut";
         TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
         TVUser *u = [crud getLoggedInUser:crud.ctx];
         if (u) {
-            [self.box.ids.userServerId setString:u.serverId];
+            [self.box.userServerId setString:u.serverId];
             if (u.activated.boolValue == YES) {
                 [self loadContentCtl];
             } else {
@@ -366,7 +388,7 @@ NSString *const tvSignOut = @"tvSignOut";
             r.isBearer = YES;
             r.method = @"GET";
             [r setupRequest];
-            NSMutableArray *m = [self getCardVerList:self.box.ids.userServerId withCtx:crud.ctx];
+            NSMutableArray *m = [self getCardVerList:self.box.userServerId withCtx:crud.ctx];
             r.body = [self getJSONSyncWithCardVerList:m err:nil];
             [r setupAndLoadToQueue:self.box.comWorker];
         } else {
@@ -406,7 +428,6 @@ NSString *const tvSignOut = @"tvSignOut";
         [self.nativeViewController didMoveToParentViewController:self];
     }
     self.nativeViewController.view.hidden = NO;
-    self.box.ctlOnDuty = TVNativePickCtl;
 }
 
 - (void)loadTargetPickCtl
@@ -422,7 +443,6 @@ NSString *const tvSignOut = @"tvSignOut";
         [self.targetViewController didMoveToParentViewController:self];
     }
     self.targetViewController.view.hidden = NO;
-    self.box.ctlOnDuty = TVTargetPickCtl;
 }
 
 - (void)loadActivationCtl:(BOOL)isOnTop
@@ -438,37 +458,20 @@ NSString *const tvSignOut = @"tvSignOut";
         [self.view addSubview:self.activationViewController.view];
     }
     self.activationViewController.view.hidden = NO;
-    self.box.ctlOnDuty = TVActivationCtl;
 }
 
 - (void)loadContentCtl
 {
-//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(startSync:) name:NSManagedObjectContextDidSaveNotification object:nil];
-    self.contentViewController = [[TVContentRootViewController alloc] initWithNibName:nil bundle:nil];
-    
-    self.contentViewController.searchViewIncluded = NO;
-    self.contentViewController.box = self.box;
-    
-    [self addChildViewController:self.contentViewController];
-    [self.view addSubview:self.contentViewController.view];
-    [self.contentViewController didMoveToParentViewController:self];
+    if (!self.contentViewController) {
+        self.contentViewController = [[TVContentRootViewController alloc] initWithNibName:nil bundle:nil];
+        
+        [self addChildViewController:self.contentViewController];
+        [self.view addSubview:self.contentViewController.view];
+        [self.contentViewController didMoveToParentViewController:self];
+        self.contentViewController.view.tag = 1009;
+    }
+    self.contentViewController.view.hidden = NO;
 }
-
-//- (void)startSync:(NSNotification *)didSaveNotification
-//{
-//    if (self.willSendRequest == YES) {
-//        NSMutableSet *entitiesToSync = [NSMutableSet setWithCapacity:1];
-//        [entitiesToSync addObject:@"TVCard"];
-//        if ([self startSyncEntitySet:entitiesToSync
-//               withNewCardController:self.contentViewController.myNewBaseViewController user:self.user]) {
-//            // Successful
-//            NSLog(@"connected");
-//        } else {
-//            // Failed, show indicator to let users know
-//            NSLog(@"not connected");
-//        }
-//    }
-//}
 
 #pragma mark - warning display
 

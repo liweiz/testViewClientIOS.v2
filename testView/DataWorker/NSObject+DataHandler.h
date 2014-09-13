@@ -11,7 +11,7 @@
 #import "TVUser.h"
 #import "TVCard.h"
 #import "TVRequestIdCandidate.h"
-#import "TVIdCarrier.h"
+#import "TVIdPair.h"
 
 typedef NS_ENUM(NSInteger, TVDocEditCode) {
     TVDocNoAction,
@@ -49,7 +49,7 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 - (NSInteger)getRequestIdCandidateOperationVersion:(TVBase *)base;
 - (TVRequestIdCandidate *)analyzeOneRecord:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx serverIsAvailable:(BOOL)isAvail;
 - (NSArray *)getCards:(NSString *)userServerId inCtx:(NSManagedObjectContext *)ctx;
-- (TVCard *)getOneCard:(NSString *)cardServerId inCtx:(NSManagedObjectContext *)ctx;
+- (TVCard *)getOneCard:(TVIdPair *)cardIds inCtx:(NSManagedObjectContext *)ctx;
 - (NSArray *)getObjs:(NSSet *)ids name:(NSString *)entityName inCtx:(NSManagedObjectContext *)ctx;
 - (NSDictionary *)findCard:(NSString *)serverId localId:(NSString *)localId inArray:(NSArray *)array;
 
@@ -59,7 +59,7 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 - (TVRequestIdCandidate *)findReqCandidate:(TVBase *)b byReqId:(NSString *)reqId;
 - (NSMutableArray *)getRequestIdCandidatesForRecord:(TVBase *)b ascending:(BOOL)ascending;
 - (TVUser *)getLoggedInUser:(NSManagedObjectContext *)ctx;
-- (NSDictionary *)getObjInCarrier:(TVIdCarrier *)ids inCtx:(NSManagedObjectContext *)ctx;
+- (NSSet *)getObjInCarrier:(NSSet *)ids entityName:(NSString *)name inCtx:(NSManagedObjectContext *)ctx;
 
 - (void)signOut:(NSString *)userId;
 

@@ -16,7 +16,7 @@
 @implementation TVCRUDChannel
 
 @synthesize ctx;
-
+@synthesize fromVewTag;
 @synthesize box;
 @synthesize ids;
 
@@ -24,7 +24,7 @@
 {
     self = [super init];
     if (self) {
-        self.ids = [[TVIdCarrier alloc] init];
+        self.ids = [[NSMutableSet alloc] init];
         self.box = ((TVAppRootViewController *)[UIApplication sharedApplication].keyWindow.rootViewController).box;
         self.ctx = [self managedObjectContext:self.ctx coordinator:self.box.coordinator model:self.box.model];
     }
@@ -267,7 +267,7 @@
 
 #pragma mark - process response
 
-// Only successful request leads to response with
+// od: @"user": TVUser @"cards": NSSet TVCard
 - (BOOL)processResponseJSON:(NSMutableDictionary *)dict reqType:(NSInteger)t objDic:(NSDictionary *)od
 {
     BOOL toSave = NO;
@@ -465,6 +465,7 @@
     if (toSave) {
         if ([self saveWithCtx:self.ctx]) {
             // action after saved to db
+            [self actionAfterReqToDbDone:t];
             return YES;
         }
     }
@@ -489,14 +490,22 @@
                 // Show view to ask user to activate
                 [[NSNotificationCenter defaultCenter] postNotificationName:tvShowActivation object:self];
             };
-            //        case TVOneUser:
-            //            if (self.box.ctlOnDuty == TVActivationCtl) {
-            //                if ([self getLatestUserInDB].activated.integerValue == 1) {
-            //                    [[NSNotificationCenter defaultCenter] postNotificationName:tvShowLangPick object:self];
-            //                } else {
-            //                    // Show message that user is still not activated
-            //                }
-            //            };
+        case TVOneUser:
+            if (self.box.ctlOnDuty == TVActivationCtl) {
+                TVUser *u = [self getLoggedInUser:self.ctx];
+                if (u.activated.boolValue == YES) {
+                    if (u.sourceLang.length > 0) {
+                        // User already selected lang pair before.
+                        [[NSNotificationCenter defaultCenter] postNotificationName:tvShowContent object:self];
+                    } else {
+                        [[NSNotificationCenter defaultCenter] postNotificationName:tvShowTarget object:self];
+                    }
+                } else {
+                    // Show message that user is still not activated
+                    [self.box.warning setString:@"Activation needed."];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
+                }
+            };
             //        case TVSync:
             //            if (self.box.ctlOnDuty == TVLangPickCtl) {
             //                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowAfterActivated object:self];

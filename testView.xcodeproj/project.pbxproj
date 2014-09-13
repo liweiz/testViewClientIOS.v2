@@ -52,7 +52,6 @@
 		EEA1D21819AD7A52004BE5A9 /* NSObject+CoreDataStack.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA1D21719AD7A52004BE5A9 /* NSObject+CoreDataStack.m */; };
 		EEA889EC19885E4100F042EB /* TVNewViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA889EB19885E4100F042EB /* TVNewViewController.m */; };
 		EEA889F21988A0E200F042EB /* TVScrollViewVertical.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA889F11988A0E200F042EB /* TVScrollViewVertical.m */; };
-		EEAE026A19BA5226009B2EC9 /* TVIdCarrier.m in Sources */ = {isa = PBXBuildFile; fileRef = EEAE026919BA5226009B2EC9 /* TVIdCarrier.m */; };
 		EEAE026D19BA54FB009B2EC9 /* TVIdPair.m in Sources */ = {isa = PBXBuildFile; fileRef = EEAE026C19BA54FB009B2EC9 /* TVIdPair.m */; };
 		EEB6304F1993B96200EDFD56 /* TVCellLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = EEB630461993B96200EDFD56 /* TVCellLabel.m */; };
 		EEB630501993B96200EDFD56 /* TVCellLabelContext.m in Sources */ = {isa = PBXBuildFile; fileRef = EEB630481993B96200EDFD56 /* TVCellLabelContext.m */; };
@@ -154,8 +153,6 @@
 		EEA889EB19885E4100F042EB /* TVNewViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVNewViewController.m; sourceTree = "<group>"; };
 		EEA889F01988A0E200F042EB /* TVScrollViewVertical.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVScrollViewVertical.h; sourceTree = "<group>"; };
 		EEA889F11988A0E200F042EB /* TVScrollViewVertical.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVScrollViewVertical.m; sourceTree = "<group>"; };
-		EEAE026819BA5226009B2EC9 /* TVIdCarrier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVIdCarrier.h; sourceTree = "<group>"; };
-		EEAE026919BA5226009B2EC9 /* TVIdCarrier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVIdCarrier.m; sourceTree = "<group>"; };
 		EEAE026B19BA54FB009B2EC9 /* TVIdPair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVIdPair.h; sourceTree = "<group>"; };
 		EEAE026C19BA54FB009B2EC9 /* TVIdPair.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVIdPair.m; sourceTree = "<group>"; };
 		EEB630451993B96200EDFD56 /* TVCellLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVCellLabel.h; sourceTree = "<group>"; };
@@ -378,8 +375,6 @@
 				EEA1D21719AD7A52004BE5A9 /* NSObject+CoreDataStack.m */,
 				EE6BDACB19AFE5F000545DAF /* TVCRUDChannel.h */,
 				EE6BDACC19AFE5F000545DAF /* TVCRUDChannel.m */,
-				EEAE026819BA5226009B2EC9 /* TVIdCarrier.h */,
-				EEAE026919BA5226009B2EC9 /* TVIdCarrier.m */,
 				EEAE026B19BA54FB009B2EC9 /* TVIdPair.h */,
 				EEAE026C19BA54FB009B2EC9 /* TVIdPair.m */,
 			);
@@ -656,7 +651,6 @@
 				EEB630501993B96200EDFD56 /* TVCellLabelContext.m in Sources */,
 				EEFDD933180F12CA0058A366 /* KeychainItemWrapper.m in Sources */,
 				D09F1026192465AA00CDF21E /* NSObject+DataHandler.m in Sources */,
-				EEAE026A19BA5226009B2EC9 /* TVIdCarrier.m in Sources */,
 				EEE4F8711812E869009939F1 /* TVLoginViewController.m in Sources */,
 				D06A1A4E179DC6A3003346F4 /* TVAppDelegate.m in Sources */,
 				D06A1A4A179DC6A3003346F4 /* main.m in Sources */,
@@ -802,6 +796,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				BUNDLE_LOADER = "";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -830,6 +825,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				BUNDLE_LOADER = "";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";

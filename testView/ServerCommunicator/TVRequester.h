@@ -10,7 +10,6 @@
 #import "NSObject+NetworkHandler.h"
 #import "TVRequestIdCandidate.h"
 #import "TVRootViewCtlBox.h"
-#import "TVIdCarrier.h"
 #import "TVQueueElement.h"
 
 @interface TVRequester : NSObject
@@ -35,11 +34,10 @@
 @property (strong, nonatomic) NSMutableArray *objectIdArray;
 
 @property (assign, nonatomic) BOOL isUserTriggered;
-// Record the tag of the view that triggers the requester.
-@property (assign, nonatomic) NSInteger fromVewTag;
+
 
 @property (strong, nonatomic) TVRootViewCtlBox *box;
-@property (strong, nonatomic) TVIdCarrier *ids;
+@property (strong, nonatomic) NSMutableSet *ids;
 
 - (void)proceedToRequest;
 - (NSMutableURLRequest *)setupRequest;
