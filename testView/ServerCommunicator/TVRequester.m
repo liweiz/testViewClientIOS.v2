@@ -102,18 +102,20 @@
              NSLog(@"number of requests in progress not right: %ld", (long)self.box.numberOfUserTriggeredRequests);
          }
          if ([(NSHTTPURLResponse *)response statusCode] == 200) {
-             // Mark requestId done
-             TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
-                 TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-                 TVUser *u = [self getLoggedInUser:crud.ctx];
-                 if (u) {
-                     if ([crud markReqDone:u.serverId localId:u.localId reqId:self.reqId entityName:@"TVUser"]) {
-                         //
+             // Mark requestId done, if there is a requestId for the request.
+             if (self.reqId.length > 0) {
+                 TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
+                     TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
+                     TVUser *u = [self getLoggedInUser:crud.ctx];
+                     if (u) {
+                         if ([crud markReqDone:u.serverId localId:u.localId reqId:self.reqId entityName:@"TVUser"]) {
+                             //
+                         }
                      }
-                 }
-             }];
-             // No need to set queuePriority here since it's a normal one.
-             [[NSOperationQueue mainQueue] addOperation:o];
+                 }];
+                 // No need to set queuePriority here since it's a normal one.
+                 [[NSOperationQueue mainQueue] addOperation:o];
+             }
              if (data.length > 0) {
                  NSError *aErr;
                  NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&aErr];

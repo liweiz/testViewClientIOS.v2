@@ -12,6 +12,7 @@
 #import "TVAppRootViewController.h"
 #import "TVRequester.h"
 #import "TVQueueElement.h"
+#import "TVUser.h"
 
 @implementation TVCRUDChannel
 
@@ -127,7 +128,7 @@
     if (recordServerId.length > 0) {
         NSPredicate *p1 = [NSPredicate predicateWithFormat:@"serverId == %@", recordServerId];
         [fr setPredicate:p1];
-        NSMutableArray *r1;
+        NSMutableArray *r1 = [NSMutableArray arrayWithCapacity:0];;
         if ([self fetch:fr withCtx:self.ctx outcome:r1]) {
             if ([r1 count] > 0) {
                 found = YES;
@@ -139,7 +140,7 @@
         if (recordLocalId.length > 0) {
             NSPredicate *p2 = [NSPredicate predicateWithFormat:@"localId == %@", recordLocalId];
             [fr setPredicate:p2];
-            NSMutableArray *r2;
+            NSMutableArray *r2 = [NSMutableArray arrayWithCapacity:0];;
             if ([self fetch:fr withCtx:self.ctx outcome:r2]) {
                 if ([r2 count] > 0) {
                     found = YES;
@@ -279,6 +280,7 @@
             if ([dict valueForKey:@"user"]) {
                 [self setupNewDocBaseServer:newUser fromRequest:[dict valueForKey:@"user"]];
                 [self setupNewUserServer:newUser withDic:dict];
+                NSLog(@"newUser: %@", newUser);
                 if ([dict valueForKey:@"tokens"]) {
                     NSMutableDictionary *t = [dict valueForKey:@"tokens"];
                     [self saveAccessToken:[t valueForKey:@"accessToken"] refreshToken:[t valueForKey:@"refreshToken"] toAccount:newUser.serverId];
@@ -476,20 +478,29 @@
 {
     switch (reqType) {
         case TVSignUp:
+        {
+            // Set userServerId for box
+            TVUser *u = [self getLoggedInUser:self.ctx];
+            [self.box.userServerId setString:u.serverId];
+            if (u.activated.integerValue == 1) {
+                // Show contentCtl
+            } else {
+                // Show view to ask user to activate
+                [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
+                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowActivation object:self];
+            }
+            break;
+        }
+        case TVSignIn:
+            // Set userServerId for box
+            [self.box.userServerId setString:[self getLoggedInUser:self.ctx].serverId];
             if ([self getLoggedInUser:self.ctx].activated.integerValue == 1) {
                 
             } else {
                 // Show view to ask user to activate
                 [[NSNotificationCenter defaultCenter] postNotificationName:tvShowActivation object:self];
             }
-            
-        case TVSignIn:
-            if ([self getLoggedInUser:self.ctx].activated.integerValue == 1) {
-                
-            } else {
-                // Show view to ask user to activate
-                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowActivation object:self];
-            };
+            break;
         case TVOneUser:
             if (self.box.ctlOnDuty == TVActivationCtl) {
                 TVUser *u = [self getLoggedInUser:self.ctx];
@@ -505,7 +516,8 @@
                     [self.box.warning setString:@"Activation needed."];
                     [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
                 }
-            };
+            }
+            break;
             //        case TVSync:
             //            if (self.box.ctlOnDuty == TVLangPickCtl) {
             //                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowAfterActivated object:self];

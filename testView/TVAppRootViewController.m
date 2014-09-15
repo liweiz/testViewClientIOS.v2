@@ -239,7 +239,7 @@ NSString *const tvSignOut = @"tvSignOut";
 
 - (void)showActivationBelow
 {
-    [self loadActivationCtl:NO];
+    [self loadActivationCtl];
     [self showViewBelow:self.activationViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
     self.box.ctlOnDuty = TVActivationCtl;
 }
@@ -317,6 +317,10 @@ NSString *const tvSignOut = @"tvSignOut";
                     self.nativeViewController.view.hidden = YES;
                     [self.nativeViewController.view.layer removeAllAnimations];
                     break;
+                case TVTargetPickCtl:
+                    self.targetViewController.view.hidden = YES;
+                    [self.targetViewController.view.layer removeAllAnimations];
+                    break;
                 default:
                     break;
             }
@@ -353,7 +357,7 @@ NSString *const tvSignOut = @"tvSignOut";
             if (u.activated.boolValue == YES) {
                 [self loadContentCtl];
             } else {
-                [self loadActivationCtl:YES];
+                [self loadActivationCtl];
             }
         } else {
             [self loadLoginCtl];
@@ -445,17 +449,15 @@ NSString *const tvSignOut = @"tvSignOut";
     self.targetViewController.view.hidden = NO;
 }
 
-- (void)loadActivationCtl:(BOOL)isOnTop
+- (void)loadActivationCtl
 {
     if (!self.activationViewController) {
         self.activationViewController = [[TVActivationViewController alloc] initWithNibName:nil bundle:nil];
-        
+        self.activationViewController.box = self.box;
         [self addChildViewController:self.activationViewController];
+        [self.view addSubview:self.activationViewController.view];
         [self.activationViewController didMoveToParentViewController:self];
         self.activationViewController.view.tag = 1002;
-    }
-    if (isOnTop) {
-        [self.view addSubview:self.activationViewController.view];
     }
     self.activationViewController.view.hidden = NO;
 }

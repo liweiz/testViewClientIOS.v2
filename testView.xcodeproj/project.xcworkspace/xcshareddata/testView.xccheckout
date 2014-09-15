@@ -20,7 +20,7 @@
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>10265E242415D473A6A613214DB7AC3EE3D43F93</key>
-		<string>../../testView/KIF/</string>
+		<string>../../testView/KIF</string>
 		<key>976923ED0892DD8357B190C9104FDF9FA99BE872</key>
 		<string>../..</string>
 	</dict>

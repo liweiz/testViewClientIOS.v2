@@ -34,12 +34,12 @@
     NSFetchRequest *fetchCard = [NSFetchRequest fetchRequestWithEntityName:@"TVCard"];
     NSPredicate *pCard = [NSPredicate predicateWithFormat:@"belongToUser == %@ && lastUnsyncAction != %d", userServerId, TVDocNoAction];
     fetchCard.predicate = pCard;
-    NSMutableArray *r1;
+    NSMutableArray *r1 = [NSMutableArray arrayWithCapacity:0];
     if ([self fetch:fetchUser withCtx:ctx outcome:r1]) {
         if ([r1 count] > 0) {
             [r addObject:r1[0]];
         }
-        NSMutableArray *r2;
+        NSMutableArray *r2 = [NSMutableArray arrayWithCapacity:0];;
         if ([self fetch:fetchCard withCtx:ctx outcome:r2]) {
             if ([r2 count] > 0) {
                 [r addObjectsFromArray:r2];
@@ -240,8 +240,8 @@
 - (TVUser *)getLoggedInUser:(NSManagedObjectContext *)ctx
 {
     NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:@"TVUser"];
-    NSMutableArray *r;
-    if ([ctx fetch:fr withCtx:ctx outcome:r]) {
+    NSMutableArray *r = [NSMutableArray arrayWithCapacity:0];
+    if ([self fetch:fr withCtx:ctx outcome:r]) {
         if ([r count] != 0) {
             for (TVUser *u in r) {
                 NSString *s = [self getRefreshTokenForAccount:u.serverId];
@@ -259,7 +259,7 @@
     NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:@"TVCard"];
     NSPredicate *p = [NSPredicate predicateWithFormat:@"(belongToUser like %@) && !(locallyDeleted like NO)", userServerId];
     [fr setPredicate:p];
-    NSMutableArray *r;
+    NSMutableArray *r = [NSMutableArray arrayWithCapacity:0];;
     if ([self fetch:fr withCtx:ctx outcome:r]) {
         return r;
     }
@@ -273,7 +273,7 @@
         NSPredicate *p1 = [NSPredicate predicateWithFormat:@"serverId like %@", cardIds.serverId];
         [fr setPredicate:p1];
     }
-    NSMutableArray *r;
+    NSMutableArray *r = [NSMutableArray arrayWithCapacity:0];;
     if ([self fetch:fr withCtx:ctx outcome:r]) {
         if ([r count] > 0) {
             return r[0];
@@ -301,7 +301,7 @@
             if (pair.serverId.length > 0) {
                 NSPredicate *p1 = [NSPredicate predicateWithFormat:@"serverId == %@", pair.serverId];
                 [fr setPredicate:p1];
-                NSMutableArray *a1;
+                NSMutableArray *a1 = [NSMutableArray arrayWithCapacity:0];;
                 if ([self fetch:fr withCtx:ctx outcome:a1]) {
                     if ([a1 count] > 0) {
                         [s addObject:a1[0]];
@@ -312,7 +312,7 @@
                     if (pair.localId.length > 0) {
                         NSPredicate *p2 = [NSPredicate predicateWithFormat:@"localId == %@", pair.localId];
                         [fr setPredicate:p2];
-                        NSMutableArray *a2;
+                        NSMutableArray *a2 = [NSMutableArray arrayWithCapacity:0];;
                         if ([self fetch:fr withCtx:ctx outcome:a2]) {
                             if ([a2 count] > 0) {
                                 [s addObject:a2[0]];
@@ -350,7 +350,7 @@
     NSPredicate *p2 = [NSPredicate predicateWithFormat:@"localId in %@",
                        localIdToProcess];
     [r setPredicate:p1];
-    NSMutableArray *a1;
+    NSMutableArray *a1 = [NSMutableArray arrayWithCapacity:0];;
     if ([self fetch:r withCtx:ctx outcome:a1]) {
         // Remove localId corresponding to serverId that has been fetched.
         for (TVBase *b in a1) {
@@ -367,7 +367,7 @@
                 }
             }
         }
-        NSMutableArray *a2;
+        NSMutableArray *a2 = [NSMutableArray arrayWithCapacity:0];;
         [r setPredicate:p2];
         if ([self fetch:r withCtx:ctx outcome:a2]) {
             [a1 addObjectsFromArray:a2];
@@ -404,15 +404,16 @@
 #pragma mark - fetch & save data process
 
 // Its return value indicates if the save operation is successful.
+// Objective-C is a pass-by-value language, so we have to initialize outcome before passing it as parameter here: http://stackoverflow.com/questions/7680310/objective-c-can-you-test-an-uninitialized-pointer-for-static-class-type
 - (BOOL)fetch:(NSFetchRequest *)r withCtx:(NSManagedObjectContext *)ctx outcome:(NSMutableArray *)outcome
 {
     NSError *err;
     NSArray *a = [ctx executeFetchRequest:r error:&err];
-    if (!err) {
+    if (err) {
         [[NSNotificationCenter defaultCenter] postNotificationName:tvFetchOrSaveErr object:self];
         return NO;
     } else {
-        outcome = [NSMutableArray arrayWithArray:a];
+        [outcome addObjectsFromArray:a];
         return YES;
     }
 }
@@ -422,7 +423,7 @@
 {
     NSError *err;
     [ctx save:&err];
-    if (!err) {
+    if (err) {
         [[NSNotificationCenter defaultCenter] postNotificationName:tvFetchOrSaveErr object:self];
         return NO;
     } else {

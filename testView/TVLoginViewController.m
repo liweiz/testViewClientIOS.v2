@@ -343,7 +343,7 @@
     }
     NSLog(@"sLang: %@", self.box.sourceLang);
     NSLog(@"tLang: %@", self.box.targetLang);
-//    reqster.body = [self getJSONSignUpWithSource:self.box.sourceLang target:self.box.targetLang err:nil];
+    reqster.body = [self getJSONSignUpWithSource:self.box.sourceLang target:self.box.targetLang err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
     reqster.isUserTriggered = YES;
