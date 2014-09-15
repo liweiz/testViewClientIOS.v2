@@ -484,23 +484,26 @@
             [self.box.userServerId setString:u.serverId];
             if (u.activated.integerValue == 1) {
                 // Show contentCtl
+                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowContent object:self];
             } else {
                 // Show view to ask user to activate
-                [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
                 [[NSNotificationCenter defaultCenter] postNotificationName:tvShowActivation object:self];
             }
             break;
         }
         case TVSignIn:
+        {
             // Set userServerId for box
-            [self.box.userServerId setString:[self getLoggedInUser:self.ctx].serverId];
-            if ([self getLoggedInUser:self.ctx].activated.integerValue == 1) {
+            TVUser *u = [self getLoggedInUser:self.ctx];
+            [self.box.userServerId setString:u.serverId];
+            if (u.activated.integerValue == 1) {
                 
             } else {
                 // Show view to ask user to activate
                 [[NSNotificationCenter defaultCenter] postNotificationName:tvShowActivation object:self];
             }
             break;
+        }
         case TVOneUser:
             if (self.box.ctlOnDuty == TVActivationCtl) {
                 TVUser *u = [self getLoggedInUser:self.ctx];

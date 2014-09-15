@@ -52,39 +52,9 @@
     return self;
 }
 
-- (NSMutableURLRequest *)setupRequest
-{
-    self.urlBranch = [self getUrlBranchFor:self.requestType userId:self.box.userServerId deviceInfoId:self.deviceInfoId cardId:self.cardId];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[tvServerUrl stringByAppendingString:self.urlBranch]]];
-    [request setHTTPMethod:self.method];
-    if (self.contentType) {
-        [request setValue:self.contentType forHTTPHeaderField:@"Content-type"];
-    }
-    if (self.body) {
-        [request setHTTPBody:self.body];
-    }
-    NSString *auth;
-    if (self.requestType == TVEmailForPasswordResetting) {
-        // No need to set auth here
-    } else {
-        if (self.isBearer) {
-            auth = [self authenticationStringWithToken:self.accessToken];
-        } else {
-            auth = [self authenticationStringWithEmail:self.email password:self.password];
-        }
-        [request setValue:auth forHTTPHeaderField:@"Authorization"];
-    }
-    // Setup request "X-REMOLET-DEVICE-ID" in header
-    [request setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forHTTPHeaderField:@"X-REMOLET-DEVICE-ID"];
-    return request;
-}
-
 // No batch operation so far. each time, we handle only a single step operation for one record only.
 - (void)proceedToRequest
 {
-    if (self.isUserTriggered) {
-        self.box.numberOfUserTriggeredRequests = self.box.numberOfUserTriggeredRequests + 1;
-    }
     // Setup request and send
     NSMutableURLRequest *request = [self setupRequest];
     // Start the indicator if it is not showing.
@@ -152,6 +122,33 @@
              [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
          }
      }];
+}
+
+- (NSMutableURLRequest *)setupRequest
+{
+    self.urlBranch = [self getUrlBranchFor:self.requestType userId:self.box.userServerId deviceInfoId:self.deviceInfoId cardId:self.cardId];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[tvServerUrl stringByAppendingString:self.urlBranch]]];
+    [request setHTTPMethod:self.method];
+    if (self.contentType) {
+        [request setValue:self.contentType forHTTPHeaderField:@"Content-type"];
+    }
+    if (self.body) {
+        [request setHTTPBody:self.body];
+    }
+    NSString *auth;
+    if (self.requestType == TVEmailForPasswordResetting) {
+        // No need to set auth here
+    } else {
+        if (self.isBearer) {
+            auth = [self authenticationStringWithToken:self.accessToken];
+        } else {
+            auth = [self authenticationStringWithEmail:self.email password:self.password];
+        }
+        [request setValue:auth forHTTPHeaderField:@"Authorization"];
+    }
+    // Setup request "X-REMOLET-DEVICE-ID" in header
+    [request setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forHTTPHeaderField:@"X-REMOLET-DEVICE-ID"];
+    return request;
 }
 
 // Error in response is in text/plain

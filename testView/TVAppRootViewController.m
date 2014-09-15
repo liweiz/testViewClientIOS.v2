@@ -114,7 +114,7 @@ NSString *const tvSignOut = @"tvSignOut";
     
     [self loadController];
 
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showContentBelow) name:tvShowContent object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showActivationBelow) name:tvShowActivation object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showNativePickBelow) name:tvShowNative object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTargetPickBelow) name:tvShowTarget object:nil];

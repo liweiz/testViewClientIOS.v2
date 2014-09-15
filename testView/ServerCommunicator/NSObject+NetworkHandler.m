@@ -245,15 +245,15 @@
                 NSMutableURLRequest *testRequest = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://www.google.com/"]];
                 [NSURLConnection sendAsynchronousRequest:testRequest queue:q completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
                  {
+                     if (isUserTriggered) {
+                         [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
+                     }
                      if ([(NSHTTPURLResponse *)response statusCode] == 200) {
                          __block BOOL flag = YES;
                      } else {
                          __block BOOL flag = NO;
                          // Internet is not available, clear the queue since it's impossible to have the rest ones successfully processed.
                          [q cancelAllOperations];
-                     }
-                     if (isUserTriggered) {
-                         [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
                      }
                  }];
             }];
