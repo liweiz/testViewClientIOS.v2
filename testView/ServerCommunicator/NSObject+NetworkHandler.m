@@ -230,14 +230,22 @@
 #pragma mark - check server availability
 
 // Only initial app launch and user crud operations such as load a tableView trigger this. We do not set a timer-based regular check since user tends to use the app in a short peroid and it is highly impossible to have the app on without any user operation.
-- (void)checkServerAvail:(BOOL)isUserTriggered inQueue:(NSOperationQueue *)q flagToSet:(BOOL)flag noCurrentCheck:(BOOL)noOtherCheckInQueue
+- (void)checkServerAvail:(BOOL)isUserTriggered inQueue:(NSOperationQueue *)q flagToSet:(BOOL)flag
 {
     // Only check when flag indicates server is not available.
     if (flag == NO) {
         // Only add when there is no other check in queue already. We don't need multiple checks to run.
-        if (noOtherCheckInQueue == YES) {
+        BOOL otherCheckInQueueAlready = NO;
+        for (TVQueueElement *qe in q.operations) {
+            if (qe.isForServerAvailCheck) {
+                otherCheckInQueueAlready = YES;
+                break;
+            }
+        }
+        if (!otherCheckInQueueAlready) {
             TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
                 // Use itIsUserTriggered as the parameter to avoid future change of self.isUserTriggered.
+                // Nerver cancel this operation, it's a prerequisite for all other requests.
                 // Check indicator
                 if (isUserTriggered) {
                     [[NSNotificationCenter defaultCenter] postNotificationName:tvAddAndCheckReqNo object:self];
@@ -259,9 +267,9 @@
             }];
             // Jump the queue, always.
             [o setQueuePriority:NSOperationQueuePriorityVeryHigh];
+            o.isForServerAvailCheck = YES;
             [q addOperation:o];
         }
-        
     }
 }
 

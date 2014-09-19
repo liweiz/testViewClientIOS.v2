@@ -20,6 +20,35 @@
 
 @implementation NSObject (DataHandler)
 
+#pragma - mark operation blocker
+
+// To block lower priority operations.
+// All operations on the record user is interacting with are disabled. User interaction includes editing/choosingToDeleting an existing record. During this period, (1) no request is allowed to be generated, (2) ongoing request does not commit to local db, (3) waiting-listed request is cancelled.
+
+- (BOOL)checkToProceed:(NSSet *)ids withPair:(TVIdPair *)pInEditing
+{
+    for (TVIdPair *p in ids) {
+        if ([self toDismissOpsOnUserInterationObjServerId:p.serverId localId:p.localId withPair:pInEditing]) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
+// For (1) no request is allowed to be generated, (2) ongoing request does not commit to local db
+- (BOOL)toDismissOpsOnUserInterationObjServerId:(NSString *)serverId localId:(NSString *)localId withPair:(TVIdPair *)pInEditing
+{
+    if (pInEditing.serverId.length + pInEditing.localId.length > 0) {
+        // A record is under user interaction
+        if (pInEditing.serverId.length > 0 && [pInEditing.serverId isEqualToString:serverId]) {
+            return YES;
+        } else if (pInEditing.localId.length > 0 && [pInEditing.localId isEqualToString:localId]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
 #pragma - mark sync cycle
 
 // First find undone records one by one, and after all are clear, send sync request. The process can be disrupted at any time when local db changes.
@@ -333,9 +362,9 @@
 {
     NSMutableSet *serverIdToProcess = [NSMutableSet setWithCapacity:0];
     NSMutableSet *localIdToProcess = [NSMutableSet setWithCapacity:0];
-    for (NSDictionary *d in ids) {
-        NSString *serverId = [d valueForKey:@"serverId"];
-        NSString *localId = [d valueForKey:@"localId"];
+    for (TVIdPair *d in ids) {
+        NSString *serverId = d.serverId;
+        NSString *localId = d.localId;
         // Only add non-empty ones.
         if (serverId.length > 0) {
             [serverIdToProcess addObject:serverId];
@@ -354,9 +383,9 @@
     if ([self fetch:r withCtx:ctx outcome:a1]) {
         // Remove localId corresponding to serverId that has been fetched.
         for (TVBase *b in a1) {
-            for (NSDictionary *obj in ids) {
-                NSString *serverId = [obj valueForKey:@"serverId"];
-                NSString *localId = [obj valueForKey:@"localId"];
+            for (TVIdPair *obj in ids) {
+                NSString *serverId = obj.serverId;
+                NSString *localId = obj.localId;
                 if ([serverId isEqualToString:b.serverId]) {
                     for (NSString *l in localIdToProcess) {
                         if ([l isEqualToString:localId]) {

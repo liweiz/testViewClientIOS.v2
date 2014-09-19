@@ -178,7 +178,8 @@
         req.box = self.box;
         req.isUserTriggered = isUserTriggered;
         req.isBearer = YES;
-        TVRequestIdCandidate *r = [self analyzeOneRecord:u inCtx:self.ctx serverIsAvailable:self.box.serverIsAvailable];
+        TVRequestIdCandidate *r;
+        r = [self analyzeOneRecord:u inCtx:self.ctx serverIsAvailable:self.box.serverIsAvailable];
         // requestId is generated in analyzeOneRecord
         req.reqId = r.requestId;
         if (r) {
@@ -197,7 +198,10 @@
     }
     NSArray *cards = [self getCards:self.box.userServerId inCtx:self.ctx];
     for (TVCard *c in cards) {
-        TVRequestIdCandidate *r = [self analyzeOneRecord:c inCtx:self.ctx serverIsAvailable:self.box.serverIsAvailable];
+        TVRequestIdCandidate *r;
+        if ([self toDismissOpsOnUserInterationObjServerId:c.serverId localId:c.localId withPair:self.box.cardIdInEditing]) {
+            r = [self analyzeOneRecord:c inCtx:self.ctx serverIsAvailable:self.box.serverIsAvailable];
+        }
         if (r) {
             if (c.serverId.length > 0) {
                 readyToSyncCard = NO;

@@ -349,6 +349,7 @@ NSString *const tvSignOut = @"tvSignOut";
 - (void)loadController
 {
     // When sync with server, isLoggedIn is not processed on server. The response in turn is always true. So when user signs out, isLoggedIn is set to be false. Once user signs in it set to be the value in response, which is alwasy true.
+    // Nerver cancel this operation, it's a fundamental one for the app.
     TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
         TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
         TVUser *u = [crud getLoggedInUser:crud.ctx];
@@ -383,7 +384,7 @@ NSString *const tvSignOut = @"tvSignOut";
             // Prepare request
             
             
-            [self checkServerAvail:YES inQueue:self.box.comWorker flagToSet:self.box.serverIsAvailable noCurrentCheck:(!self.box.isCheckingServer)];
+            [self checkServerAvail:YES inQueue:self.box.comWorker flagToSet:self.box.serverIsAvailable];
             TVRequester *r = [[TVRequester alloc] init];
             r.box = self.box;
             // We need user wait for the result from server

@@ -34,13 +34,12 @@
 @synthesize cardId;
 @synthesize internetIsOn;
 @synthesize reqId;
-@synthesize objectIdArray;
 
 @synthesize isUserTriggered;
 
-
 @synthesize box;
 @synthesize ids;
+@synthesize objs;
 
 - (id)init
 {
@@ -48,80 +47,94 @@
     if (self) {
         // Custom initialization
         self.ids = [[NSMutableSet alloc] init];
+        self.objs = [[NSMutableSet alloc] init];
     }
     return self;
 }
 
 // No batch operation so far. each time, we handle only a single step operation for one record only.
-- (void)proceedToRequest
+- (void)proceedToRequest:(BOOL)cancellationFlag
 {
-    // Setup request and send
-    NSMutableURLRequest *request = [self setupRequest];
-    // Start the indicator if it is not showing.
-    if (self.isUserTriggered) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:tvAddAndCheckReqNo object:self];
-    }
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
-     {
-         NSLog(@"response code: %li", (long)[(NSHTTPURLResponse *)response statusCode]);
-         if (error.code == -1004) {
-             // Error Domain=NSURLErrorDomain Code=-1004 "Could not connect to the server." https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Constants/Reference/reference.html
-             //                 [ctler showSysMsg:@"Communication not successful"];
-         }
-         if (self.box.numberOfUserTriggeredRequests <= 0) {
-             NSLog(@"number of requests in progress not right: %ld", (long)self.box.numberOfUserTriggeredRequests);
-         }
-         if ([(NSHTTPURLResponse *)response statusCode] == 200) {
-             // Mark requestId done, if there is a requestId for the request.
-             if (self.reqId.length > 0) {
-                 TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
-                     TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-                     TVUser *u = [self getLoggedInUser:crud.ctx];
-                     if (u) {
-                         if ([crud markReqDone:u.serverId localId:u.localId reqId:self.reqId entityName:@"TVUser"]) {
-                             //
-                         }
-                     }
-                 }];
-                 // No need to set queuePriority here since it's a normal one.
-                 [[NSOperationQueue mainQueue] addOperation:o];
+    if (cancellationFlag) {
+        // Setup request and send
+        NSMutableURLRequest *request = [self setupRequest];
+        // Start the indicator if it is not showing.
+        if (self.isUserTriggered) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:tvAddAndCheckReqNo object:self];
+        }
+        [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
+         {
+             NSLog(@"response code: %li", (long)[(NSHTTPURLResponse *)response statusCode]);
+             if (error.code == -1004) {
+                 // Error Domain=NSURLErrorDomain Code=-1004 "Could not connect to the server." https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Constants/Reference/reference.html
+                 //                 [ctler showSysMsg:@"Communication not successful"];
              }
-             if (data.length > 0) {
-                 NSError *aErr;
-                 NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&aErr];
-                 if (!aErr) {
-                     NSLog(@"JSON of response %li: %@", (long)self.requestType, dict);
-                     TVQueueElement *o1 = [TVQueueElement blockOperationWithBlock:^{
+             if (self.box.numberOfUserTriggeredRequests <= 0) {
+                 NSLog(@"number of requests in progress not right: %ld", (long)self.box.numberOfUserTriggeredRequests);
+             }
+             if ([(NSHTTPURLResponse *)response statusCode] == 200) {
+                 // Mark requestId done, if there is a requestId for the request.
+                 if (self.reqId.length > 0) {
+                     // Nerver cancel marking reqId done operation on local db. It's a high priority operation. It has no effect on user interaction, either.
+                     TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
                          TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-                         TVUser *u1 = [self getLoggedInUser:crud.ctx];
-                         NSSet *s = [crud getObjInCarrier:self.ids entityName:@"TVCard" inCtx:crud.ctx];
-                         NSMutableDictionary *d1 = [NSMutableDictionary dictionaryWithCapacity:0];
-                         [d1 setValue:u1 forKey:@"user"];
-                         [d1 setValue:s forKey:@"cards"];
-                         if (![crud processResponseJSON:dict reqType:self.requestType objDic:d1]) {
-                             // Process unsuccessful
-                             // WHAT'S NEXT????????????
+                         TVUser *u = [self getLoggedInUser:crud.ctx];
+                         if (u) {
+                             if ([crud markReqDone:u.serverId localId:u.localId reqId:self.reqId entityName:@"TVUser"]) {
+                                 //
+                             }
                          }
                      }];
-                     [o1 setQueuePriority:NSOperationQueuePriorityVeryLow];
-                     [[NSOperationQueue mainQueue] addOperation:o1];
-                 } else {
-                     // For non-sync request, mark requestId as done, wait for the sync request to do the job. Sync returns with a body every time. So even a failure here does not stop the next try.
+                     // No need to set queuePriority here since it's a normal one.
+                     [[NSOperationQueue mainQueue] addOperation:o];
+                 }
+                 if (data.length > 0) {
+                     if (cancellationFlag) {
+                         if ([self checkToProceed:self.ids withPair:self.box.cardIdInEditing]) {
+                             // Only proceed when no card is under user interaction.
+                             NSError *aErr;
+                             NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&aErr];
+                             if (!aErr) {
+                                 NSLog(@"JSON of response %li: %@", (long)self.requestType, dict);
+                                 TVQueueElement *o1 = [[TVQueueElement alloc] init];
+                                 __weak __typeof__(o1) weakO1 = o1;
+                                 [o1 addExecutionBlock:^{
+                                     TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
+                                     TVUser *u1 = [self getLoggedInUser:crud.ctx];
+                                     NSSet *s = [crud getObjInCarrier:self.ids entityName:@"TVCard" inCtx:crud.ctx];
+                                     NSMutableDictionary *d1 = [NSMutableDictionary dictionaryWithCapacity:0];
+                                     [d1 setValue:u1 forKey:@"user"];
+                                     [d1 setValue:s forKey:@"cards"];
+                                     __strong __typeof__(o1) strongO1 = weakO1;
+                                     if (!strongO1.isCancelled) {
+                                         if (![crud processResponseJSON:dict reqType:self.requestType objDic:d1]) {
+                                             // Process unsuccessful
+                                             // WHAT'S NEXT????????????
+                                         }
+                                     }
+                                 }];
+                                 [o1 setQueuePriority:NSOperationQueuePriorityVeryLow];
+                                 [[NSOperationQueue mainQueue] addOperation:o1];
+                             } else {
+                                 // For non-sync request, mark requestId as done, wait for the sync request to do the job. Sync returns with a body every time. So even a failure here does not stop the next try.
+                             }
+                         }
+                     } else {
+                         // Request has been successfully processed on server previously. Set related requestId to done.
+                         // Post notification to let others react.
+                         [[NSNotificationCenter defaultCenter] postNotificationName:@"TVRequestOKOnly" object:self];
+                     }
                  }
              } else {
-                 // Request has been successfully processed on server previously. Set related requestId to done.
-                 // Post notification to let others react.
-                 [[NSNotificationCenter defaultCenter] postNotificationName:@"TVRequestOKOnly" object:self];
+                 NSString *errMsg = [self processResponseText:response data:data];
+                 // Need a module to handle unsuccessful requests.
+                 [self processResponseErrMsg:errMsg];
              }
-         } else {
-             NSString *errMsg = [self processResponseText:response data:data];
-             // Need a module to handle unsuccessful requests.
-             [self processResponseErrMsg:errMsg];
-         }
-         if (self.isUserTriggered) {
-             [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
-         }
-     }];
+             if (self.isUserTriggered) {
+                 [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
+             }
+         }];
+    }
 }
 
 - (NSMutableURLRequest *)setupRequest
@@ -228,11 +241,20 @@
 
 - (TVQueueElement *)setupAndLoadToQueue:(NSOperationQueue *)q
 {
-    TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
-        [self proceedToRequest];
-    }];
-    [q addOperation:o];
-    return o;
+    // This is the instant operation, unlike queueElement that may execute later. So it only matters while user is interacting with the record instead of the status later, which may be different from what it is now. For later status, we put the logic in response processing phase to decide whether to continue or not.
+    // No request is allowed to be generated when it contains record user is interacting with.
+    if ([self checkToProceed:self.ids withPair:self.box.cardIdInEditing]) {
+        TVQueueElement *o = [[TVQueueElement alloc] init];
+        // weak and strong: http://blog.waterworld.com.hk/post/block-weakself-strongself
+        __weak __typeof__(o) weakO = o;
+        [o addExecutionBlock:^{
+            __strong __typeof__(o) strongO = weakO;
+            [self proceedToRequest:strongO.isCancelled];
+        }];
+        [q addOperation:o];
+        return o;
+    }
+    return nil;
 }
 
 @end

@@ -11,7 +11,7 @@
 
 @interface TVQueueElement : NSBlockOperation
 
-@property (assign, nonatomic) BOOL isForRequest;
+@property (assign, nonatomic) BOOL isForServerAvailCheck;
 @property (weak, nonatomic) TVRootViewCtlBox *box;
 
 @end

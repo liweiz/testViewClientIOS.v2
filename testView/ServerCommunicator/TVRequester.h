@@ -31,15 +31,13 @@
 @property (strong, nonatomic) NSString *deviceUuid;
 @property (strong, nonatomic) NSString *cardId;
 
-@property (strong, nonatomic) NSMutableArray *objectIdArray;
-
 @property (assign, nonatomic) BOOL isUserTriggered;
-
 
 @property (strong, nonatomic) TVRootViewCtlBox *box;
 @property (strong, nonatomic) NSMutableSet *ids;
+@property (strong, nonatomic) NSMutableSet *objs;
 
-- (void)proceedToRequest;
+- (void)proceedToRequest:(BOOL)cancellationFlag;
 - (NSMutableURLRequest *)setupRequest;
 - (TVQueueElement *)setupAndLoadToQueue:(NSOperationQueue *)q;
 

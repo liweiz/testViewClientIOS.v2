@@ -11,7 +11,7 @@
 
 @implementation TVQueueElement
 
-@synthesize isForRequest;
+@synthesize isForServerAvailCheck;
 @synthesize box;
 
 - (id)init
@@ -23,6 +23,7 @@
         [self setCompletionBlock:^{
             [[NSNotificationCenter defaultCenter] postNotificationName:tvRemoveOperation object:weakSelf];
         }];
+        self.isForServerAvailCheck = NO;
     }
     return self;
 }

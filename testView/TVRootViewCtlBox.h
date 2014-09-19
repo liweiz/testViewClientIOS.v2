@@ -37,7 +37,6 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (assign, nonatomic) CGFloat gapY;
 
 @property (assign, nonatomic) BOOL serverIsAvailable;
-@property (assign, nonatomic) BOOL isCheckingServer;
 
 @property (strong, nonatomic) NSMutableString *userServerId;
 @property (strong, nonatomic) TVIdPair *cardIdInEditing;
@@ -49,7 +48,7 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (strong, nonatomic) NSOperationQueue *dbWorker;
 @property (strong, nonatomic) NSOperationQueue *comWorker;
 
-@property (strong, nonatomic) NSMutableArray *taskArray;
+@property (strong, nonatomic) NSMutableArray *comTaskArray;
 @property (strong, nonatomic) NSMutableSet *ids;
 
 - (void)setupBox;

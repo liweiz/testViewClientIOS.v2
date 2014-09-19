@@ -92,11 +92,12 @@
 - (void)proceed
 {
     // Check server availability
-    [self checkServerAvail:YES inQueue:self.box.comWorker flagToSet:self.box.serverIsAvailable noCurrentCheck:(!self.box.isCheckingServer)];
+    [self checkServerAvail:YES inQueue:self.box.comWorker flagToSet:self.box.serverIsAvailable];
     TVRequester *req = [[TVRequester alloc] init];
     req.box = self.box;
     req.isUserTriggered = YES;
     req.isBearer = YES;
+    req.accessToken = [self getAccessTokenForAccount:self.box.userServerId];
     req.method = @"GET";
     req.requestType = TVOneUser;
     [req setupRequest];

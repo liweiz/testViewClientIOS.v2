@@ -63,4 +63,7 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 
 - (void)signOut:(NSString *)userId;
 
+- (BOOL)checkToProceed:(NSSet *)ids withPair:(TVIdPair *)pInEditing;
+- (BOOL)toDismissOpsOnUserInterationObjServerId:(NSString *)serverId localId:(NSString *)localId withPair:(TVIdPair *)pInEditing;
+
 @end

@@ -114,6 +114,7 @@
 - (void)saveAsNew
 {
     if ([self checkIfTargetIsInContext]) {
+        // Nerver cancel user triggered operation on local db.
         TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
             [crud userCreateOneCard:[self getReadyForCard]];
@@ -128,6 +129,7 @@
 - (void)saveAsUpdate
 {
     if ([self checkIfTargetIsInContext]) {
+        // Nerver cancel user triggered operation on local db.
         TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
             TVCard *c = [crud getOneCard:self.box.cardIdInEditing inCtx:crud.ctx];

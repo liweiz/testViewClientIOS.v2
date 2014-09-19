@@ -263,6 +263,7 @@
 
 - (void)finalizeTableDataSource
 {
+    // Nerver cancel this operation, it's a fundamental one for the app.
     TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
         TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
         NSArray *a = [self getCards:self.box.userServerId inCtx:crud.ctx];
@@ -434,6 +435,7 @@
     UITapGestureRecognizer *tempSender = sender;
     if ([tempSender.view.superview.superview.superview.superview isKindOfClass:[UITableViewCell class]]) {
         // For single deletion, we currently locate the option in save menu. User has to choose to edit a card and pinch to show the menu. The option is on that menu.
+        // Nerver cancel this operation, it's a fundamental one for the app.
         TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
             NSArray *a = [crud getObjs:[NSSet setWithObject:self.box.cardIdInEditing] name:@"TVCard" inCtx:crud.ctx];
