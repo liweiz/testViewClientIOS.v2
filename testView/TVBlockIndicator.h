@@ -8,7 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface TVIndicator : UIView
+@interface TVBlockIndicator : UIView
+
+// This is the loading indicator that blocks user interaction since it's full screen.
 
 @property (strong, nonatomic) UIActivityIndicatorView *indicator;
 

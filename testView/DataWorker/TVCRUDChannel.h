@@ -20,6 +20,7 @@
 @property (strong, nonatomic) NSMutableSet *ids;
 // Record the tag of the view that triggers the requester.
 @property (assign, nonatomic) NSInteger fromVewTag;
+@property (strong, nonatomic) NSMutableString *dna;
 
 #pragma mark - create new
 - (TVCard *)insertOneCard:(NSDictionary *)card fromServer:(BOOL)isFromServer;

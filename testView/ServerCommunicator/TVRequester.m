@@ -40,6 +40,7 @@
 @synthesize box;
 @synthesize ids;
 @synthesize objs;
+@synthesize dna;
 
 - (id)init
 {
@@ -48,6 +49,7 @@
         // Custom initialization
         self.ids = [[NSMutableSet alloc] init];
         self.objs = [[NSMutableSet alloc] init];
+        self.dna = [[NSMutableString alloc] init];
     }
     return self;
 }
@@ -78,6 +80,7 @@
                      // Nerver cancel marking reqId done operation on local db. It's a high priority operation. It has no effect on user interaction, either.
                      TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
                          TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
+                         [crud.dna setString:self.dna];
                          TVUser *u = [self getLoggedInUser:crud.ctx];
                          if (u) {
                              if ([crud markReqDone:u.serverId localId:u.localId reqId:self.reqId entityName:@"TVUser"]) {
@@ -85,11 +88,12 @@
                              }
                          }
                      }];
+                     [o.dna setString:self.dna];
                      // No need to set queuePriority here since it's a normal one.
                      [[NSOperationQueue mainQueue] addOperation:o];
                  }
                  if (data.length > 0) {
-                     if (cancellationFlag) {
+                     if (self.box.validDna.length > 0 && [self.box.validDna isEqualToString:self.dna]) {
                          if ([self checkToProceed:self.ids withPair:self.box.cardIdInEditing]) {
                              // Only proceed when no card is under user interaction.
                              NSError *aErr;
@@ -97,16 +101,18 @@
                              if (!aErr) {
                                  NSLog(@"JSON of response %li: %@", (long)self.requestType, dict);
                                  TVQueueElement *o1 = [[TVQueueElement alloc] init];
+                                 [o1.dna setString:self.dna];
                                  __weak __typeof__(o1) weakO1 = o1;
                                  [o1 addExecutionBlock:^{
                                      TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
+                                     [crud.dna setString:self.dna];
                                      TVUser *u1 = [self getLoggedInUser:crud.ctx];
                                      NSSet *s = [crud getObjInCarrier:self.ids entityName:@"TVCard" inCtx:crud.ctx];
                                      NSMutableDictionary *d1 = [NSMutableDictionary dictionaryWithCapacity:0];
                                      [d1 setValue:u1 forKey:@"user"];
                                      [d1 setValue:s forKey:@"cards"];
                                      __strong __typeof__(o1) strongO1 = weakO1;
-                                     if (!strongO1.isCancelled) {
+                                     if (self.box.validDna.length > 0 && [self.box.validDna isEqualToString:strongO1.dna]) {
                                          if (![crud processResponseJSON:dict reqType:self.requestType objDic:d1]) {
                                              // Process unsuccessful
                                              // WHAT'S NEXT????????????
@@ -245,11 +251,12 @@
     // No request is allowed to be generated when it contains record user is interacting with.
     if ([self checkToProceed:self.ids withPair:self.box.cardIdInEditing]) {
         TVQueueElement *o = [[TVQueueElement alloc] init];
+        [o.dna setString:self.dna];
         // weak and strong: http://blog.waterworld.com.hk/post/block-weakself-strongself
         __weak __typeof__(o) weakO = o;
         [o addExecutionBlock:^{
             __strong __typeof__(o) strongO = weakO;
-            [self proceedToRequest:strongO.isCancelled];
+            [self proceedToRequest:(self.box.validDna.length > 0 && [self.box.validDna isEqualToString:strongO.dna])];
         }];
         [q addOperation:o];
         return o;

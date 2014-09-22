@@ -6,9 +6,9 @@
 //  Copyright (c) 2014 Liwei. All rights reserved.
 //
 
-#import "TVIndicator.h"
+#import "TVBlockIndicator.h"
 
-@implementation TVIndicator
+@implementation TVBlockIndicator
 
 @synthesize indicator;
 

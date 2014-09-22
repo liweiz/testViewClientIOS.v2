@@ -94,6 +94,7 @@
     // Check server availability
     [self checkServerAvail:YES inQueue:self.box.comWorker flagToSet:self.box.serverIsAvailable];
     TVRequester *req = [[TVRequester alloc] init];
+    [req.dna setString:self.box.validDna];
     req.box = self.box;
     req.isUserTriggered = YES;
     req.isBearer = YES;

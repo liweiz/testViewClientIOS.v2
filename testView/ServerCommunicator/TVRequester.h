@@ -36,6 +36,7 @@
 @property (strong, nonatomic) TVRootViewCtlBox *box;
 @property (strong, nonatomic) NSMutableSet *ids;
 @property (strong, nonatomic) NSMutableSet *objs;
+@property (strong, nonatomic) NSMutableString *dna;
 
 - (void)proceedToRequest:(BOOL)cancellationFlag;
 - (NSMutableURLRequest *)setupRequest;

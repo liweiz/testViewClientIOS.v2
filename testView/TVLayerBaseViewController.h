@@ -8,7 +8,6 @@
 
 #import <UIKit/UIKit.h>
 #import "TVUser.h"
-#import "TVIndicator.h"
 #import "TVRootViewCtlBox.h"
 
 typedef NS_ENUM(NSInteger, TVPinchAction) {

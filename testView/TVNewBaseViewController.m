@@ -120,6 +120,8 @@
             [crud userCreateOneCard:[self getReadyForCard]];
             if ([crud saveWithCtx:crud.ctx]) {
                 [self dismissSaveView];
+                // Start a new sync cycle.
+                [self.box.validDna setString:[[NSUUID UUID] UUIDString]];
             }
         }];
         [[NSOperationQueue mainQueue] addOperation:o];
@@ -137,6 +139,8 @@
                 [crud userUpdateOneCard:c by:[self getReadyForCard]];
                 if ([crud saveWithCtx:crud.ctx]) {
                     [self dismissSaveView];
+                    // Start a new sync cycle.
+                    [self.box.validDna setString:[[NSUUID UUID] UUIDString]];
                 }
             } else {
                 [self saveAsNew];

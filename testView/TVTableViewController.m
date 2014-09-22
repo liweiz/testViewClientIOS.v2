@@ -443,6 +443,8 @@
                 [crud userDeleteOneCard:a[0]];
                 if ([crud saveWithCtx:crud.ctx]) {
                     // action after deletion
+                    // Start a new sync cycle.
+                    [self.box.validDna setString:[[NSUUID UUID] UUIDString]];
                 }
             }
         }];

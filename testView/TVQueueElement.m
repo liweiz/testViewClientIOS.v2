@@ -13,6 +13,7 @@
 
 @synthesize isForServerAvailCheck;
 @synthesize box;
+@synthesize dna;
 
 - (id)init
 {
@@ -24,6 +25,7 @@
             [[NSNotificationCenter defaultCenter] postNotificationName:tvRemoveOperation object:weakSelf];
         }];
         self.isForServerAvailCheck = NO;
+        self.dna = [[NSMutableString alloc] init];
     }
     return self;
 }

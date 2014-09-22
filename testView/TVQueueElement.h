@@ -13,5 +13,6 @@
 
 @property (assign, nonatomic) BOOL isForServerAvailCheck;
 @property (weak, nonatomic) TVRootViewCtlBox *box;
+@property (strong, nonatomic) NSMutableString *dna;
 
 @end

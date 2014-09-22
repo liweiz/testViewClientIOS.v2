@@ -20,6 +20,7 @@
 @synthesize fromVewTag;
 @synthesize box;
 @synthesize ids;
+@synthesize dna;
 
 - (id)init
 {
@@ -28,6 +29,7 @@
         self.ids = [[NSMutableSet alloc] init];
         self.box = ((TVAppRootViewController *)[UIApplication sharedApplication].keyWindow.rootViewController).box;
         self.ctx = [self managedObjectContext:self.ctx coordinator:self.box.coordinator model:self.box.model];
+        self.dna = [[NSMutableString alloc] init];
     }
     return self;
 }
@@ -157,6 +159,10 @@
             if ([c.requestId isEqualToString:reqId]) {
                 [self markRequestIdAsDone:c];
                 if ([self saveWithCtx:self.ctx]) {
+                    if (c.operationVersion.integerValue == [record.hasReqIdCandidate count]) {
+                        // The last reqIdCandidate is the one done this time.
+                        [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusOneToUncommitted object:self];
+                    }
                     return YES;
                 }
                 break;
@@ -170,16 +176,18 @@
 
 - (void)syncCycle:(BOOL)isUserTriggered
 {
+    self.box.numberOfUncommittedRecord = 0;
     BOOL readyToSyncUser = YES;
     BOOL readyToSyncCard = YES;
     TVUser *u = [self getLoggedInUser:self.ctx];
     if (u) {
         TVRequester *req = [[TVRequester alloc] init];
+        [req.dna setString:self.dna];
         req.box = self.box;
         req.isUserTriggered = isUserTriggered;
         req.isBearer = YES;
         TVRequestIdCandidate *r;
-        r = [self analyzeOneRecord:u inCtx:self.ctx serverIsAvailable:self.box.serverIsAvailable];
+        r = [self analyzeOneRecord:u inCtx:self.ctx serverIsAvailable:self.box.serverIsAvailable noOfUncommitted:self.box.numberOfUncommittedRecord];
         // requestId is generated in analyzeOneRecord
         req.reqId = r.requestId;
         if (r) {
@@ -200,12 +208,13 @@
     for (TVCard *c in cards) {
         TVRequestIdCandidate *r;
         if ([self toDismissOpsOnUserInterationObjServerId:c.serverId localId:c.localId withPair:self.box.cardIdInEditing]) {
-            r = [self analyzeOneRecord:c inCtx:self.ctx serverIsAvailable:self.box.serverIsAvailable];
+            r = [self analyzeOneRecord:c inCtx:self.ctx serverIsAvailable:self.box.serverIsAvailable noOfUncommitted:self.box.numberOfUncommittedRecord];
         }
         if (r) {
             if (c.serverId.length > 0) {
                 readyToSyncCard = NO;
                 TVRequester *req = [[TVRequester alloc] init];
+                [req.dna setString:self.dna];
                 req.box = self.box;
                 req.isUserTriggered = isUserTriggered;
                 req.isBearer = YES;
@@ -238,6 +247,7 @@
                 if (r.editAction.integerValue == TVDocNew || r.editAction.integerValue == TVDocUpdated) {
                     readyToSyncCard = NO;
                     TVRequester *req = [[TVRequester alloc] init];
+                    [req.dna setString:self.dna];
                     req.reqId = r.requestId;
                     req.box = self.box;
                     req.isUserTriggered = isUserTriggered;
@@ -258,6 +268,7 @@
     if (readyToSyncCard && readyToSyncUser) {
         // Sync
         TVRequester *req = [[TVRequester alloc] init];
+        [req.dna setString:self.dna];
         req.box = self.box;
         req.isUserTriggered = isUserTriggered;
         req.isBearer = YES;
@@ -525,10 +536,11 @@
                 }
             }
             break;
-            //        case TVSync:
-            //            if (self.box.ctlOnDuty == TVLangPickCtl) {
-            //                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowAfterActivated object:self];
-            //            };
+        case TVSync:
+            [self.box.validDna setString:@""];
+            if (self.box.ctlOnDuty == TVActivationCtl) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowAfterActivated object:self];
+            };
     }
 }
 

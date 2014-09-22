@@ -484,7 +484,8 @@
  
  When nil is returned, which indicates no requestId for next steps, we don't need to proceed further since the client has already got the message from server that the request has been successfully processed on server.
 */
-- (TVRequestIdCandidate *)analyzeOneRecord:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx serverIsAvailable:(BOOL)isAvail
+// Get the number of uncommitted records every time. Each successful following request decrease it by one. When zero is reached, trigger syncCycle to check and send sync request accordingly.
+- (TVRequestIdCandidate *)analyzeOneRecord:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx serverIsAvailable:(BOOL)isAvail noOfUncommitted:(NSInteger)n
 {
     // Get array with descending order to loop from the last obj.
     NSMutableArray *ids = [self getRequestIdCandidatesForRecord:b ascending:NO];
@@ -496,6 +497,7 @@
         TVRequestIdCandidate *lastObj = ids[0];
         if (lastObj.requestId.length == 0) {
             // Lastest operation not being pushed before, push it now if server is available
+            n++;
             if (isAvail) {
                 [self generateRequestInfoForRequestIdCandidate:lastObj];
                 if ([self saveWithCtx:ctx]) {
@@ -511,6 +513,7 @@
                 return nil;
             } else {
                 // Push again
+                n++;
                 return lastObj;
             }
         }

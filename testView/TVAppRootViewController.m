@@ -56,6 +56,9 @@ NSString *const tvMarkReqIdDone = @"tvMarkReqIdDone";
 
 NSString *const tvSignOut = @"tvSignOut";
 
+NSString *const tvAddOneToUncommitted = @"tvAddOneToUncommitted";
+NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
+
 @interface TVAppRootViewController ()
 
 @end
@@ -63,7 +66,7 @@ NSString *const tvSignOut = @"tvSignOut";
 @implementation TVAppRootViewController
 
 @synthesize userFetchRequest, loginViewController, requestReceivedResponse, willSendRequest, passItem, appRect, internetIsAccessible;
-@synthesize indicator;
+@synthesize bIndicator, nbIndicator;
 @synthesize sysMsg;
 
 @synthesize nativeViewController;
@@ -99,9 +102,12 @@ NSString *const tvSignOut = @"tvSignOut";
     
     self.requestReceivedResponse = YES;
     self.willSendRequest = YES;
-    self.indicator = [[TVIndicator alloc] initWithFrame:self.appRect];
-    [self.view addSubview:self.indicator];
-    self.indicator.hidden = YES;
+    self.bIndicator = [[TVBlockIndicator alloc] initWithFrame:self.appRect];
+    [self.view addSubview:self.bIndicator];
+    self.bIndicator.hidden = YES;
+    self.nbIndicator = [[TVNonBlockIndicator alloc] initWithFrame:CGRectMake(self.appRect.origin.x, self.appRect.origin.y, self.appRect.size.width, 3.0f)];
+    [self.view addSubview:self.nbIndicator];
+    self.nbIndicator.hidden = YES;
     // sysMsg width: 80 height: 44
     self.sysMsg = [[UILabel alloc] initWithFrame:CGRectMake((self.view.frame.size.width - 150.0f) * 0.5f, (self.view.frame.size.height - 44.0f) * 0.5f, 150.0f, 44.0f)];
     [self.view addSubview:self.sysMsg];
@@ -123,6 +129,7 @@ NSString *const tvSignOut = @"tvSignOut";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showWarningWithText:) name:tvShowWarning object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pinchToShowAbove:) name:tvPinchToShowAbove object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showWarningWithText:) name:tvFetchOrSaveErr object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(decreaseUncommittedByOne:) name:tvMinusOneToUncommitted object:nil];
 }
 
 /*
@@ -164,36 +171,73 @@ NSString *const tvSignOut = @"tvSignOut";
 
 #pragma mark - indicator on/off
 
+// Two indicators: one for blocking user interaction, which is user triggered, one not, which is client triggered. 
+
+// For blockIndicator
 - (void)addAndCheckReqNo
 {
-    self.box.numberOfUserTriggeredRequests = self.box.numberOfUserTriggeredRequests + 1;
-    if (self.indicator.hidden) {
-        [self showIndicator];
+    self.box.numberOfUserTriggeredRequests++;
+    if (self.bIndicator.hidden) {
+        [self showBIndicator];
     }
 }
 
 - (void)minusAndCheckReqNo
 {
-    self.box.numberOfUserTriggeredRequests = self.box.numberOfUserTriggeredRequests - 1;
-    if (!self.indicator.hidden && self.box.numberOfUserTriggeredRequests == 0) {
-        [self hideIndicator];
+    self.box.numberOfUserTriggeredRequests--;
+    if (!self.bIndicator.hidden && self.box.numberOfUserTriggeredRequests == 0) {
+        [self hideBIndicator];
     }
 }
 
-- (void)showIndicator
+- (void)showBIndicator
 {
-    if (self.indicator.hidden) {
-        self.indicator.hidden = NO;
-        [self.indicator.superview bringSubviewToFront:self.indicator];
-        [self.indicator.indicator startAnimating];
+    if (self.bIndicator.hidden) {
+        self.bIndicator.hidden = NO;
+        [self.bIndicator.superview bringSubviewToFront:self.bIndicator];
+        [self.bIndicator.indicator startAnimating];
     }
 }
 
-- (void)hideIndicator
+- (void)hideBIndicator
 {
-    if (!self.indicator.hidden) {
-        self.indicator.hidden = YES;
-        [self.indicator.indicator stopAnimating];
+    if (!self.bIndicator.hidden) {
+        self.bIndicator.hidden = YES;
+        [self.bIndicator.indicator stopAnimating];
+    }
+}
+
+// For nonBlockIndicator
+- (void)addAndCheckReqNoNB
+{
+    self.box.numberOfNonUserTriggeredRequests++;
+    if (self.nbIndicator.hidden) {
+        [self showBIndicator];
+    }
+}
+
+- (void)minusAndCheckReqNoNB
+{
+    self.box.numberOfNonUserTriggeredRequests--;
+    if (!self.nbIndicator.hidden && self.box.numberOfNonUserTriggeredRequests == 0) {
+        [self hideNBIndicator];
+    }
+}
+
+- (void)showNBIndicator
+{
+    if (self.nbIndicator.hidden) {
+        self.nbIndicator.hidden = NO;
+        [self.nbIndicator.superview bringSubviewToFront:self.nbIndicator];
+        [self.nbIndicator startAni];
+    }
+}
+
+- (void)hideNBIndicator
+{
+    if (!self.nbIndicator.hidden) {
+        self.nbIndicator.hidden = YES;
+        [self.nbIndicator stopAni];
     }
 }
 
@@ -386,6 +430,7 @@ NSString *const tvSignOut = @"tvSignOut";
             
             [self checkServerAvail:YES inQueue:self.box.comWorker flagToSet:self.box.serverIsAvailable];
             TVRequester *r = [[TVRequester alloc] init];
+            [r.dna setString:self.box.validDna];
             r.box = self.box;
             // We need user wait for the result from server
             r.isUserTriggered = YES;
@@ -507,6 +552,17 @@ NSString *const tvSignOut = @"tvSignOut";
     self.warning.text = nil;
     if (self.warning.alpha == 1.0f) {
         self.warning.alpha = 0.0f;
+    }
+}
+
+#pragma mark - mornitor sync cycle
+
+- (void)decreaseUncommittedByOne:(NSNotification *)note
+{
+    TVCRUDChannel *crud = note.object;
+    self.box.numberOfUncommittedRecord--;
+    if (self.box.numberOfUncommittedRecord == 0) {
+        [crud syncCycle:NO];
     }
 }
 

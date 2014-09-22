@@ -47,7 +47,7 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 - (NSDictionary *)convertCardObjToDic:(NSManagedObject *)obj;
 
 - (NSInteger)getRequestIdCandidateOperationVersion:(TVBase *)base;
-- (TVRequestIdCandidate *)analyzeOneRecord:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx serverIsAvailable:(BOOL)isAvail;
+
 - (NSArray *)getCards:(NSString *)userServerId inCtx:(NSManagedObjectContext *)ctx;
 - (TVCard *)getOneCard:(TVIdPair *)cardIds inCtx:(NSManagedObjectContext *)ctx;
 - (NSArray *)getObjs:(NSSet *)ids name:(NSString *)entityName inCtx:(NSManagedObjectContext *)ctx;
@@ -65,5 +65,6 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 
 - (BOOL)checkToProceed:(NSSet *)ids withPair:(TVIdPair *)pInEditing;
 - (BOOL)toDismissOpsOnUserInterationObjServerId:(NSString *)serverId localId:(NSString *)localId withPair:(TVIdPair *)pInEditing;
+- (TVRequestIdCandidate *)analyzeOneRecord:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx serverIsAvailable:(BOOL)isAvail noOfUncommitted:(NSInteger)n;
 
 @end

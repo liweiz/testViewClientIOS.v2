@@ -258,10 +258,12 @@
                      }
                      if ([(NSHTTPURLResponse *)response statusCode] == 200) {
                          __block BOOL flag = YES;
+                         // Internet is available, resume latest sync cycle.
+                         
                      } else {
                          __block BOOL flag = NO;
                          // Internet is not available, clear the queue since it's impossible to have the rest ones successfully processed.
-                         [q cancelAllOperations];
+                         [[(TVAppRootViewController *)[[[UIApplication sharedApplication] keyWindow] rootViewController] box].validDna setString:@""];
                      }
                  }];
             }];
