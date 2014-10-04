@@ -38,8 +38,8 @@
 @property (strong, nonatomic) NSMutableSet *objs;
 @property (strong, nonatomic) NSMutableString *dna;
 
-- (void)proceedToRequest:(BOOL)cancellationFlag;
+- (void)proceedToRequest:(BOOL)cancellationFlag withDna:(BOOL)dnaIsNeeded;
 - (NSMutableURLRequest *)setupRequest;
-- (TVQueueElement *)setupAndLoadToQueue:(NSOperationQueue *)q;
+- (TVQueueElement *)setupAndLoadToQueue:(NSOperationQueue *)q withDna:(BOOL)dnaIsNeeded;
 
 @end

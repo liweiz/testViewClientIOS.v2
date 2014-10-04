@@ -196,11 +196,11 @@
             if (r.editAction.integerValue == TVDocNew) {
                 req.requestType = TVNewDeviceInfo;
                 req.urlBranch = [self getUrlBranchFor:TVNewDeviceInfo userId:self.box.userServerId deviceInfoId:nil cardId:nil];
-                [req setupAndLoadToQueue:self.box.comWorker];
+                [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
             } else if (r.editAction.integerValue == TVDocUpdated) {
                 req.requestType = TVOneDeviceInfo;
                 req.urlBranch = [self getUrlBranchFor:TVOneDeviceInfo userId:self.box.userServerId deviceInfoId:self.box.deviceInfoId cardId:nil];
-                [req setupAndLoadToQueue:self.box.comWorker];
+                [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
             }
         }
     }
@@ -224,7 +224,7 @@
                     // No way to delete deviceInfo from client, so the only thing to delete is card.
                     req.requestType = TVOneCard;
                     req.urlBranch = [self getUrlBranchFor:TVOneCard userId:self.box.userServerId deviceInfoId:nil cardId:c.serverId];
-                    [req setupAndLoadToQueue:self.box.comWorker];
+                    [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
                 } else {
                     NSError *e;
                     req.body = [self getBody:r.requestId forRecord:c err:&e];
@@ -234,11 +234,11 @@
                         if (r.editAction.integerValue == TVDocNew) {
                             req.requestType = TVNewCard;
                             req.urlBranch = [self getUrlBranchFor:TVNewCard userId:self.box.userServerId deviceInfoId:nil cardId:nil];
-                            [req setupAndLoadToQueue:self.box.comWorker];
+                            [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
                         } else if (r.editAction.integerValue == TVDocUpdated) {
                             req.requestType = TVOneCard;
                             req.urlBranch = [self getUrlBranchFor:TVOneCard userId:self.box.userServerId deviceInfoId:nil cardId:c.serverId];
-                            [req setupAndLoadToQueue:self.box.comWorker];
+                            [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
                         }
                     }
                 }
@@ -257,7 +257,7 @@
                     if (!e) {
                         req.requestType = TVNewCard;
                         req.urlBranch = [self getUrlBranchFor:TVNewCard userId:self.box.userServerId deviceInfoId:nil cardId:nil];
-                        [req setupAndLoadToQueue:self.box.comWorker];
+                        [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
                     }
                 }
             }
@@ -277,7 +277,7 @@
         req.urlBranch = [self getUrlBranchFor:TVSync userId:self.box.userServerId deviceInfoId:nil cardId:nil];
         NSMutableArray *m = [self getCardVerList:self.box.userServerId withCtx:self.ctx];
         req.body = [self getJSONSyncWithCardVerList:m err:nil];
-        [req setupAndLoadToQueue:self.box.comWorker];
+        [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
     }
 }
 
@@ -523,12 +523,7 @@
             if (self.box.ctlOnDuty == TVActivationCtl) {
                 TVUser *u = [self getLoggedInUser:self.ctx];
                 if (u.activated.boolValue == YES) {
-                    if (u.sourceLang.length > 0) {
-                        // User already selected lang pair before.
-                        [[NSNotificationCenter defaultCenter] postNotificationName:tvShowContent object:self];
-                    } else {
-                        [[NSNotificationCenter defaultCenter] postNotificationName:tvShowTarget object:self];
-                    }
+                    [[NSNotificationCenter defaultCenter] postNotificationName:tvShowContent object:self];
                 } else {
                     // Show message that user is still not activated
                     [self.box.warning setString:@"Activation needed."];

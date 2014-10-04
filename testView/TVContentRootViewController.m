@@ -7,8 +7,10 @@
 //
 
 #import "TVContentRootViewController.h"
+#import "NSObject+DataHandler.h"
 #import "TVCard.h"
-
+#import "TVQueueElement.h"
+#import "TVCRUDChannel.h"
 #import <Foundation/Foundation.h>
 //#import "TVCardsViewController.h"
 //#import "TVSearchBaseViewController.h"
@@ -71,7 +73,8 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    
+    // Start a new sync cycle everytime content controller launches.
+    [self startNewSyncCycle:self.box byUser:NO];
     // Add cards view
     
     // Get user's settings

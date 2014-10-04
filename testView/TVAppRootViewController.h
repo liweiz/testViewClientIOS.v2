@@ -50,7 +50,7 @@
  Except user-triggerd db/server operations, all the rest are composed of sync cycles. Ongoing cycles can be interrupted by user activities and new cycles start afterwards. Interrupted cycles need to be stopped immediatedly. Thus, the data/request operations derived from the interrupted cycle have to be stopped asap, too. Because new state will be taken care of by the new sync cycle. As for the parts already done for the stopped cycle, just leave them as is since new cycles will put new layers on them if necessary.
  Based on above notion, the key is to stop any given cycle and its derived operations. A good way is to assign a DNA to the cycle and its operations so that we can easily identify them with their DNA. A DNA here in the context of digital world can simply be a UUID. We set checkpoint for operations before they run to stop them. It's like isCancelled for NSOperation, but with the DNA, we can specifically have a cycle stopped without extra steps.
  There is also a need for something to record the order of the DNAs to let the app know which ones to stop and which ones to proceed. A NSMutableArray is ideal for this task. However, at any moment, there is only one sync cycle can be valid at most. And sometimes no sync cycle is valid. So we can use a NSMutableString to store the current valid dna and while no cycle is valid, simply set it as empty.
- We also need to know when a cycle starts and ends. It starts when (a) user triggers create/update/delete/sync operations (b) some viewController launches (c) client check with server regularly. It ends when (a) a cycle is completed (b) a new cycle starts before the previous one ends.
+ We also need to know when a cycle starts and ends. It starts when (a) user triggers create/update/delete/sync operations (b) some viewController launches: tableView for cards (c) client check with server regularly. It ends when (a) a cycle is completed (b) a new cycle starts before the previous one ends.
  Sync request is generated and sent when the rest
  
  We choose to use NSOperationQueue to manage above process. Meanwhile, use another array to store the NSOperation so that we could easily locate any given NSOperation to make further change after it is added to the queue, such as cancellation. Completed and cancelled ones are removed from the array right away.
@@ -76,6 +76,9 @@ extern NSString *const tvShowAfterActivated;
 extern NSString *const tvPinchToShowAbove;
 extern NSString *const tvAddAndCheckReqNo;
 extern NSString *const tvMinusAndCheckReqNo;
+extern NSString *const tvAddAndCheckReqNoNB;
+extern NSString *const tvMinusAndCheckReqNoNB;
+
 extern NSString *const tvUserChangedLocalDb;
 extern NSString *const tvUserSignUp;
 extern NSString *const tvShowWarning;

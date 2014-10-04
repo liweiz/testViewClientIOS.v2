@@ -286,7 +286,7 @@
 - (NSArray *)getCards:(NSString *)userServerId inCtx:(NSManagedObjectContext *)ctx
 {
     NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:@"TVCard"];
-    NSPredicate *p = [NSPredicate predicateWithFormat:@"(belongToUser like %@) && !(locallyDeleted like NO)", userServerId];
+    NSPredicate *p = [NSPredicate predicateWithFormat:@"(belongToUser like %@) && !(locallyDeleted == NO)", userServerId];
     [fr setPredicate:p];
     NSMutableArray *r = [NSMutableArray arrayWithCapacity:0];;
     if ([self fetch:fr withCtx:ctx outcome:r]) {
@@ -485,6 +485,20 @@
  When nil is returned, which indicates no requestId for next steps, we don't need to proceed further since the client has already got the message from server that the request has been successfully processed on server.
 */
 // Get the number of uncommitted records every time. Each successful following request decrease it by one. When zero is reached, trigger syncCycle to check and send sync request accordingly.
+- (void)startNewSyncCycle:(TVRootViewCtlBox *)box byUser:(BOOL)userTriggered
+{
+    NSString *s = [[NSUUID UUID] UUIDString];
+    [box.validDna setString:s];
+    TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
+        TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
+        [crud.dna setString:s];
+        [crud syncCycle:userTriggered];
+    }];
+    [o.dna setString:s];
+    // No need to set queuePriority here since it's a normal one.
+    [[NSOperationQueue mainQueue] addOperation:o];
+}
+
 - (TVRequestIdCandidate *)analyzeOneRecord:(TVBase *)b inCtx:(NSManagedObjectContext *)ctx serverIsAvailable:(BOOL)isAvail noOfUncommitted:(NSInteger)n
 {
     // Get array with descending order to loop from the last obj.

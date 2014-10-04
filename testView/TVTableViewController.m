@@ -63,6 +63,8 @@
         self.rawDataSource = [NSMutableArray arrayWithCapacity:0];
         self.tableDataSources = [NSMutableArray arrayWithCapacity:0];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(hideCard:) name:tvHideExpandedCard object:nil];
+        // Start a new sync cycle to reach the most updated data source.
+        [self startNewSyncCycle:self.box byUser:NO];
     }
     return self;
 }
@@ -444,7 +446,7 @@
                 if ([crud saveWithCtx:crud.ctx]) {
                     // action after deletion
                     // Start a new sync cycle.
-                    [self.box.validDna setString:[[NSUUID UUID] UUIDString]];
+                    [self startNewSyncCycle:self.box byUser:NO];
                 }
             }
         }];

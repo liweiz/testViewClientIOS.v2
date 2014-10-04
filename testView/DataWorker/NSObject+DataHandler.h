@@ -12,6 +12,7 @@
 #import "TVCard.h"
 #import "TVRequestIdCandidate.h"
 #import "TVIdPair.h"
+#import "TVRootViewCtlBox.h"
 
 typedef NS_ENUM(NSInteger, TVDocEditCode) {
     TVDocNoAction,
@@ -62,6 +63,8 @@ typedef NS_ENUM(NSInteger, TVDocEditCode) {
 - (NSSet *)getObjInCarrier:(NSSet *)ids entityName:(NSString *)name inCtx:(NSManagedObjectContext *)ctx;
 
 - (void)signOut:(NSString *)userId;
+
+- (void)startNewSyncCycle:(TVRootViewCtlBox *)box byUser:(BOOL)userTriggered;
 
 - (BOOL)checkToProceed:(NSSet *)ids withPair:(TVIdPair *)pInEditing;
 - (BOOL)toDismissOpsOnUserInterationObjServerId:(NSString *)serverId localId:(NSString *)localId withPair:(TVIdPair *)pInEditing;

@@ -195,7 +195,7 @@
     //    reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    [reqster setupAndLoadToQueue:self.box.comWorker];
+    [reqster setupAndLoadToQueue:self.box.comWorker withDna:NO];
 }
 
 - (void)showSwitchToSignUp
@@ -347,7 +347,7 @@
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
     reqster.isUserTriggered = YES;
-    [reqster setupAndLoadToQueue:self.box.comWorker];
+    [reqster setupAndLoadToQueue:self.box.comWorker withDna:NO];
 }
 
 - (void)goToSignIn
@@ -470,7 +470,7 @@
     
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    [reqster setupAndLoadToQueue:self.box.comWorker];
+    [reqster setupAndLoadToQueue:self.box.comWorker withDna:NO];
 }
 
 #pragma mark - keyboard

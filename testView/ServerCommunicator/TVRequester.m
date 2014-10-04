@@ -55,14 +55,20 @@
 }
 
 // No batch operation so far. each time, we handle only a single step operation for one record only.
-- (void)proceedToRequest:(BOOL)cancellationFlag
+- (void)proceedToRequest:(BOOL)cancellationFlag withDna:(BOOL)dnaIsNeeded
 {
     if (cancellationFlag) {
         // Setup request and send
         NSMutableURLRequest *request = [self setupRequest];
         // Start the indicator if it is not showing.
         if (self.isUserTriggered) {
-            [[NSNotificationCenter defaultCenter] postNotificationName:tvAddAndCheckReqNo object:self];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:tvAddAndCheckReqNo object:self];
+            });
+        } else {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:tvAddAndCheckReqNoNB object:self];
+            });
         }
         [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse *response, NSData* data, NSError* error)
          {
@@ -93,7 +99,15 @@
                      [[NSOperationQueue mainQueue] addOperation:o];
                  }
                  if (data.length > 0) {
-                     if (self.box.validDna.length > 0 && [self.box.validDna isEqualToString:self.dna]) {
+                     BOOL toProceed1 = NO;
+                     if (dnaIsNeeded) {
+                         if (self.box.validDna.length > 0 && [self.box.validDna isEqualToString:self.dna]) {
+                             toProceed1 = YES;
+                         }
+                     } else {
+                         toProceed1 = YES;
+                     }
+                     if (toProceed1) {
                          if ([self checkToProceed:self.ids withPair:self.box.cardIdInEditing]) {
                              // Only proceed when no card is under user interaction.
                              NSError *aErr;
@@ -112,7 +126,15 @@
                                      [d1 setValue:u1 forKey:@"user"];
                                      [d1 setValue:s forKey:@"cards"];
                                      __strong __typeof__(o1) strongO1 = weakO1;
-                                     if (self.box.validDna.length > 0 && [self.box.validDna isEqualToString:strongO1.dna]) {
+                                     BOOL toProceed2 = NO;
+                                     if (dnaIsNeeded) {
+                                         if (self.box.validDna.length > 0 && [self.box.validDna isEqualToString:self.dna]) {
+                                             toProceed2 = YES;
+                                         }
+                                     } else {
+                                         toProceed2 = YES;
+                                     }
+                                     if (toProceed2) {
                                          if (![crud processResponseJSON:dict reqType:self.requestType objDic:d1]) {
                                              // Process unsuccessful
                                              // WHAT'S NEXT????????????
@@ -128,7 +150,10 @@
                      } else {
                          // Request has been successfully processed on server previously. Set related requestId to done.
                          // Post notification to let others react.
-                         [[NSNotificationCenter defaultCenter] postNotificationName:@"TVRequestOKOnly" object:self];
+                         dispatch_async(dispatch_get_main_queue(), ^{
+                             [[NSNotificationCenter defaultCenter] postNotificationName:@"TVRequestOKOnly" object:self];
+                         });
+                         
                      }
                  }
              } else {
@@ -137,7 +162,13 @@
                  [self processResponseErrMsg:errMsg];
              }
              if (self.isUserTriggered) {
-                 [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
+                 dispatch_async(dispatch_get_main_queue(), ^{
+                     [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNo object:self];
+                 });
+             } else {
+                 dispatch_async(dispatch_get_main_queue(), ^{
+                     [[NSNotificationCenter defaultCenter] postNotificationName:tvMinusAndCheckReqNoNB object:self];
+                 });
              }
          }];
     }
@@ -245,7 +276,7 @@
 
 #pragma mark - load to com queue
 
-- (TVQueueElement *)setupAndLoadToQueue:(NSOperationQueue *)q
+- (TVQueueElement *)setupAndLoadToQueue:(NSOperationQueue *)q withDna:(BOOL)dnaIsNeeded
 {
     // This is the instant operation, unlike queueElement that may execute later. So it only matters while user is interacting with the record instead of the status later, which may be different from what it is now. For later status, we put the logic in response processing phase to decide whether to continue or not.
     // No request is allowed to be generated when it contains record user is interacting with.
@@ -256,7 +287,11 @@
         __weak __typeof__(o) weakO = o;
         [o addExecutionBlock:^{
             __strong __typeof__(o) strongO = weakO;
-            [self proceedToRequest:(self.box.validDna.length > 0 && [self.box.validDna isEqualToString:strongO.dna])];
+            if (dnaIsNeeded) {
+                [self proceedToRequest:(self.box.validDna.length > 0 && [self.box.validDna isEqualToString:strongO.dna]) withDna:YES];
+            } else {
+                [self proceedToRequest:YES withDna:NO];
+            }
         }];
         [q addOperation:o];
         return o;

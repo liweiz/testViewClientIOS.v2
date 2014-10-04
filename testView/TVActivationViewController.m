@@ -102,7 +102,7 @@
     req.method = @"GET";
     req.requestType = TVOneUser;
     [req setupRequest];
-    [req setupAndLoadToQueue:self.box.comWorker];
+    [req setupAndLoadToQueue:self.box.comWorker withDna:NO];
 }
 
 - (void)sendEmail

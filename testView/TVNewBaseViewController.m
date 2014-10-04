@@ -121,7 +121,7 @@
             if ([crud saveWithCtx:crud.ctx]) {
                 [self dismissSaveView];
                 // Start a new sync cycle.
-                [self.box.validDna setString:[[NSUUID UUID] UUIDString]];
+                [self startNewSyncCycle:self.box byUser:NO];
             }
         }];
         [[NSOperationQueue mainQueue] addOperation:o];
@@ -140,7 +140,7 @@
                 if ([crud saveWithCtx:crud.ctx]) {
                     [self dismissSaveView];
                     // Start a new sync cycle.
-                    [self.box.validDna setString:[[NSUUID UUID] UUIDString]];
+                    [self startNewSyncCycle:self.box byUser:NO];
                 }
             } else {
                 [self saveAsNew];

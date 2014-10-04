@@ -37,6 +37,8 @@ NSString *const tvShowAfterActivated = @"tvShowAfterActivated";
 NSString *const tvPinchToShowAbove = @"tvPinchToShowAbove";
 NSString *const tvAddAndCheckReqNo = @"tvAddAndCheckReqNo";
 NSString *const tvMinusAndCheckReqNo = @"tvMinusAndCheckReqNo";
+NSString *const tvAddAndCheckReqNoNB = @"tvAddAndCheckReqNoNB";
+NSString *const tvMinusAndCheckReqNoNB = @"tvMinusAndCheckReqNoNB";
 NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
 NSString *const tvUserSignUp = @"tvUserSignUp";
 
@@ -105,8 +107,9 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
     self.bIndicator = [[TVBlockIndicator alloc] initWithFrame:self.appRect];
     [self.view addSubview:self.bIndicator];
     self.bIndicator.hidden = YES;
-    self.nbIndicator = [[TVNonBlockIndicator alloc] initWithFrame:CGRectMake(self.appRect.origin.x, self.appRect.origin.y, self.appRect.size.width, 3.0f)];
+    self.nbIndicator = [[TVNonBlockIndicator alloc] initWithFrame:CGRectMake(self.appRect.origin.x, self.appRect.origin.y, self.appRect.size.width, 33.0f)];
     [self.view addSubview:self.nbIndicator];
+    
     self.nbIndicator.hidden = YES;
     // sysMsg width: 80 height: 44
     self.sysMsg = [[UILabel alloc] initWithFrame:CGRectMake((self.view.frame.size.width - 150.0f) * 0.5f, (self.view.frame.size.height - 44.0f) * 0.5f, 150.0f, 44.0f)];
@@ -126,6 +129,8 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showTargetPickBelow) name:tvShowTarget object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addAndCheckReqNo) name:tvAddAndCheckReqNo object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(minusAndCheckReqNo) name:tvMinusAndCheckReqNo object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addAndCheckReqNoNB) name:tvAddAndCheckReqNoNB object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(minusAndCheckReqNoNB) name:tvMinusAndCheckReqNoNB object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showWarningWithText:) name:tvShowWarning object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pinchToShowAbove:) name:tvPinchToShowAbove object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showWarningWithText:) name:tvFetchOrSaveErr object:nil];
@@ -166,7 +171,7 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
     r.isBearer = YES;
     r.method = @"GET";
     r.accessToken = [self getAccessTokenForAccount:self.box.userServerId];
-    [r setupAndLoadToQueue:self.box.comWorker];
+    [r setupAndLoadToQueue:self.box.comWorker withDna:NO];
 }
 
 #pragma mark - indicator on/off
@@ -212,7 +217,7 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 {
     self.box.numberOfNonUserTriggeredRequests++;
     if (self.nbIndicator.hidden) {
-        [self showBIndicator];
+        [self showNBIndicator];
     }
 }
 
@@ -227,18 +232,20 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 - (void)showNBIndicator
 {
     if (self.nbIndicator.hidden) {
+        NSLog(@"subview count: %lu", (unsigned long)[self.view.subviews count]);
         self.nbIndicator.hidden = NO;
-        [self.nbIndicator.superview bringSubviewToFront:self.nbIndicator];
         [self.nbIndicator startAni];
     }
 }
 
 - (void)hideNBIndicator
 {
-    if (!self.nbIndicator.hidden) {
-        self.nbIndicator.hidden = YES;
-        [self.nbIndicator stopAni];
-    }
+//    if (!self.nbIndicator.hidden) {
+//        NSLog(@"subview count: %lu", (unsigned long)[self.view.subviews count]);
+//        self.nbIndicator.hidden = YES;
+//        NSLog(@"animationToStop");
+//        [self.nbIndicator stopAni];
+//    }
 }
 
 # pragma mark - view layers in/out
@@ -412,44 +419,6 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
     [[NSOperationQueue mainQueue] addOperation:o];
 }
 
-- (void)actionAfterActivationDone
-{
-    TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
-        TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-        TVUser *u = [crud getLoggedInUser:crud.ctx];
-        if (u.sourceLang.length == 0) {
-            // This indicates that there is no data on this device previously, the app is the first time to be installed here or it's a reinstall after previous deletion. Start a sync cycle to get all from server.
-            // Show langPicker and indicator since a request is sent anyway to get the deviceInfo status from server and user has to wait for the response.
-            // 1. If no response received, let user pick lang pair so that user can keep use the app.
-            // 2. If server side error, let user pick lang pair so that user can keep use the app.
-            // 3. If there is existing deviceInfo on server(either specific for this device or fetched as default, see more details in server files), sync data from server and show content right away.
-            // 4. If there is no existing deviceInfo on server, let user pick lang pair so that user can keep use the app.
-            // Show langPick first. At the mean time, send request show indicator accordingly.
-            // Prepare request
-            
-            
-            [self checkServerAvail:YES inQueue:self.box.comWorker flagToSet:self.box.serverIsAvailable];
-            TVRequester *r = [[TVRequester alloc] init];
-            [r.dna setString:self.box.validDna];
-            r.box = self.box;
-            // We need user wait for the result from server
-            r.isUserTriggered = YES;
-            r.requestType = TVSync;
-            r.isBearer = YES;
-            r.method = @"GET";
-            [r setupRequest];
-            NSMutableArray *m = [self getCardVerList:self.box.userServerId withCtx:crud.ctx];
-            r.body = [self getJSONSyncWithCardVerList:m err:nil];
-            [r setupAndLoadToQueue:self.box.comWorker];
-        } else {
-            // Show content
-            [self loadContentCtl];
-        }
-    }];
-    // No need to set queuePriority here since it's a normal one.
-    [[NSOperationQueue mainQueue] addOperation:o];
-}
-
 - (void)loadLoginCtl
 {
     if (!self.loginViewController) {
@@ -512,7 +481,7 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 {
     if (!self.contentViewController) {
         self.contentViewController = [[TVContentRootViewController alloc] initWithNibName:nil bundle:nil];
-        
+        self.contentViewController.box = self.box;
         [self addChildViewController:self.contentViewController];
         [self.view addSubview:self.contentViewController.view];
         [self.contentViewController didMoveToParentViewController:self];
