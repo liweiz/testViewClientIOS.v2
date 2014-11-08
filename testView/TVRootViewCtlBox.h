@@ -20,6 +20,44 @@ typedef NS_ENUM(NSInteger, TVCtl) {
     TVContentCtl
 };
 
+extern NSString *const tvEnglishFontName;
+extern NSString *const tvServerUrl;
+extern CGFloat const goldenRatio;
+extern CGFloat const tvRowHeight;
+
+extern CGFloat const tvFontSizeLarge;
+extern CGFloat const tvFontSizeRegular;
+extern NSString *const tvShowNative;
+extern NSString *const tvShowTarget;
+extern NSString *const tvShowActivation;
+extern NSString *const tvShowContent;
+extern NSString *const tvShowAfterActivated;
+extern NSString *const tvPinchToShowAbove;
+extern NSString *const tvAddAndCheckReqNo;
+extern NSString *const tvMinusAndCheckReqNo;
+extern NSString *const tvAddAndCheckReqNoNB;
+extern NSString *const tvMinusAndCheckReqNoNB;
+
+extern NSString *const tvUserChangedLocalDb;
+extern NSString *const tvUserSignUp;
+extern NSString *const tvShowWarning;
+extern NSString *const tvPinchToShowSave;
+extern NSString *const tvSaveAsNew;
+extern NSString *const tvSaveAsUpdate;
+extern NSString *const tvDismissSaveViewOnly;
+extern NSString *const tvHideExpandedCard;
+
+extern NSString *const tvFetchOrSaveErr;
+extern NSString *const tvRemoveOperation;
+
+extern NSString *const tvMarkReqIdDone;
+extern NSString *const tvSignOut;
+
+extern NSString *const tvAddOneToUncommitted;
+extern NSString *const tvMinusOneToUncommitted;
+
+extern CGFloat const gapY;
+
 @interface TVRootViewCtlBox : NSObject
 
 // Show the current viewController on duty
@@ -52,7 +90,8 @@ typedef NS_ENUM(NSInteger, TVCtl) {
 @property (strong, nonatomic) NSMutableString *validDna;
 @property (strong, nonatomic) NSMutableSet *ids;
 
-- (void)setupBox;
++ (instancetype)sharedBox;
 
+- (void)setupBox;
 
 @end

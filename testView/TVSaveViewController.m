@@ -37,7 +37,7 @@
 - (void)loadView
 {
     //self.myNewView.decelerationRate =  UIScrollViewDecelerationRateFast;
-    TVView *theView = [[TVView alloc] initWithFrame:self.box.appRect];
+    TVView *theView = [[TVView alloc] initWithFrame:[TVRootViewCtlBox sharedBox].appRect];
     theView.touchToDismissKeyboardIsOn = NO;
     theView.touchToDismissViewIsOn = YES;
     theView.ctlInCharge = self.ctlInCharge;
@@ -52,7 +52,7 @@
     
     // Add Create button.
     // The action will be added in rootViewController
-    self.saveAsNewBtn = [[UILabel alloc] initWithFrame:CGRectMake(self.box.originX, 10.0f, self.box.labelWidth, tvRowHeight)];
+    self.saveAsNewBtn = [[UILabel alloc] initWithFrame:CGRectMake([TVRootViewCtlBox sharedBox].originX, 10.0f, [TVRootViewCtlBox sharedBox].labelWidth, tvRowHeight)];
     self.saveAsNewBtn.userInteractionEnabled = YES;
     self.saveAsNewBtn.text = @"Create a new card";
     self.saveAsNewBtn.textAlignment = NSTextAlignmentCenter;
@@ -70,7 +70,7 @@
         self.updateBtn.hidden = YES;
     } else {
         if (!self.updateBtn) {
-            self.updateBtn = [[UILabel alloc] initWithFrame:CGRectMake(self.box.originX, self.saveAsNewBtn.frame.origin.y + self.saveAsNewBtn.frame.size.height + 10.0f, self.box.labelWidth, tvRowHeight)];
+            self.updateBtn = [[UILabel alloc] initWithFrame:CGRectMake([TVRootViewCtlBox sharedBox].originX, self.saveAsNewBtn.frame.origin.y + self.saveAsNewBtn.frame.size.height + 10.0f, [TVRootViewCtlBox sharedBox].labelWidth, tvRowHeight)];
             self.updateBtn.userInteractionEnabled = YES;
             self.updateBtn.text = @"Update";
             self.updateBtn.textAlignment = NSTextAlignmentCenter;
@@ -86,13 +86,13 @@
 
 - (void)saveAsNew
 {
-    self.box.transitionPointInRoot = [self pointBy:self.saveAsNewTap inView:self.parentViewController.view];
+    [TVRootViewCtlBox sharedBox].transitionPointInRoot = [self pointBy:self.saveAsNewTap inView:self.parentViewController.view];
     [[NSNotificationCenter defaultCenter] postNotificationName:tvSaveAsNew object:self];
 }
 
 - (void)saveAsUpdate
 {
-    self.box.transitionPointInRoot = [self pointBy:self.updateTap inView:self.parentViewController.view];
+    [TVRootViewCtlBox sharedBox].transitionPointInRoot = [self pointBy:self.updateTap inView:self.parentViewController.view];
     [[NSNotificationCenter defaultCenter] postNotificationName:tvSaveAsUpdate object:self];
 }
 

@@ -145,6 +145,11 @@
     [self.keyboardSlot setContentOffset:CGPointZero animated:YES];
 }
 
+-(void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 //Keyboard position test:
 // - (void)willShow:(NSNotification*)aNotification
 // {

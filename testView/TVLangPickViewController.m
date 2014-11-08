@@ -86,10 +86,10 @@
 
 - (void)nextToTargetLang
 {
-    self.box.transitionPointInRoot = [self.buttonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+    [TVRootViewCtlBox sharedBox].transitionPointInRoot = [self.buttonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     NSLog(@"text: %@", self.lang.text);
-    [self.box.sourceLang setString:self.lang.text];
-    NSLog(@"text1: %@", self.box.sourceLang);
+    [[TVRootViewCtlBox sharedBox].sourceLang setString:self.lang.text];
+    NSLog(@"text1: %@", [TVRootViewCtlBox sharedBox].sourceLang);
     [[NSNotificationCenter defaultCenter] postNotificationName:tvShowTarget object:self];
 }
 
@@ -102,12 +102,12 @@
 
 - (void)signUp
 {
-    self.box.transitionPointInRoot = [self.buttonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+    [TVRootViewCtlBox sharedBox].transitionPointInRoot = [self.buttonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     NSLog(@"text: %@", self.lang.text);
-    NSLog(@"text0: %@", self.box.targetLang);
-    [self.box.targetLang setString:self.lang.text];
-    NSLog(@"text1: %@", self.box.sourceLang);
-    NSLog(@"text2: %@", self.box.targetLang);
+    NSLog(@"text0: %@", [TVRootViewCtlBox sharedBox].targetLang);
+    [[TVRootViewCtlBox sharedBox].targetLang setString:self.lang.text];
+    NSLog(@"text1: %@", [TVRootViewCtlBox sharedBox].sourceLang);
+    NSLog(@"text2: %@", [TVRootViewCtlBox sharedBox].targetLang);
     [[NSNotificationCenter defaultCenter] postNotificationName:tvUserSignUp object:self];
 }
 
@@ -121,7 +121,7 @@
         }
     }
     if (!isMatched) {
-        [self.box.warning setString:@"Please select a language."];
+        [[TVRootViewCtlBox sharedBox].warning setString:@"Please select a language."];
         [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
         return NO;
     }
@@ -136,11 +136,11 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSLog(@"text21: %@", self.box.sourceLang);
-    NSLog(@"text22: %@", self.box.targetLang);
+    NSLog(@"text21: %@", [TVRootViewCtlBox sharedBox].sourceLang);
+    NSLog(@"text22: %@", [TVRootViewCtlBox sharedBox].targetLang);
     self.lang.text = [self.langPickController.langArray objectAtIndex:indexPath.row];
-    NSLog(@"text31: %@", self.box.sourceLang);
-    NSLog(@"text32: %@", self.box.targetLang);
+    NSLog(@"text31: %@", [TVRootViewCtlBox sharedBox].sourceLang);
+    NSLog(@"text32: %@", [TVRootViewCtlBox sharedBox].targetLang);
 }
 
 - (void)didReceiveMemoryWarning

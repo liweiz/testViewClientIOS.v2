@@ -7,16 +7,38 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "TVUser.h"
 #import "TVBlockIndicator.h"
 #import "TVNonBlockIndicator.h"
 #import "TVLoginViewController.h"
 #import "KeychainItemWrapper.h"
 #import "TVLangPickViewController.h"
 #import "TVActivationViewController.h"
-
-#import "TVRootViewCtlBox.h"
 #import "TVContentRootViewController.h"
+
+@interface TVAppRootViewController : UIViewController
+
+@property (strong, nonatomic) NSFetchRequest *userFetchRequest;
+
+@property (strong, nonatomic) TVLoginViewController *loginViewController;
+@property (strong, nonatomic) TVActivationViewController *activationViewController;
+@property (strong, nonatomic) TVLangPickViewController *nativeViewController;
+@property (strong, nonatomic) TVLangPickViewController *targetViewController;
+@property (strong, nonatomic) TVContentRootViewController *contentViewController;
+
+@property (assign, nonatomic) BOOL requestReceivedResponse;
+@property (assign, nonatomic) BOOL willSendRequest;
+@property (assign, nonatomic) BOOL internetIsAccessible;
+
+@property (strong, nonatomic) KeychainItemWrapper *passItem;
+
+@property (strong, nonatomic) TVBlockIndicator *bIndicator;
+@property (strong, nonatomic) TVNonBlockIndicator *nbIndicator;
+@property (strong, nonatomic) UILabel *sysMsg;
+
+@property (strong, nonatomic) UILabel *warning;
+
+- (void)showSysMsg:(NSString *)msg;
+- (void)sendActivationEmail:(BOOL)isUserTriggered;
 
 /*
  Local db faces the challenge that changes from both local user activities and server feedbacks(through http response).
@@ -58,75 +80,5 @@
  
  To prevent concurrent ctx operation (yes, we can use merge policy, but we don't want to add that layer to this app for now), we use a queue mentioned above to manage the process of all the ctxes so that each time only one ctx is processed. It's on the main thread. There is another queue, comWorker(NSOperationQueue, name abbreviated from communication worker). comWorker is on a background thread, all the operation does not block main thread. All communications with server are on comWorker.
  */
-
-extern NSString *const tvEnglishFontName;
-extern NSString *const tvServerUrl;
-extern CGFloat const goldenRatio;
-extern CGFloat const tvRowHeight;
-//extern UIColor *const tvBackgroundColor;
-//extern UIColor *const tvBackgroundColorAlternative;
-//extern UIColor *const tvFontColor;
-extern CGFloat const tvFontSizeLarge;
-extern CGFloat const tvFontSizeRegular;
-extern NSString *const tvShowNative;
-extern NSString *const tvShowTarget;
-extern NSString *const tvShowActivation;
-extern NSString *const tvShowContent;
-extern NSString *const tvShowAfterActivated;
-extern NSString *const tvPinchToShowAbove;
-extern NSString *const tvAddAndCheckReqNo;
-extern NSString *const tvMinusAndCheckReqNo;
-extern NSString *const tvAddAndCheckReqNoNB;
-extern NSString *const tvMinusAndCheckReqNoNB;
-
-extern NSString *const tvUserChangedLocalDb;
-extern NSString *const tvUserSignUp;
-extern NSString *const tvShowWarning;
-extern NSString *const tvPinchToShowSave;
-extern NSString *const tvSaveAsNew;
-extern NSString *const tvSaveAsUpdate;
-extern NSString *const tvDismissSaveViewOnly;
-extern NSString *const tvHideExpandedCard;
-
-extern NSString *const tvFetchOrSaveErr;
-extern NSString *const tvRemoveOperation;
-
-extern NSString *const tvMarkReqIdDone;
-extern NSString *const tvSignOut;
-
-extern NSString *const tvAddOneToUncommitted;
-extern NSString *const tvMinusOneToUncommitted;
-
-@interface TVAppRootViewController : UIViewController
-
-@property (nonatomic, assign) CGRect appRect;
-
-@property (strong, nonatomic) NSFetchRequest *userFetchRequest;
-
-@property (strong, nonatomic) TVLoginViewController *loginViewController;
-@property (strong, nonatomic) TVActivationViewController *activationViewController;
-@property (strong, nonatomic) TVLangPickViewController *nativeViewController;
-@property (strong, nonatomic) TVLangPickViewController *targetViewController;
-@property (strong, nonatomic) TVContentRootViewController *contentViewController;
-
-@property (assign, nonatomic) BOOL requestReceivedResponse;
-@property (assign, nonatomic) BOOL willSendRequest;
-@property (assign, nonatomic) BOOL internetIsAccessible;
-
-
-@property (strong, nonatomic) KeychainItemWrapper *passItem;
-
-@property (strong, nonatomic) TVBlockIndicator *bIndicator;
-@property (strong, nonatomic) TVNonBlockIndicator *nbIndicator;
-@property (strong, nonatomic) UILabel *sysMsg;
-
-
-
-@property (strong, nonatomic) TVRootViewCtlBox *box;
-@property (strong, nonatomic) UILabel *warning;
-
-- (void)showSysMsg:(NSString *)msg;
-- (void)sendActivationEmail:(BOOL)isUserTriggered;
-
 
 @end

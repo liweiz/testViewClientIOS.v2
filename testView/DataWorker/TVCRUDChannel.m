@@ -11,30 +11,26 @@
 #import "NSObject+DataHandler.h"
 #import "TVAppRootViewController.h"
 #import "TVRequester.h"
-#import "TVQueueElement.h"
 #import "TVUser.h"
 
-@implementation TVCRUDChannel
+@interface TVCRUDChannel ()
 
-@synthesize ctx;
-@synthesize fromVewTag;
-@synthesize box;
-@synthesize ids;
-@synthesize dna;
+@property (strong, nonatomic) NSManagedObjectContext *ctx;
+
+@end
+
+@implementation TVCRUDChannel
 
 - (id)init
 {
     self = [super init];
     if (self) {
-        self.ids = [[NSMutableSet alloc] init];
-        self.box = ((TVAppRootViewController *)[UIApplication sharedApplication].keyWindow.rootViewController).box;
-        self.ctx = [self managedObjectContext:self.ctx coordinator:self.box.coordinator model:self.box.model];
-        self.dna = [[NSMutableString alloc] init];
+        _ctx = [self managedObjectContext:self.ctx coordinator:[TVRootViewCtlBox sharedBox].coordinator model:[TVRootViewCtlBox sharedBox].model];
     }
     return self;
 }
 
-#pragma mark - create new
+#pragma mark - Create New
 
 - (TVCard *)insertOneCard:(NSDictionary *)card fromServer:(BOOL)isFromServer
 {
@@ -69,7 +65,7 @@
     [self insertOneReqId:TVDocNew for:c];
 }
 
-#pragma mark - update
+#pragma mark - Update
 
 - (void)updateOneCard:(TVCard *)cardToUpdate by:(NSDictionary *)card fromServer:(BOOL)isFromServer
 {
@@ -103,7 +99,7 @@
     [self insertOneReqId:TVDocUpdated for:userToUpdate];
 }
 
-#pragma mark - delete
+#pragma mark - Delete
 
 - (void)deleteOneCard:(TVCard *)cardToDelete fromServer:(BOOL)isFromServer
 {
@@ -120,7 +116,7 @@
     [self insertOneReqId:TVDocDeleted for:cardToDelete];
 }
 
-#pragma mark - mark requestIdDone
+#pragma mark - Mark RequestIdDone
 
 - (BOOL)markReqDone:(NSString *)recordServerId localId:(NSString *)recordLocalId reqId:(NSString *)reqId entityName:(NSString *)name
 {
@@ -172,22 +168,21 @@
     return NO;
 }
 
-#pragma mark - sync cycle
+#pragma mark - Sync Cycle
 
 - (void)syncCycle:(BOOL)isUserTriggered
 {
-    self.box.numberOfUncommittedRecord = 0;
+    [TVRootViewCtlBox sharedBox].numberOfUncommittedRecord = 0;
     BOOL readyToSyncUser = YES;
     BOOL readyToSyncCard = YES;
     TVUser *u = [self getLoggedInUser:self.ctx];
     if (u) {
         TVRequester *req = [[TVRequester alloc] init];
-        [req.dna setString:self.dna];
-        req.box = self.box;
+        req.cycleDna = self.cycleDna;
         req.isUserTriggered = isUserTriggered;
         req.isBearer = YES;
         TVRequestIdCandidate *r;
-        r = [self analyzeOneRecord:u inCtx:self.ctx serverIsAvailable:self.box.serverIsAvailable noOfUncommitted:self.box.numberOfUncommittedRecord];
+        r = [self analyzeOneRecord:u inCtx:self.ctx serverIsAvailable:[TVRootViewCtlBox sharedBox].serverIsAvailable noOfUncommitted:[TVRootViewCtlBox sharedBox].numberOfUncommittedRecord];
         // requestId is generated in analyzeOneRecord
         req.reqId = r.requestId;
         if (r) {
@@ -195,27 +190,26 @@
             // DeviceInfo
             if (r.editAction.integerValue == TVDocNew) {
                 req.requestType = TVNewDeviceInfo;
-                req.urlBranch = [self getUrlBranchFor:TVNewDeviceInfo userId:self.box.userServerId deviceInfoId:nil cardId:nil];
-                [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
+                req.urlBranch = [self getUrlBranchFor:TVNewDeviceInfo userId:[TVRootViewCtlBox sharedBox].userServerId deviceInfoId:nil cardId:nil];
+                [req setupAndLoadToQueue:[TVRootViewCtlBox sharedBox].comWorker withDna:YES];
             } else if (r.editAction.integerValue == TVDocUpdated) {
                 req.requestType = TVOneDeviceInfo;
-                req.urlBranch = [self getUrlBranchFor:TVOneDeviceInfo userId:self.box.userServerId deviceInfoId:self.box.deviceInfoId cardId:nil];
-                [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
+                req.urlBranch = [self getUrlBranchFor:TVOneDeviceInfo userId:[TVRootViewCtlBox sharedBox].userServerId deviceInfoId:[TVRootViewCtlBox sharedBox].deviceInfoId cardId:nil];
+                [req setupAndLoadToQueue:[TVRootViewCtlBox sharedBox].comWorker withDna:YES];
             }
         }
     }
-    NSArray *cards = [self getCards:self.box.userServerId inCtx:self.ctx];
+    NSArray *cards = [self getCards:[TVRootViewCtlBox sharedBox].userServerId inCtx:self.ctx];
     for (TVCard *c in cards) {
         TVRequestIdCandidate *r;
-        if ([self toDismissOpsOnUserInterationObjServerId:c.serverId localId:c.localId withPair:self.box.cardIdInEditing]) {
-            r = [self analyzeOneRecord:c inCtx:self.ctx serverIsAvailable:self.box.serverIsAvailable noOfUncommitted:self.box.numberOfUncommittedRecord];
+        if ([self toDismissOpsOnUserInterationObjServerId:c.serverId localId:c.localId withPair:[TVRootViewCtlBox sharedBox].cardIdInEditing]) {
+            r = [self analyzeOneRecord:c inCtx:self.ctx serverIsAvailable:[TVRootViewCtlBox sharedBox].serverIsAvailable noOfUncommitted:[TVRootViewCtlBox sharedBox].numberOfUncommittedRecord];
         }
         if (r) {
             if (c.serverId.length > 0) {
                 readyToSyncCard = NO;
                 TVRequester *req = [[TVRequester alloc] init];
-                [req.dna setString:self.dna];
-                req.box = self.box;
+                req.cycleDna = self.cycleDna;
                 req.isUserTriggered = isUserTriggered;
                 req.isBearer = YES;
                 req.reqId = r.requestId;
@@ -223,8 +217,8 @@
                     req.method = @"DELETE";
                     // No way to delete deviceInfo from client, so the only thing to delete is card.
                     req.requestType = TVOneCard;
-                    req.urlBranch = [self getUrlBranchFor:TVOneCard userId:self.box.userServerId deviceInfoId:nil cardId:c.serverId];
-                    [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
+                    req.urlBranch = [self getUrlBranchFor:TVOneCard userId:[TVRootViewCtlBox sharedBox].userServerId deviceInfoId:nil cardId:c.serverId];
+                    [req setupAndLoadToQueue:[TVRootViewCtlBox sharedBox].comWorker withDna:YES];
                 } else {
                     NSError *e;
                     req.body = [self getBody:r.requestId forRecord:c err:&e];
@@ -233,12 +227,12 @@
                         // Card
                         if (r.editAction.integerValue == TVDocNew) {
                             req.requestType = TVNewCard;
-                            req.urlBranch = [self getUrlBranchFor:TVNewCard userId:self.box.userServerId deviceInfoId:nil cardId:nil];
-                            [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
+                            req.urlBranch = [self getUrlBranchFor:TVNewCard userId:[TVRootViewCtlBox sharedBox].userServerId deviceInfoId:nil cardId:nil];
+                            [req setupAndLoadToQueue:[TVRootViewCtlBox sharedBox].comWorker withDna:YES];
                         } else if (r.editAction.integerValue == TVDocUpdated) {
                             req.requestType = TVOneCard;
-                            req.urlBranch = [self getUrlBranchFor:TVOneCard userId:self.box.userServerId deviceInfoId:nil cardId:c.serverId];
-                            [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
+                            req.urlBranch = [self getUrlBranchFor:TVOneCard userId:[TVRootViewCtlBox sharedBox].userServerId deviceInfoId:nil cardId:c.serverId];
+                            [req setupAndLoadToQueue:[TVRootViewCtlBox sharedBox].comWorker withDna:YES];
                         }
                     }
                 }
@@ -247,17 +241,16 @@
                 if (r.editAction.integerValue == TVDocNew || r.editAction.integerValue == TVDocUpdated) {
                     readyToSyncCard = NO;
                     TVRequester *req = [[TVRequester alloc] init];
-                    [req.dna setString:self.dna];
+                    req.cycleDna = self.cycleDna;
                     req.reqId = r.requestId;
-                    req.box = self.box;
                     req.isUserTriggered = isUserTriggered;
                     req.isBearer = YES;
                     NSError *e;
                     req.body = [self getBody:r.requestId forRecord:c err:&e];
                     if (!e) {
                         req.requestType = TVNewCard;
-                        req.urlBranch = [self getUrlBranchFor:TVNewCard userId:self.box.userServerId deviceInfoId:nil cardId:nil];
-                        [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
+                        req.urlBranch = [self getUrlBranchFor:TVNewCard userId:[TVRootViewCtlBox sharedBox].userServerId deviceInfoId:nil cardId:nil];
+                        [req setupAndLoadToQueue:[TVRootViewCtlBox sharedBox].comWorker withDna:YES];
                     }
                 }
             }
@@ -268,20 +261,19 @@
     if (readyToSyncCard && readyToSyncUser) {
         // Sync
         TVRequester *req = [[TVRequester alloc] init];
-        [req.dna setString:self.dna];
-        req.box = self.box;
+        req.cycleDna = self.cycleDna;
         req.isUserTriggered = isUserTriggered;
         req.isBearer = YES;
         req.method = @"POST";
         req.requestType = TVSync;
-        req.urlBranch = [self getUrlBranchFor:TVSync userId:self.box.userServerId deviceInfoId:nil cardId:nil];
-        NSMutableArray *m = [self getCardVerList:self.box.userServerId withCtx:self.ctx];
+        req.urlBranch = [self getUrlBranchFor:TVSync userId:[TVRootViewCtlBox sharedBox].userServerId deviceInfoId:nil cardId:nil];
+        NSMutableArray *m = [self getCardVerList:[TVRootViewCtlBox sharedBox].userServerId withCtx:self.ctx];
         req.body = [self getJSONSyncWithCardVerList:m err:nil];
-        [req setupAndLoadToQueue:self.box.comWorker withDna:YES];
+        [req setupAndLoadToQueue:[TVRootViewCtlBox sharedBox].comWorker withDna:YES];
     }
 }
 
-#pragma mark - process response
+#pragma mark - Process Response
 
 // od: @"user": TVUser @"cards": NSSet TVCard
 - (BOOL)processResponseJSON:(NSMutableDictionary *)dict reqType:(NSInteger)t objDic:(NSDictionary *)od
@@ -496,7 +488,7 @@
         {
             // Set userServerId for box
             TVUser *u = [self getLoggedInUser:self.ctx];
-            [self.box.userServerId setString:u.serverId];
+            [[TVRootViewCtlBox sharedBox].userServerId setString:u.serverId];
             if (u.activated.integerValue == 1) {
                 // Show contentCtl
                 [[NSNotificationCenter defaultCenter] postNotificationName:tvShowContent object:self];
@@ -510,7 +502,7 @@
         {
             // Set userServerId for box
             TVUser *u = [self getLoggedInUser:self.ctx];
-            [self.box.userServerId setString:u.serverId];
+            [[TVRootViewCtlBox sharedBox].userServerId setString:u.serverId];
             if (u.activated.integerValue == 1) {
                 
             } else {
@@ -520,23 +512,32 @@
             break;
         }
         case TVOneUser:
-            if (self.box.ctlOnDuty == TVActivationCtl) {
+            if ([TVRootViewCtlBox sharedBox].ctlOnDuty == TVActivationCtl) {
                 TVUser *u = [self getLoggedInUser:self.ctx];
                 if (u.activated.boolValue == YES) {
                     [[NSNotificationCenter defaultCenter] postNotificationName:tvShowContent object:self];
                 } else {
                     // Show message that user is still not activated
-                    [self.box.warning setString:@"Activation needed."];
+                    [[TVRootViewCtlBox sharedBox].warning setString:@"Activation needed."];
                     [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
                 }
             }
             break;
         case TVSync:
-            [self.box.validDna setString:@""];
-            if (self.box.ctlOnDuty == TVActivationCtl) {
+            [[TVRootViewCtlBox sharedBox].validDna setString:@""];
+            if ([TVRootViewCtlBox sharedBox].ctlOnDuty == TVActivationCtl) {
                 [[NSNotificationCenter defaultCenter] postNotificationName:tvShowAfterActivated object:self];
             };
     }
+}
+
+#pragma mark - Record Getter
+- (TVUser *)getLoggedInUser {
+    return [self getLoggedInUser:self.ctx];
+}
+
+- (NSSet *)getObjInCarrier:(NSSet *)ids entityName:(NSString *)name {
+    return [self getObjInCarrier:ids entityName:name inCtx:self.ctx];
 }
 
 /*

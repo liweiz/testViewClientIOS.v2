@@ -7,7 +7,6 @@
 //
 
 #import "TVRequester.h"
-#import "NSObject+NetworkHandler.h"
 #import "NSObject+DataHandler.h"
 #import "TVAppRootViewController.h"
 #import "TVBase.h"
@@ -15,41 +14,24 @@
 #import "TVCard.h"
 #import "TVRequestIdCandidate.h"
 #import "TVCRUDChannel.h"
-#import "TVQueueElement.h"
+#import "TVRootViewCtlBox.h"
+
+@interface TVRequester ()
+
+
+
+@end
 
 @implementation TVRequester
-
-@synthesize urlBranch;
-@synthesize contentType;
-@synthesize method;
-@synthesize body;
-@synthesize email;
-@synthesize password;
-@synthesize accessToken;
-@synthesize isBearer;
-@synthesize requestType;
-
-@synthesize deviceInfoId;
-@synthesize deviceUuid;
-@synthesize cardId;
-@synthesize internetIsOn;
-@synthesize reqId;
-
-@synthesize isUserTriggered;
-
-@synthesize box;
-@synthesize ids;
-@synthesize objs;
-@synthesize dna;
 
 - (id)init
 {
     self = [super init];
     if (self) {
         // Custom initialization
-        self.ids = [[NSMutableSet alloc] init];
-        self.objs = [[NSMutableSet alloc] init];
-        self.dna = [[NSMutableString alloc] init];
+        _ids = [[NSMutableSet alloc] init];
+        _objs = [[NSMutableSet alloc] init];
+        _cycleDna = [[NSMutableString alloc] init];
     }
     return self;
 }
@@ -77,8 +59,8 @@
                  // Error Domain=NSURLErrorDomain Code=-1004 "Could not connect to the server." https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Miscellaneous/Foundation_Constants/Reference/reference.html
                  //                 [ctler showSysMsg:@"Communication not successful"];
              }
-             if (self.box.numberOfUserTriggeredRequests <= 0) {
-                 NSLog(@"number of requests in progress not right: %ld", (long)self.box.numberOfUserTriggeredRequests);
+             if ([TVRootViewCtlBox sharedBox].numberOfUserTriggeredRequests <= 0) {
+                 NSLog(@"number of requests in progress not right: %ld", (long)[TVRootViewCtlBox sharedBox].numberOfUserTriggeredRequests);
              }
              if ([(NSHTTPURLResponse *)response statusCode] == 200) {
                  // Mark requestId done, if there is a requestId for the request.
@@ -86,49 +68,49 @@
                      // Nerver cancel marking reqId done operation on local db. It's a high priority operation. It has no effect on user interaction, either.
                      TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
                          TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-                         [crud.dna setString:self.dna];
-                         TVUser *u = [self getLoggedInUser:crud.ctx];
+                         crud.cycleDna = self.cycleDna;
+                         TVUser *u = [crud getLoggedInUser];
                          if (u) {
                              if ([crud markReqDone:u.serverId localId:u.localId reqId:self.reqId entityName:@"TVUser"]) {
                                  //
                              }
                          }
                      }];
-                     [o.dna setString:self.dna];
+                     o.cycleDna = self.cycleDna;
                      // No need to set queuePriority here since it's a normal one.
                      [[NSOperationQueue mainQueue] addOperation:o];
                  }
                  if (data.length > 0) {
                      BOOL toProceed1 = NO;
                      if (dnaIsNeeded) {
-                         if (self.box.validDna.length > 0 && [self.box.validDna isEqualToString:self.dna]) {
+                         if ([TVRootViewCtlBox sharedBox].validDna.length > 0 && [[TVRootViewCtlBox sharedBox].validDna isEqualToString:self.cycleDna]) {
                              toProceed1 = YES;
                          }
                      } else {
                          toProceed1 = YES;
                      }
                      if (toProceed1) {
-                         if ([self checkToProceed:self.ids withPair:self.box.cardIdInEditing]) {
+                         if ([self checkToProceed:self.ids withPair:[TVRootViewCtlBox sharedBox].cardIdInEditing]) {
                              // Only proceed when no card is under user interaction.
                              NSError *aErr;
                              NSMutableDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&aErr];
                              if (!aErr) {
                                  NSLog(@"JSON of response %li: %@", (long)self.requestType, dict);
                                  TVQueueElement *o1 = [[TVQueueElement alloc] init];
-                                 [o1.dna setString:self.dna];
+                                 o1.cycleDna = self.cycleDna;
                                  __weak __typeof__(o1) weakO1 = o1;
                                  [o1 addExecutionBlock:^{
                                      TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-                                     [crud.dna setString:self.dna];
-                                     TVUser *u1 = [self getLoggedInUser:crud.ctx];
-                                     NSSet *s = [crud getObjInCarrier:self.ids entityName:@"TVCard" inCtx:crud.ctx];
+                                     crud.cycleDna = self.cycleDna;
+                                     TVUser *u1 = [crud getLoggedInUser];
+                                     NSSet *s = [crud getObjInCarrier:self.ids entityName:@"TVCard"];
                                      NSMutableDictionary *d1 = [NSMutableDictionary dictionaryWithCapacity:0];
-                                     [d1 setValue:u1 forKey:@"user"];
-                                     [d1 setValue:s forKey:@"cards"];
+                                     [d1 setObject:u1 forKey:@"user"];
+                                     [d1 setObject:s forKey:@"cards"];
                                      __strong __typeof__(o1) strongO1 = weakO1;
                                      BOOL toProceed2 = NO;
                                      if (dnaIsNeeded) {
-                                         if (self.box.validDna.length > 0 && [self.box.validDna isEqualToString:self.dna]) {
+                                         if ([TVRootViewCtlBox sharedBox].validDna.length > 0 && [[TVRootViewCtlBox sharedBox].validDna isEqualToString:self.cycleDna]) {
                                              toProceed2 = YES;
                                          }
                                      } else {
@@ -176,7 +158,7 @@
 
 - (NSMutableURLRequest *)setupRequest
 {
-    self.urlBranch = [self getUrlBranchFor:self.requestType userId:self.box.userServerId deviceInfoId:self.deviceInfoId cardId:self.cardId];
+    self.urlBranch = [self getUrlBranchFor:self.requestType userId:[TVRootViewCtlBox sharedBox].userServerId deviceInfoId:self.deviceInfoId cardId:self.cardId];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[tvServerUrl stringByAppendingString:self.urlBranch]]];
     [request setHTTPMethod:self.method];
     if (self.contentType) {
@@ -274,21 +256,21 @@
     }
 }
 
-#pragma mark - load to com queue
+#pragma mark - Load To Com Queue
 
 - (TVQueueElement *)setupAndLoadToQueue:(NSOperationQueue *)q withDna:(BOOL)dnaIsNeeded
 {
     // This is the instant operation, unlike queueElement that may execute later. So it only matters while user is interacting with the record instead of the status later, which may be different from what it is now. For later status, we put the logic in response processing phase to decide whether to continue or not.
     // No request is allowed to be generated when it contains record user is interacting with.
-    if ([self checkToProceed:self.ids withPair:self.box.cardIdInEditing]) {
+    if ([self checkToProceed:self.ids withPair:[TVRootViewCtlBox sharedBox].cardIdInEditing]) {
         TVQueueElement *o = [[TVQueueElement alloc] init];
-        [o.dna setString:self.dna];
+        o.cycleDna = self.cycleDna;
         // weak and strong: http://blog.waterworld.com.hk/post/block-weakself-strongself
         __weak __typeof__(o) weakO = o;
         [o addExecutionBlock:^{
             __strong __typeof__(o) strongO = weakO;
             if (dnaIsNeeded) {
-                [self proceedToRequest:(self.box.validDna.length > 0 && [self.box.validDna isEqualToString:strongO.dna]) withDna:YES];
+                [self proceedToRequest:([TVRootViewCtlBox sharedBox].validDna.length > 0 && [[TVRootViewCtlBox sharedBox].validDna isEqualToString:strongO.cycleDna]) withDna:YES];
             } else {
                 [self proceedToRequest:YES withDna:NO];
             }

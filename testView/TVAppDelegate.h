@@ -15,9 +15,8 @@
 @property (strong, nonatomic) NSManagedObjectContext *ctx;
 @property (strong, nonatomic) NSManagedObjectModel *model;
 @property (strong, nonatomic) NSPersistentStoreCoordinator *coordinator;
-@property (nonatomic, assign) CGRect appRect;
 
 
-- (void)saveContext;
+//- (void)saveContext;
 
 @end

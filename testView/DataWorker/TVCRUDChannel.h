@@ -10,42 +10,41 @@
 #import "TVRootViewCtlBox.h"
 #import "TVBase.h"
 #import "TVCard.h"
-#import "TVUser.h"
 
 @interface TVCRUDChannel : NSObject
 
-@property (strong, nonatomic) NSManagedObjectContext *ctx;
-
-@property (strong, nonatomic) TVRootViewCtlBox *box;
-@property (strong, nonatomic) NSMutableSet *ids;
 // Record the tag of the view that triggers the requester.
 @property (assign, nonatomic) NSInteger fromVewTag;
-@property (strong, nonatomic) NSMutableString *dna;
+@property (copy, nonatomic) NSString *cycleDna;
 
-#pragma mark - create new
+#pragma mark - Create new
 - (TVCard *)insertOneCard:(NSDictionary *)card fromServer:(BOOL)isFromServer;
 - (void)insertOneReqId:(NSInteger)action for:(TVBase *)base;
 - (void)insertOneUser:(NSDictionary *)user;
 - (void)userCreateOneCard:(NSDictionary *)card;
 
-#pragma mark - update
+#pragma mark - Update
 - (void)updateOneCard:(TVCard *)cardToUpdate by:(NSDictionary *)card fromServer:(BOOL)isFromServer;
 - (void)updateOneUser:(TVUser *)userToUpdate by:(NSDictionary *)user fromServer:(BOOL)isFromServer;
 - (void)userUpdateOneCard:(TVCard *)cardToUpdate by:(NSDictionary *)card;
 - (void)userUpdateOneUser:(TVUser *)userToUpdate by:(NSDictionary *)user;
 
-#pragma mark - delete
+#pragma mark - Delete
 - (void)deleteOneCard:(TVCard *)cardToDelete fromServer:(BOOL)isFromServer;
 - (void)userDeleteOneCard:(TVCard *)cardToDelete;
 
-#pragma mark - mark requestIdDone
+#pragma mark - Mark RequestIdDone
 - (BOOL)markReqDone:(NSString *)recordServerId localId:(NSString *)recordLocalId reqId:(NSString *)reqId entityName:(NSString *)name;
 
-#pragma mark - sync cycle
+#pragma mark - Sync Cycle
 - (void)syncCycle:(BOOL)isUserTriggered;
 
-#pragma mark - process response
+#pragma mark - Process Response
 - (BOOL)processResponseJSON:(NSMutableDictionary *)dict reqType:(NSInteger)t objDic:(NSDictionary *)od;
 - (void)actionAfterReqToDbDone:(NSInteger)reqType;
+
+#pragma mark - Record Getter
+- (TVUser *)getLoggedInUser;
+- (NSSet *)getObjInCarrier:(NSSet *)ids entityName:(NSString *)name;
 
 @end

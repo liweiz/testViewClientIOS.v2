@@ -41,14 +41,14 @@
 {
     // Avoid pinchGesture triggered multiple times by limiting its action only when gesture just begins to be recognized.
     if (self.pinchToShow.state == UIGestureRecognizerStateBegan) {
-        NSLog(@"x: %f", self.box.transitionPointInRoot.x);
-        NSLog(@"y: %f", self.box.transitionPointInRoot.y);
+        NSLog(@"x: %f", [TVRootViewCtlBox sharedBox].transitionPointInRoot.x);
+        NSLog(@"y: %f", [TVRootViewCtlBox sharedBox].transitionPointInRoot.y);
         switch (self.actionNo) {
             case TVPinchRoot:
-                self.box.transitionPointInRoot = [self pointBy:self.pinchToShow inView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+                [TVRootViewCtlBox sharedBox].transitionPointInRoot = [self pointBy:self.pinchToShow inView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
                 break;
             case TVPinchToSave:
-                self.box.transitionPointInRoot = [self pointBy:self.pinchToShow inView:self.parentViewController.view];
+                [TVRootViewCtlBox sharedBox].transitionPointInRoot = [self pointBy:self.pinchToShow inView:self.parentViewController.view];
             default:
                 break;
         }

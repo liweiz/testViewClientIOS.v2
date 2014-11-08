@@ -494,7 +494,7 @@
         [crud.dna setString:s];
         [crud syncCycle:userTriggered];
     }];
-    [o.dna setString:s];
+    o.cycleDna = s;
     // No need to set queuePriority here since it's a normal one.
     [[NSOperationQueue mainQueue] addOperation:o];
 }

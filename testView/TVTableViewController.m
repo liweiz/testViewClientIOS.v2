@@ -64,7 +64,7 @@
         self.tableDataSources = [NSMutableArray arrayWithCapacity:0];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(hideCard:) name:tvHideExpandedCard object:nil];
         // Start a new sync cycle to reach the most updated data source.
-        [self startNewSyncCycle:self.box byUser:NO];
+        [self startNewSyncCycle:[TVRootViewCtlBox sharedBox] byUser:NO];
     }
     return self;
 }
@@ -74,7 +74,7 @@
     if ([self.tableDataSources count] == 0) {
         [self finalizeTableDataSource];
     }
-    CGRect r = CGRectMake(self.box.appRect.size.width, 0.0f, self.box.appRect.size.width, self.box.appRect.size.height);
+    CGRect r = CGRectMake([TVRootViewCtlBox sharedBox].appRect.size.width, 0.0f, [TVRootViewCtlBox sharedBox].appRect.size.width, [TVRootViewCtlBox sharedBox].appRect.size.height);
     self.tableView = [[UITableView alloc] initWithFrame:r style:UITableViewStylePlain];
     self.tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     self.tableView.backgroundColor = [UIColor whiteColor];
@@ -268,7 +268,7 @@
     // Nerver cancel this operation, it's a fundamental one for the app.
     TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
         TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-        NSArray *a = [self getCards:self.box.userServerId inCtx:crud.ctx];
+        NSArray *a = [self getCards:[TVRootViewCtlBox sharedBox].userServerId inCtx:crud.ctx];
         [self.rawDataSource setArray:a];
         NSMutableArray *snapshot = [self takeSnapshotOfTableDataSource];
         [self addBlankRowsToTableDataSource:snapshot];
@@ -440,13 +440,13 @@
         // Nerver cancel this operation, it's a fundamental one for the app.
         TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-            NSArray *a = [crud getObjs:[NSSet setWithObject:self.box.cardIdInEditing] name:@"TVCard" inCtx:crud.ctx];
+            NSArray *a = [crud getObjs:[NSSet setWithObject:[TVRootViewCtlBox sharedBox].cardIdInEditing] name:@"TVCard" inCtx:crud.ctx];
             if (a) {
                 [crud userDeleteOneCard:a[0]];
                 if ([crud saveWithCtx:crud.ctx]) {
                     // action after deletion
                     // Start a new sync cycle.
-                    [self startNewSyncCycle:self.box byUser:NO];
+                    [self startNewSyncCycle:[TVRootViewCtlBox sharedBox] byUser:NO];
                 }
             }
         }];
@@ -749,6 +749,11 @@
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 @end

@@ -47,17 +47,17 @@
 
 - (void)loadView
 {
-    self.view = [[UIView alloc] initWithFrame:self.box.appRect];
-    self.myRootView = [[UIScrollView alloc] initWithFrame:self.box.appRect];
+    self.view = [[UIView alloc] initWithFrame:[TVRootViewCtlBox sharedBox].appRect];
+    self.myRootView = [[UIScrollView alloc] initWithFrame:[TVRootViewCtlBox sharedBox].appRect];
     NSInteger i;
     if (self.searchViewIncluded) {
         i = 3;
-        self.centerOffsetX = self.myRootView.contentSize.width / 2 - self.box.appRect.size.width / 2;
+        self.centerOffsetX = self.myRootView.contentSize.width / 2 - [TVRootViewCtlBox sharedBox].appRect.size.width / 2;
         self.myRootView.delegate = self;
     } else {
         i = 2;
     }
-    CGSize theContentSize = CGSizeMake(self.box.appRect.size.width * i, self.box.appRect.size.height);
+    CGSize theContentSize = CGSizeMake([TVRootViewCtlBox sharedBox].appRect.size.width * i, [TVRootViewCtlBox sharedBox].appRect.size.height);
     self.myRootView.contentSize = theContentSize;
     self.myRootView.bounces = NO;
     self.myRootView.showsVerticalScrollIndicator = NO;
@@ -74,13 +74,12 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     // Start a new sync cycle everytime content controller launches.
-    [self startNewSyncCycle:self.box byUser:NO];
+    [self startNewSyncCycle:[TVRootViewCtlBox sharedBox] byUser:NO];
     // Add cards view
     
     // Get user's settings
     
     self.myCardsViewController = [[TVTableViewController alloc] initWithStyle:UITableViewStylePlain];
-    self.myCardsViewController.box = self.box;
     self.myCardsViewController.tableEntityName = @"TVCard";
     [self addChildViewController:self.myCardsViewController];
     [self.myRootView addSubview:self.myCardsViewController.view];
@@ -88,7 +87,6 @@
     
     // Add new view
     self.myNewBaseViewController = [[TVNewBaseViewController alloc] initWithNibName:nil bundle:nil];
-    self.myNewBaseViewController.box = self.box;
     [self addChildViewController:myNewBaseViewController];
     [self.myRootView addSubview:self.myNewBaseViewController.view];
     [self.myNewBaseViewController didMoveToParentViewController:self];
@@ -220,13 +218,13 @@
 
 - (CGRect)updateFrame:(CGFloat)position
 {
-    CGRect updatedFrame = CGRectMake(self.box.appRect.size.width * position, 0, self.box.appRect.size.width, self.box.appRect.size.height);
+    CGRect updatedFrame = CGRectMake([TVRootViewCtlBox sharedBox].appRect.size.width * position, 0, [TVRootViewCtlBox sharedBox].appRect.size.width, [TVRootViewCtlBox sharedBox].appRect.size.height);
     return updatedFrame;
 }
 
 - (void)recenter:(UIScrollView *)scrollView
 {
-    if (scrollView.contentOffset.x == 0 || scrollView.contentOffset.x == self.box.appRect.size.width * 2) {
+    if (scrollView.contentOffset.x == 0 || scrollView.contentOffset.x == [TVRootViewCtlBox sharedBox].appRect.size.width * 2) {
         // Get the new position before recentering contentview since contentOffset will change after recentering
         // Dismiss keyboard after leaving New
         if (self.newViewPosition == 1) {
@@ -237,7 +235,7 @@
             self.newViewPosition = [self viewStackLoopAdd:self.newViewPosition];
             self.cardsViewPosition = [self viewStackLoopAdd:self.cardsViewPosition];
             self.searchViewPosition = [self viewStackLoopAdd:self.searchViewPosition];
-        } else if (scrollView.contentOffset.x == self.box.appRect.size.width * 2) {
+        } else if (scrollView.contentOffset.x == [TVRootViewCtlBox sharedBox].appRect.size.width * 2) {
             self.newViewPosition = [self viewStackLoopMinus:self.newViewPosition];
             self.cardsViewPosition = [self viewStackLoopMinus:self.cardsViewPosition];
             self.searchViewPosition = [self viewStackLoopMinus:self.searchViewPosition];

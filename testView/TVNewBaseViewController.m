@@ -44,7 +44,7 @@
 
 - (void)loadView
 {
-    CGRect viewRect = CGRectMake(self.box.appRect.size.width * 0.0f, 0.0f, self.box.appRect.size.width, self.box.appRect.size.height);
+    CGRect viewRect = CGRectMake([TVRootViewCtlBox sharedBox].appRect.size.width * 0.0f, 0.0f, [TVRootViewCtlBox sharedBox].appRect.size.width, [TVRootViewCtlBox sharedBox].appRect.size.height);
     self.view = [[UIView alloc] initWithFrame:viewRect];
     self.view.backgroundColor = [UIColor purpleColor];
     self.view.clipsToBounds = YES;
@@ -54,8 +54,6 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.myNewViewCtl = [[TVNewViewController alloc] initWithNibName:nil bundle:nil];
-
-    self.myNewViewCtl.box = self.box;
     [self addChildViewController:self.myNewViewCtl];
     [self.view addSubview:self.myNewViewCtl.view];
     [self.myNewViewCtl didMoveToParentViewController:self];
@@ -72,21 +70,20 @@
 {
     if (!self.saveViewCtl) {
         self.saveViewCtl = [[TVSaveViewController alloc] init];
-        self.saveViewCtl.box = self.box;
         [self addChildViewController:self.saveViewCtl];
         [self.saveViewCtl didMoveToParentViewController:self];
         [self.view addSubview:self.saveViewCtl.view];
     }
     self.saveViewCtl.createNewOnly = toCreateNewOnly;
     [self.saveViewCtl checkIfUpdateBtnNeeded];
-    NSLog(@"x: %f", self.box.transitionPointInRoot.x);
-    NSLog(@"y: %f", self.box.transitionPointInRoot.y);
-    [self showViewAbove:self.saveViewCtl.view currentView:self.myNewViewCtl.view baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+    NSLog(@"x: %f", [TVRootViewCtlBox sharedBox].transitionPointInRoot.x);
+    NSLog(@"y: %f", [TVRootViewCtlBox sharedBox].transitionPointInRoot.y);
+    [self showViewAbove:self.saveViewCtl.view currentView:self.myNewViewCtl.view baseView:self.view pointInBaseView:[TVRootViewCtlBox sharedBox].transitionPointInRoot];
 }
 
 - (void)dismissSaveView
 {
-    [self showViewBelow:self.myNewViewCtl.view currentView:self.saveViewCtl.view baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+    [self showViewBelow:self.myNewViewCtl.view currentView:self.saveViewCtl.view baseView:self.view pointInBaseView:[TVRootViewCtlBox sharedBox].transitionPointInRoot];
 }
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
@@ -121,7 +118,7 @@
             if ([crud saveWithCtx:crud.ctx]) {
                 [self dismissSaveView];
                 // Start a new sync cycle.
-                [self startNewSyncCycle:self.box byUser:NO];
+                [self startNewSyncCycle:[TVRootViewCtlBox sharedBox] byUser:NO];
             }
         }];
         [[NSOperationQueue mainQueue] addOperation:o];
@@ -134,13 +131,13 @@
         // Nerver cancel user triggered operation on local db.
         TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-            TVCard *c = [crud getOneCard:self.box.cardIdInEditing inCtx:crud.ctx];
+            TVCard *c = [crud getOneCard:[TVRootViewCtlBox sharedBox].cardIdInEditing inCtx:crud.ctx];
             if (c) {
                 [crud userUpdateOneCard:c by:[self getReadyForCard]];
                 if ([crud saveWithCtx:crud.ctx]) {
                     [self dismissSaveView];
                     // Start a new sync cycle.
-                    [self startNewSyncCycle:self.box byUser:NO];
+                    [self startNewSyncCycle:[TVRootViewCtlBox sharedBox] byUser:NO];
                 }
             } else {
                 [self saveAsNew];
@@ -157,9 +154,9 @@
     [d setObject:self.myNewViewCtl.myTargetView.text forKey:@"target"];
     [d setObject:self.myNewViewCtl.myTranslationView.text forKey:@"translation"];
     [d setObject:self.myNewViewCtl.myDetailView.text forKey:@"detail"];
-    [d setObject:self.box.userServerId forKey:@"belongTo"];
-    [d setObject:self.box.sourceLang forKey:@"sourceLang"];
-    [d setObject:self.box.targetLang forKey:@"targetLang"];
+    [d setObject:[TVRootViewCtlBox sharedBox].userServerId forKey:@"belongTo"];
+    [d setObject:[TVRootViewCtlBox sharedBox].sourceLang forKey:@"sourceLang"];
+    [d setObject:[TVRootViewCtlBox sharedBox].targetLang forKey:@"targetLang"];
     return d;
 }
 

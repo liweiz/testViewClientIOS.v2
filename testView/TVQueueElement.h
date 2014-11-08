@@ -7,12 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "TVRootViewCtlBox.h"
 
 @interface TVQueueElement : NSBlockOperation
 
 @property (assign, nonatomic) BOOL isForServerAvailCheck;
-@property (weak, nonatomic) TVRootViewCtlBox *box;
-@property (strong, nonatomic) NSMutableString *dna;
+@property (copy, nonatomic) NSString *cycleDna;
 
 @end

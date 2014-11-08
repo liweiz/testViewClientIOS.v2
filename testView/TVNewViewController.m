@@ -41,9 +41,9 @@
 
 - (void)loadView
 {
-    CGRect viewRect = CGRectMake(self.box.appRect.size.width * 0.0f, 0.0f, self.box.appRect.size.width, self.box.appRect.size.height);
-    self.myNewView = [[TVScrollViewVertical alloc] initWithFrame:self.box.appRect];
-    self.myNewView.contentSize = CGSizeMake(self.box.appRect.size.width, self.box.appRect.size.height * 2.0f + 500.0f);
+    CGRect viewRect = CGRectMake([TVRootViewCtlBox sharedBox].appRect.size.width * 0.0f, 0.0f, [TVRootViewCtlBox sharedBox].appRect.size.width, [TVRootViewCtlBox sharedBox].appRect.size.height);
+    self.myNewView = [[TVScrollViewVertical alloc] initWithFrame:[TVRootViewCtlBox sharedBox].appRect];
+    self.myNewView.contentSize = CGSizeMake([TVRootViewCtlBox sharedBox].appRect.size.width, [TVRootViewCtlBox sharedBox].appRect.size.height * 2.0f + 500.0f);
     // Set the initial section
     self.myNewView.contentOffset = CGPointMake(0.0f, 0.0f);
     // sectionNo: 0=>Context, 1=>Target, 2=>Translation, 3=>Detail
@@ -68,24 +68,24 @@
 	// Do any additional setup after loading the view.
     [self.view addSubview:self.myNewView];
     // Add context label
-    UILabel *contextLabel =[[UILabel alloc] initWithFrame:CGRectMake(self.box.originX, self.box.gapY, self.box.labelWidth, tvRowHeight)];
+    UILabel *contextLabel =[[UILabel alloc] initWithFrame:CGRectMake([TVRootViewCtlBox sharedBox].originX, [TVRootViewCtlBox sharedBox].gapY, [TVRootViewCtlBox sharedBox].labelWidth, tvRowHeight)];
     contextLabel.text = @"Example";
     [self.myNewView addSubview:contextLabel];
     
     // Add context view
-    self.myContextView = [[UITextView alloc] initWithFrame:CGRectMake(self.box.originX, self.box.gapY + contextLabel.frame.origin.y + contextLabel.frame.size.height, self.box.labelWidth, tvRowHeight * 5.0f)];
+    self.myContextView = [[UITextView alloc] initWithFrame:CGRectMake([TVRootViewCtlBox sharedBox].originX, [TVRootViewCtlBox sharedBox].gapY + contextLabel.frame.origin.y + contextLabel.frame.size.height, [TVRootViewCtlBox sharedBox].labelWidth, tvRowHeight * 5.0f)];
     [self.myNewView addSubview:self.myContextView];
     self.myContextView.delegate = self;
     
     self.stopContextTarget = self.myContextView.frame.origin.y + self.myContextView.frame.size.height;
     
     // Add target label
-    UILabel *targetLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.box.originX, self.box.gapY + self.myContextView.frame.origin.y + self.myContextView.frame.size.height, self.box.labelWidth, tvRowHeight)];
+    UILabel *targetLabel = [[UILabel alloc] initWithFrame:CGRectMake([TVRootViewCtlBox sharedBox].originX, [TVRootViewCtlBox sharedBox].gapY + self.myContextView.frame.origin.y + self.myContextView.frame.size.height, [TVRootViewCtlBox sharedBox].labelWidth, tvRowHeight)];
     targetLabel.text = @"Target";
     [self.myNewView addSubview:targetLabel];
     
     // Add target view, 15 is the space between two views
-    self.myTargetView = [[UITextView alloc] initWithFrame:CGRectMake(self.box.originX, self.box.gapY + targetLabel.frame.origin.y + targetLabel.frame.size.height, self.box.labelWidth, tvRowHeight * 2.0f)];
+    self.myTargetView = [[UITextView alloc] initWithFrame:CGRectMake([TVRootViewCtlBox sharedBox].originX, [TVRootViewCtlBox sharedBox].gapY + targetLabel.frame.origin.y + targetLabel.frame.size.height, [TVRootViewCtlBox sharedBox].labelWidth, tvRowHeight * 2.0f)];
     [self.myNewView addSubview:self.myTargetView];
     self.myTargetView.backgroundColor = [UIColor whiteColor];
     self.myTargetView.delegate = self;
@@ -93,12 +93,12 @@
     self.stopTargetTranslation = self.myTargetView.frame.origin.y + self.myTargetView.frame.size.height;
     
     // Add translation label
-    UILabel *translationLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.box.originX, self.box.gapY + self.myTargetView.frame.origin.y + self.myTargetView.frame.size.height, self.box.labelWidth, tvRowHeight)];
+    UILabel *translationLabel = [[UILabel alloc] initWithFrame:CGRectMake([TVRootViewCtlBox sharedBox].originX, [TVRootViewCtlBox sharedBox].gapY + self.myTargetView.frame.origin.y + self.myTargetView.frame.size.height, [TVRootViewCtlBox sharedBox].labelWidth, tvRowHeight)];
     translationLabel.text = @"Translation";
     [self.myNewView addSubview:translationLabel];
     
     // Add translation view
-    self.myTranslationView = [[UITextView alloc] initWithFrame:CGRectMake(self.box.originX, self.box.gapY + translationLabel.frame.origin.y + translationLabel.frame.size.height, self.box.labelWidth, tvRowHeight * 2.0f)];
+    self.myTranslationView = [[UITextView alloc] initWithFrame:CGRectMake([TVRootViewCtlBox sharedBox].originX, [TVRootViewCtlBox sharedBox].gapY + translationLabel.frame.origin.y + translationLabel.frame.size.height, [TVRootViewCtlBox sharedBox].labelWidth, tvRowHeight * 2.0f)];
     [self.myNewView addSubview:self.myTranslationView];
     self.myTranslationView.backgroundColor = [UIColor whiteColor];
     self.myTranslationView.delegate = self;
@@ -106,12 +106,12 @@
     self.stopTranslationDetail = self.myTranslationView.frame.origin.y + self.myTranslationView.frame.size.height;
     
     // Add detail label
-    UILabel *detailLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.box.originX, self.box.gapY + self.myTranslationView.frame.origin.y + self.myTranslationView.frame.size.height, self.box.labelWidth, tvRowHeight)];
+    UILabel *detailLabel = [[UILabel alloc] initWithFrame:CGRectMake([TVRootViewCtlBox sharedBox].originX, [TVRootViewCtlBox sharedBox].gapY + self.myTranslationView.frame.origin.y + self.myTranslationView.frame.size.height, [TVRootViewCtlBox sharedBox].labelWidth, tvRowHeight)];
     detailLabel.text = @"Note";
     [self.myNewView addSubview:detailLabel];
     
     // Add detail view
-    self.myDetailView = [[UITextView alloc] initWithFrame:CGRectMake(self.box.originX, self.box.gapY + detailLabel.frame.origin.y + detailLabel.frame.size.height, self.box.labelWidth, tvRowHeight * 5.0f)];
+    self.myDetailView = [[UITextView alloc] initWithFrame:CGRectMake([TVRootViewCtlBox sharedBox].originX, [TVRootViewCtlBox sharedBox].gapY + detailLabel.frame.origin.y + detailLabel.frame.size.height, [TVRootViewCtlBox sharedBox].labelWidth, tvRowHeight * 5.0f)];
     [self.myNewView addSubview:self.myDetailView];
     self.myDetailView.delegate = self;
     

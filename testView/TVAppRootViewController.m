@@ -10,56 +10,12 @@
 #import "TVRequester.h"
 #import "NSObject+DataHandler.h"
 #import "NSObject+NetworkHandler.h"
-#import "TVTestViewController.h"
 #import "UIViewController+InOutTransition.h"
 #import "TVLangPickViewController.h"
-#import "TVActivationViewController.h"
 #import "TVLayerBaseViewController.h"
 #import "TVCRUDChannel.h"
 #import "TVRootViewCtlBox.h"
-
-NSString *const tvEnglishFontName = @"TimesNewRomanPSMT";
-NSString *const tvServerUrl = @"http://localhost:3000";
-CGFloat const goldenRatio = 1.6180339887498948482f / 2.6180339887498948482f;
-CGFloat const tvRowHeight = 50.0f;
-//UIColor *const tvBackgroundColor = [UIColor colorWithRed:43/255.0f green:43/255.0f blue:42/255.0f alpha:1.0f];
-//UIColor *const tvBackgroundColorAlternative = [UIColor colorWithRed:148/255.0f green:180/255.0f blue:7/255.0f alpha:1.0f];
-//UIColor *const tvFontColor = [UIColor colorWithRed:246/255.0f green:247/255.0f blue:242/255.0f alpha:1.0f];
-CGFloat const tvFontSizeLarge = 23.0f;
-CGFloat const tvFontSizeRegular = 17.0f;
-NSString *const tvShowLogin = @"tvShowLogin";
-NSString *const tvShowActivation = @"tvShowActivation";
-NSString *const tvShowNative = @"tvShowLangPickNative";
-NSString *const tvShowTarget = @"tvShowLangPickTarget";
-NSString *const tvShowContent = @"tvShowContent";
-NSString *const tvShowAfterActivated = @"tvShowAfterActivated";
-
-NSString *const tvPinchToShowAbove = @"tvPinchToShowAbove";
-NSString *const tvAddAndCheckReqNo = @"tvAddAndCheckReqNo";
-NSString *const tvMinusAndCheckReqNo = @"tvMinusAndCheckReqNo";
-NSString *const tvAddAndCheckReqNoNB = @"tvAddAndCheckReqNoNB";
-NSString *const tvMinusAndCheckReqNoNB = @"tvMinusAndCheckReqNoNB";
-NSString *const tvUserChangedLocalDb = @"tvUserChangedLocalDb";
-NSString *const tvUserSignUp = @"tvUserSignUp";
-
-NSString *const tvShowWarning = @"tvShowWarning";
-
-NSString *const tvPinchToShowSave = @"tvPinchToShowSave";
-NSString *const tvSaveAsNew = @"tvSaveAsNew";
-NSString *const tvSaveAsUpdate = @"tvSaveAsUpdate";
-
-NSString *const tvDismissSaveViewOnly = @"tvDismissSaveViewOnly";
-
-NSString *const tvHideExpandedCard = @"tvHideExpandedCard";
-
-NSString *const tvFetchOrSaveErr = @"tvFetchOrSaveErr";
-NSString *const tvRemoveOperation = @"tvRemoveOperation";
-NSString *const tvMarkReqIdDone = @"tvMarkReqIdDone";
-
-NSString *const tvSignOut = @"tvSignOut";
-
-NSString *const tvAddOneToUncommitted = @"tvAddOneToUncommitted";
-NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
+#import "TVUser.h"
 
 @interface TVAppRootViewController ()
 
@@ -67,31 +23,18 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 
 @implementation TVAppRootViewController
 
-@synthesize userFetchRequest, loginViewController, requestReceivedResponse, willSendRequest, passItem, appRect, internetIsAccessible;
-@synthesize bIndicator, nbIndicator;
-@synthesize sysMsg;
-
-@synthesize nativeViewController;
-@synthesize targetViewController;
-@synthesize activationViewController;
-
-@synthesize box;
-@synthesize warning;
-
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        
-        self.box = [[TVRootViewCtlBox alloc] init];
     }
     return self;
 }
 
 - (void)loadView
 {
-    self.view = [[UIView alloc] initWithFrame:self.appRect];
+    self.view = [[UIView alloc] initWithFrame:[TVRootViewCtlBox sharedBox].appRect];
     self.view.backgroundColor = [UIColor lightGrayColor];
 }
 
@@ -99,18 +42,17 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.box.appRect = self.appRect;
-    [self.box setupBox];
-    
     self.requestReceivedResponse = YES;
     self.willSendRequest = YES;
-    self.bIndicator = [[TVBlockIndicator alloc] initWithFrame:self.appRect];
+    
+    self.bIndicator = [[TVBlockIndicator alloc] initWithFrame:[TVRootViewCtlBox sharedBox].appRect];
     [self.view addSubview:self.bIndicator];
     self.bIndicator.hidden = YES;
-    self.nbIndicator = [[TVNonBlockIndicator alloc] initWithFrame:CGRectMake(self.appRect.origin.x, self.appRect.origin.y, self.appRect.size.width, 33.0f)];
-    [self.view addSubview:self.nbIndicator];
     
+    self.nbIndicator = [[TVNonBlockIndicator alloc] initWithFrame:CGRectMake([TVRootViewCtlBox sharedBox].appRect.origin.x, [TVRootViewCtlBox sharedBox].appRect.origin.y, [TVRootViewCtlBox sharedBox].appRect.size.width, 33.0f)];
+    [self.view addSubview:self.nbIndicator];
     self.nbIndicator.hidden = YES;
+    
     // sysMsg width: 80 height: 44
     self.sysMsg = [[UILabel alloc] initWithFrame:CGRectMake((self.view.frame.size.width - 150.0f) * 0.5f, (self.view.frame.size.height - 44.0f) * 0.5f, 150.0f, 44.0f)];
     [self.view addSubview:self.sysMsg];
@@ -165,23 +107,22 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 - (void)sendActivationEmail:(BOOL)isUserTriggered
 {
     TVRequester *r = [[TVRequester alloc] init];
-    r.box = self.box;
     r.requestType = TVEmailForActivation;
     r.isUserTriggered = isUserTriggered;
     r.isBearer = YES;
     r.method = @"GET";
-    r.accessToken = [self getAccessTokenForAccount:self.box.userServerId];
-    [r setupAndLoadToQueue:self.box.comWorker withDna:NO];
+    r.accessToken = [self getAccessTokenForAccount:[TVRootViewCtlBox sharedBox].userServerId];
+    [r setupAndLoadToQueue:[TVRootViewCtlBox sharedBox].comWorker withDna:NO];
 }
 
-#pragma mark - indicator on/off
+#pragma mark - Indicator On/off
 
-// Two indicators: one for blocking user interaction, which is user triggered, one not, which is client triggered. 
+// Two indicators: one for blocking user interaction, which is user triggered, one not, which is client/system triggered.
 
 // For blockIndicator
 - (void)addAndCheckReqNo
 {
-    self.box.numberOfUserTriggeredRequests++;
+    [TVRootViewCtlBox sharedBox].numberOfUserTriggeredRequests++;
     if (self.bIndicator.hidden) {
         [self showBIndicator];
     }
@@ -189,8 +130,8 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 
 - (void)minusAndCheckReqNo
 {
-    self.box.numberOfUserTriggeredRequests--;
-    if (!self.bIndicator.hidden && self.box.numberOfUserTriggeredRequests == 0) {
+    [TVRootViewCtlBox sharedBox].numberOfUserTriggeredRequests--;
+    if (!self.bIndicator.hidden && [TVRootViewCtlBox sharedBox].numberOfUserTriggeredRequests == 0) {
         [self hideBIndicator];
     }
 }
@@ -215,7 +156,7 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 // For nonBlockIndicator
 - (void)addAndCheckReqNoNB
 {
-    self.box.numberOfNonUserTriggeredRequests++;
+    [TVRootViewCtlBox sharedBox].numberOfNonUserTriggeredRequests++;
     if (self.nbIndicator.hidden) {
         [self showNBIndicator];
     }
@@ -223,8 +164,8 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 
 - (void)minusAndCheckReqNoNB
 {
-    self.box.numberOfNonUserTriggeredRequests--;
-    if (!self.nbIndicator.hidden && self.box.numberOfNonUserTriggeredRequests == 0) {
+    [TVRootViewCtlBox sharedBox].numberOfNonUserTriggeredRequests--;
+    if (!self.nbIndicator.hidden && [TVRootViewCtlBox sharedBox].numberOfNonUserTriggeredRequests == 0) {
         [self hideNBIndicator];
     }
 }
@@ -248,7 +189,7 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 //    }
 }
 
-# pragma mark - view layers in/out
+# pragma mark - View Layers In/out
 
 // view layers from upper to bottom: login/activation/langPicker/content
 // Compare main view layer index
@@ -272,7 +213,7 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 
 - (UIView *)getViewOnDuty
 {
-    switch (self.box.ctlOnDuty) {
+    switch ([TVRootViewCtlBox sharedBox].ctlOnDuty) {
         case TVLoginCtl:
             return self.loginViewController.view;
         case TVActivationCtl:
@@ -291,37 +232,37 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 - (void)showActivationBelow
 {
     [self loadActivationCtl];
-    [self showViewBelow:self.activationViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
-    self.box.ctlOnDuty = TVActivationCtl;
+    [self showViewBelow:self.activationViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:[TVRootViewCtlBox sharedBox].transitionPointInRoot];
+    [TVRootViewCtlBox sharedBox].ctlOnDuty = TVActivationCtl;
 }
 
 - (void)showNativePickBelow
 {
     [self loadNativePickCtl];
-    [self showViewBelow:self.nativeViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
-    self.box.ctlOnDuty = TVNativePickCtl;
+    [self showViewBelow:self.nativeViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:[TVRootViewCtlBox sharedBox].transitionPointInRoot];
+    [TVRootViewCtlBox sharedBox].ctlOnDuty = TVNativePickCtl;
 }
 
 - (void)showNativePickAbove
 {
     [self loadNativePickCtl];
-    [self showViewAbove:self.nativeViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
-    self.box.ctlOnDuty = TVNativePickCtl;
+    [self showViewAbove:self.nativeViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:[TVRootViewCtlBox sharedBox].transitionPointInRoot];
+    [TVRootViewCtlBox sharedBox].ctlOnDuty = TVNativePickCtl;
 }
 
 - (void)showTargetPickBelow
 {
     [self loadTargetPickCtl];
-    [self showViewBelow:self.targetViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
-    self.box.ctlOnDuty = TVTargetPickCtl;
+    [self showViewBelow:self.targetViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:[TVRootViewCtlBox sharedBox].transitionPointInRoot];
+    [TVRootViewCtlBox sharedBox].ctlOnDuty = TVTargetPickCtl;
 }
 
 //
 - (void)showContentBelow
 {
     [self loadContentCtl];
-    [self showViewBelow:self.contentViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
-    self.box.ctlOnDuty = TVContentCtl;
+    [self showViewBelow:self.contentViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:[TVRootViewCtlBox sharedBox].transitionPointInRoot];
+    [TVRootViewCtlBox sharedBox].ctlOnDuty = TVContentCtl;
 }
 
 - (void)pinchToShowAbove:(NSNotification *)note
@@ -330,13 +271,13 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
     NSInteger n = c.view.tag;
     if (n == 1002 || n == 1003) {
         [self loadLoginCtl];
-        [self showViewAbove:self.loginViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+        [self showViewAbove:self.loginViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:[TVRootViewCtlBox sharedBox].transitionPointInRoot];
         if (n == 1002) {
-            [self signOut:self.box.userServerId];
+            [self signOut:[TVRootViewCtlBox sharedBox].userServerId];
         }
     } else if (n == 1004) {
         [self loadNativePickCtl];
-        [self showViewAbove:self.nativeViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:self.box.transitionPointInRoot];
+        [self showViewAbove:self.nativeViewController.view currentView:[self getViewOnDuty] baseView:self.view pointInBaseView:[TVRootViewCtlBox sharedBox].transitionPointInRoot];
     }
 }
 
@@ -382,7 +323,7 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 
 - (TVCtl)getCtlAbove
 {
-    switch (self.box.ctlOnDuty) {
+    switch ([TVRootViewCtlBox sharedBox].ctlOnDuty) {
         case TVNativePickCtl:
             return TVLoginCtl;
         case TVTargetPickCtl:
@@ -403,9 +344,9 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
     // Nerver cancel this operation, it's a fundamental one for the app.
     TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
         TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-        TVUser *u = [crud getLoggedInUser:crud.ctx];
+        TVUser *u = [crud getLoggedInUser];
         if (u) {
-            [self.box.userServerId setString:u.serverId];
+            [[TVRootViewCtlBox sharedBox].userServerId setString:u.serverId];
             if (u.activated.boolValue == YES) {
                 [self loadContentCtl];
             } else {
@@ -423,16 +364,13 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 {
     if (!self.loginViewController) {
         self.loginViewController = [[TVLoginViewController alloc] initWithNibName:nil bundle:nil];
-        
-        self.loginViewController.box = self.box;
-        
         [self addChildViewController:self.loginViewController];
         [self.view addSubview:self.loginViewController.view];
         [self.loginViewController didMoveToParentViewController:self];
         self.loginViewController.view.tag = 1001;
     }
     self.loginViewController.view.hidden = NO;
-    self.box.ctlOnDuty = TVLoginCtl;
+    [TVRootViewCtlBox sharedBox].ctlOnDuty = TVLoginCtl;
 }
 
 - (void)loadNativePickCtl
@@ -440,8 +378,6 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
     if (!self.nativeViewController) {
         self.nativeViewController = [[TVLangPickViewController alloc] initWithNibName:nil bundle:nil];
         self.nativeViewController.tableIsForSourceLang = YES;
-        
-        self.nativeViewController.box = self.box;
         [self addChildViewController:self.nativeViewController];
         [self.view addSubview:self.nativeViewController.view];
         [self.nativeViewController didMoveToParentViewController:self];
@@ -454,9 +390,6 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
     if (!self.targetViewController) {
         self.targetViewController = [[TVLangPickViewController alloc] initWithNibName:nil bundle:nil];
         self.targetViewController.tableIsForSourceLang = NO;
-        
-        self.targetViewController.box = self.box;
-        
         [self addChildViewController:self.targetViewController];
         [self.view addSubview:self.targetViewController.view];
         [self.targetViewController didMoveToParentViewController:self];
@@ -468,7 +401,6 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 {
     if (!self.activationViewController) {
         self.activationViewController = [[TVActivationViewController alloc] initWithNibName:nil bundle:nil];
-        self.activationViewController.box = self.box;
         [self addChildViewController:self.activationViewController];
         [self.view addSubview:self.activationViewController.view];
         [self.activationViewController didMoveToParentViewController:self];
@@ -481,7 +413,6 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 {
     if (!self.contentViewController) {
         self.contentViewController = [[TVContentRootViewController alloc] initWithNibName:nil bundle:nil];
-        self.contentViewController.box = self.box;
         [self addChildViewController:self.contentViewController];
         [self.view addSubview:self.contentViewController.view];
         [self.contentViewController didMoveToParentViewController:self];
@@ -502,7 +433,7 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
     if ([note.name isEqualToString:tvFetchOrSaveErr]) {
         self.warning.text = @"Something went wrong, please try later.";
     } else {
-        self.warning.text = self.box.warning;
+        self.warning.text = [TVRootViewCtlBox sharedBox].warning;
     }
     
     if (self.warning.alpha == 0.0f) {
@@ -512,7 +443,7 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
     [UIView animateWithDuration:4 animations:^{
         self.warning.alpha = 0.0f;
     } completion:^(BOOL finished){
-        [self.box.warning setString:@""];
+        [[TVRootViewCtlBox sharedBox].warning setString:@""];
     }];
 }
 
@@ -529,8 +460,8 @@ NSString *const tvMinusOneToUncommitted = @"tvMinusOneToUncommitted";
 - (void)decreaseUncommittedByOne:(NSNotification *)note
 {
     TVCRUDChannel *crud = note.object;
-    self.box.numberOfUncommittedRecord--;
-    if (self.box.numberOfUncommittedRecord == 0) {
+    [TVRootViewCtlBox sharedBox].numberOfUncommittedRecord--;
+    if ([TVRootViewCtlBox sharedBox].numberOfUncommittedRecord == 0) {
         [crud syncCycle:NO];
     }
 }

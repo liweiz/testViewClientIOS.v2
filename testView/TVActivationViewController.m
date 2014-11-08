@@ -46,7 +46,7 @@
 
 - (void)loadView
 {
-    self.view = [[UIView alloc] initWithFrame:self.box.appRect];
+    self.view = [[UIView alloc] initWithFrame:[TVRootViewCtlBox sharedBox].appRect];
     self.view.backgroundColor = [UIColor whiteColor];
 }
 
@@ -59,7 +59,7 @@
     topIntroHeight = (460.0f - btnHeight) * 0.5f - gap * 2.0f;
     bottomIntroHeight = (460.0f - btnHeight) * 0.5f - gap * 3.0f - btnHeight;
     
-    self.connectBtn = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, (self.box.appRect.size.height - btnHeight) * 0.5f, self.box.appRect.size.width - 20.0f * 2.0f, btnHeight)];
+    self.connectBtn = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, ([TVRootViewCtlBox sharedBox].appRect.size.height - btnHeight) * 0.5f, [TVRootViewCtlBox sharedBox].appRect.size.width - 20.0f * 2.0f, btnHeight)];
     [self.view addSubview:self.connectBtn];
     self.connectBtn.backgroundColor = [UIColor greenColor];
     self.connectBtn.userInteractionEnabled = YES;
@@ -92,22 +92,21 @@
 - (void)proceed
 {
     // Check server availability
-    [self checkServerAvail:YES inQueue:self.box.comWorker flagToSet:self.box.serverIsAvailable];
+    [self checkServerAvail:YES inQueue:[TVRootViewCtlBox sharedBox].comWorker flagToSet:[TVRootViewCtlBox sharedBox].serverIsAvailable];
     TVRequester *req = [[TVRequester alloc] init];
-    [req.dna setString:self.box.validDna];
-    req.box = self.box;
+    req.cycleDna = [TVRootViewCtlBox sharedBox].validDna;
     req.isUserTriggered = YES;
     req.isBearer = YES;
-    req.accessToken = [self getAccessTokenForAccount:self.box.userServerId];
+    req.accessToken = [self getAccessTokenForAccount:[TVRootViewCtlBox sharedBox].userServerId];
     req.method = @"GET";
     req.requestType = TVOneUser;
     [req setupRequest];
-    [req setupAndLoadToQueue:self.box.comWorker withDna:NO];
+    [req setupAndLoadToQueue:[TVRootViewCtlBox sharedBox].comWorker withDna:NO];
 }
 
 - (void)sendEmail
 {
-    self.box.transitionPointInRoot = [self.sendBtnTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+    [TVRootViewCtlBox sharedBox].transitionPointInRoot = [self.sendBtnTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     TVAppRootViewController *t = (TVAppRootViewController *)[[UIApplication sharedApplication] keyWindow].rootViewController;
     [t sendActivationEmail:YES];
 }

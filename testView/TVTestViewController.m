@@ -68,7 +68,7 @@
 
 - (void)loadView
 {
-    self.view = [[UIView alloc] initWithFrame:self.appRect];
+    self.view = [[UIView alloc] initWithFrame:[TVRootViewCtlBox sharedBox].appRect];
     self.view.backgroundColor = [UIColor lightGrayColor];
 }
 

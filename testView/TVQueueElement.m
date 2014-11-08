@@ -11,10 +11,6 @@
 
 @implementation TVQueueElement
 
-@synthesize isForServerAvailCheck;
-@synthesize box;
-@synthesize dna;
-
 - (id)init
 {
     self = [super init];
@@ -24,8 +20,8 @@
         [self setCompletionBlock:^{
             [[NSNotificationCenter defaultCenter] postNotificationName:tvRemoveOperation object:weakSelf];
         }];
-        self.isForServerAvailCheck = NO;
-        self.dna = [[NSMutableString alloc] init];
+        _isForServerAvailCheck = NO;
+        _cycleDna = [[NSMutableString alloc] init];
     }
     return self;
 }

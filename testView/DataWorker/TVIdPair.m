@@ -10,6 +10,4 @@
 
 @implementation TVIdPair
 
-@synthesize serverId, localId;
-
 @end

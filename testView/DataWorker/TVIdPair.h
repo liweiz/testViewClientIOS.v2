@@ -10,7 +10,7 @@
 
 @interface TVIdPair : NSObject
 
-@property (strong, nonatomic) NSString *serverId;
-@property (strong, nonatomic) NSString *localId;
+@property (copy, nonatomic) NSString *serverId;
+@property (copy, nonatomic) NSString *localId;
 
 @end

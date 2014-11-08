@@ -62,21 +62,21 @@
     self.animationSec = 0.1f;
     self.gapHeight = 460.0f * goldenRatio / (1.0f + 0.5f + 0.5f + 1.0f + 3.0f * 3.0f + 1.3f + 2.0f + 2.0f + 1.0f);
     self.introHeight = 460.0f * (1.0f - goldenRatio) - self.gapHeight * 1.5f;
-    if (self.box.appRect.size.height > 460.0f) {
-        self.verticalPadding = (self.box.appRect.size.height - 460.0f) / 2.0f;
+    if ([TVRootViewCtlBox sharedBox].appRect.size.height > 460.0f) {
+        self.verticalPadding = ([TVRootViewCtlBox sharedBox].appRect.size.height - 460.0f) / 2.0f;
     } else {
         self.verticalPadding = 0.0f;
     }
-    if (self.box.appRect.size.width > 320.0f) {
-        self.horizontalPadding = (self.box.appRect.size.width - 320.0f) / 2.0f;
+    if ([TVRootViewCtlBox sharedBox].appRect.size.width > 320.0f) {
+        self.horizontalPadding = ([TVRootViewCtlBox sharedBox].appRect.size.width - 320.0f) / 2.0f;
     } else {
         self.horizontalPadding = 0.0f;
     }
     self.inputX = self.horizontalPadding + 20.0f;
     self.inputWidth = 320.0f - 20.0f * 2.0f;
     self.inputHeight = self.gapHeight * 3.0f;
-    self.baseView = [[UIScrollView alloc] initWithFrame:self.box.appRect];
-    self.baseView.contentSize = CGSizeMake(self.box.appRect.size.width, self.box.appRect.size.height * 2.0f);
+    self.baseView = [[UIScrollView alloc] initWithFrame:[TVRootViewCtlBox sharedBox].appRect];
+    self.baseView.contentSize = CGSizeMake([TVRootViewCtlBox sharedBox].appRect.size.width, [TVRootViewCtlBox sharedBox].appRect.size.height * 2.0f);
     self.coverOnBaseView = [[TVView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.baseView.contentSize.width, self.baseView.contentSize.height)];
     
     [self.baseView addSubview:self.coverOnBaseView];
@@ -183,9 +183,8 @@
 
 - (void)signIn
 {
-    self.box.transitionPointInRoot = [self.signInButtonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+    [TVRootViewCtlBox sharedBox].transitionPointInRoot = [self.signInButtonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.box = self.box;
     reqster.requestType = TVSignIn;
     
     reqster.isUserTriggered = YES;
@@ -195,7 +194,7 @@
     //    reqster.body = [self getJSONSignUpOrInWithEmail:reqster.email password:reqster.password err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    [reqster setupAndLoadToQueue:self.box.comWorker withDna:NO];
+    [reqster setupAndLoadToQueue:[TVRootViewCtlBox sharedBox].comWorker withDna:NO];
 }
 
 - (void)showSwitchToSignUp
@@ -316,7 +315,7 @@
 
 - (void)nextToNativeLang
 {
-    self.box.transitionPointInRoot = [self.nextButtonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
+    [TVRootViewCtlBox sharedBox].transitionPointInRoot = [self.nextButtonTap locationInView:[[UIApplication sharedApplication] keyWindow].rootViewController.view];
     [[NSNotificationCenter defaultCenter] postNotificationName:tvShowNative object:self];
 }
 
@@ -328,26 +327,25 @@
 - (void)signUp
 {
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.box = self.box;
     reqster.requestType = TVSignUp;
     reqster.email = self.emailInput.text;
     reqster.password = self.passwordInput.text;
     reqster.isBearer = NO;
-    if (self.box) {
+    if ([TVRootViewCtlBox sharedBox]) {
         NSLog(@"YES");
-        if (self.box.sourceLang) {
+        if ([TVRootViewCtlBox sharedBox].sourceLang) {
             NSLog(@"YES");
         } else {
             NSLog(@"NO");
         }
     }
-    NSLog(@"sLang: %@", self.box.sourceLang);
-    NSLog(@"tLang: %@", self.box.targetLang);
-    reqster.body = [self getJSONSignUpWithSource:self.box.sourceLang target:self.box.targetLang err:nil];
+    NSLog(@"sLang: %@", [TVRootViewCtlBox sharedBox].sourceLang);
+    NSLog(@"tLang: %@", [TVRootViewCtlBox sharedBox].targetLang);
+    reqster.body = [self getJSONSignUpWithSource:[TVRootViewCtlBox sharedBox].sourceLang target:[TVRootViewCtlBox sharedBox].targetLang err:nil];
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
     reqster.isUserTriggered = YES;
-    [reqster setupAndLoadToQueue:self.box.comWorker withDna:NO];
+    [reqster setupAndLoadToQueue:[TVRootViewCtlBox sharedBox].comWorker withDna:NO];
 }
 
 - (void)goToSignIn
@@ -463,14 +461,13 @@
 - (void)emailToResettingPassword
 {
     TVRequester *reqster = [[TVRequester alloc] init];
-    reqster.box = self.box;
     reqster.requestType = TVEmailForPasswordResetting;
     reqster.email = self.emailInput.text;
     reqster.body = [self getJSONForgotPasswordWithEmail:reqster.email err:nil];
     
     reqster.method = @"POST";
     reqster.contentType = @"application/json";
-    [reqster setupAndLoadToQueue:self.box.comWorker withDna:NO];
+    [reqster setupAndLoadToQueue:[TVRootViewCtlBox sharedBox].comWorker withDna:NO];
 }
 
 #pragma mark - keyboard
@@ -499,19 +496,19 @@
 {
     // Validate email
     if (self.emailInput.text.length == 0) {
-        [self.box.warning setString:@"Email should not be empty."];
+        [[TVRootViewCtlBox sharedBox].warning setString:@"Email should not be empty."];
         [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
         return NO;
     }
     // Validate password
     if (self.passwordInput.alpha == 1.0f) {
         if (self.passwordInput.text.length == 0) {
-            [self.box.warning setString:@"Password should not be empty."];
+            [[TVRootViewCtlBox sharedBox].warning setString:@"Password should not be empty."];
             [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
             return NO;
         } else if (self.passwordInput.text.length < 6 || self.passwordInput.text.length > 20) {
             // Password's length has to be no less than 6 and no more than 20.
-            [self.box.warning setString:@"Password's length has to be between 6 and 20."];
+            [[TVRootViewCtlBox sharedBox].warning setString:@"Password's length has to be between 6 and 20."];
             [[NSNotificationCenter defaultCenter] postNotificationName:tvShowWarning object:self];
             return NO;
         }

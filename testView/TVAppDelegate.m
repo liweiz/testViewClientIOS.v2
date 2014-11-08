@@ -11,26 +11,22 @@
 //#import <Crashlytics/Crashlytics.h>
 #import "TVTestViewController.h"
 #import "NSObject+CoreDataStack.h"
+#import "TVRootViewCtlBox.h"
 
 @implementation TVAppDelegate
-
-@synthesize ctx;
-@synthesize model;
-@synthesize coordinator;
-@synthesize appRect;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     CGRect aRect = [[UIScreen mainScreen] applicationFrame];
     // [[UIScreen mainScreen] applicationFrame].origin.y is 20 and it will be updated by system to 0 later. So we assign it manually first here.
-    self.appRect = CGRectMake(aRect.origin.x, 0.0f, aRect.size.width, aRect.size.height);
+    [TVRootViewCtlBox sharedBox].appRect = CGRectMake(aRect.origin.x, 0.0f, aRect.size.width, aRect.size.height);
+    [[TVRootViewCtlBox sharedBox] setupBox];
     self.window = [[UIWindow alloc] initWithFrame:aRect];
     // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     // set TVRootViewController as rootViewController
     TVAppRootViewController *tempViewController = [[TVAppRootViewController alloc] initWithNibName:nil bundle:nil];
-    tempViewController.appRect = self.appRect;
     self.window.rootViewController = tempViewController;
 //    [Crashlytics startWithAPIKey:@"d30dc014389e0e949766f2cd80d7559c4af53569"];
     return YES;
