@@ -305,7 +305,6 @@
                     // TVUser exists already.
                     [self updateDocBaseServer:u withDic:[dict valueForKey:@"user"]];
                     [self updateUser:u withDic:dict];
-                    break;
                 }
                 if (!u) {
                     u = [NSEntityDescription insertNewObjectForEntityForName:@"TVUser" inManagedObjectContext:self.ctx];
@@ -504,7 +503,8 @@
             TVUser *u = [self getLoggedInUser:self.ctx];
             [[TVRootViewCtlBox sharedBox].userServerId setString:u.serverId];
             if (u.activated.integerValue == 1) {
-                
+                // Show contentCtl
+                [[NSNotificationCenter defaultCenter] postNotificationName:tvShowContent object:self];
             } else {
                 // Show view to ask user to activate
                 [[NSNotificationCenter defaultCenter] postNotificationName:tvShowActivation object:self];
@@ -536,8 +536,26 @@
     return [self getLoggedInUser:self.ctx];
 }
 
+- (TVCard *)getOneCard:(TVIdPair *)cardIds {
+    return [self getOneCard:cardIds inCtx:self.ctx];
+}
+
+- (NSArray *)getCards:(NSString *)userServerId {
+    return [self getCards:userServerId inCtx:self.ctx];
+}
+
 - (NSSet *)getObjInCarrier:(NSSet *)ids entityName:(NSString *)name {
     return [self getObjInCarrier:ids entityName:name inCtx:self.ctx];
+}
+
+- (NSArray *)getObjs:(NSSet *)ids name:(NSString *)entityName {
+    return [self getObjs:ids name:entityName inCtx:self.ctx];
+}
+
+#pragma mark - Save
+- (BOOL)save
+{
+    return [self saveWithCtx:self.ctx];
 }
 
 /*

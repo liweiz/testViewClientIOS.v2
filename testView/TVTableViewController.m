@@ -232,9 +232,9 @@
                 }
             }
         }
-        [r setObject:toUpdate forKey:@"update"];
-        [r setObject:toDelete forKey:@"delete"];
-        [r setObject:toInsert forKey:@"insert"];
+        [r setValue:toUpdate forKey:@"update"];
+        [r setValue:toDelete forKey:@"delete"];
+        [r setValue:toInsert forKey:@"insert"];
     }
     return r;
 }
@@ -268,13 +268,13 @@
     // Nerver cancel this operation, it's a fundamental one for the app.
     TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
         TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-        NSArray *a = [self getCards:[TVRootViewCtlBox sharedBox].userServerId inCtx:crud.ctx];
+        NSArray *a = [crud getCards:[TVRootViewCtlBox sharedBox].userServerId];
         [self.rawDataSource setArray:a];
         NSMutableArray *snapshot = [self takeSnapshotOfTableDataSource];
         [self addBlankRowsToTableDataSource:snapshot];
         NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
-        [d setObject:snapshot forKey:@"dataSource"];
-        [d setObject:self.expandedCards forKey:@"expandedCards"];
+        [d setValue:snapshot forKey:@"dataSource"];
+        [d setValue:self.expandedCards forKey:@"expandedCards"];
         [self.snapshots addObject:d];
         [self.tableDataSources addObject:snapshot];
     }];
@@ -440,10 +440,10 @@
         // Nerver cancel this operation, it's a fundamental one for the app.
         TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-            NSArray *a = [crud getObjs:[NSSet setWithObject:[TVRootViewCtlBox sharedBox].cardIdInEditing] name:@"TVCard" inCtx:crud.ctx];
+            NSArray *a = [crud getObjs:[NSSet setWithObject:[TVRootViewCtlBox sharedBox].cardIdInEditing] name:@"TVCard"];
             if (a) {
                 [crud userDeleteOneCard:a[0]];
-                if ([crud saveWithCtx:crud.ctx]) {
+                if ([crud save]) {
                     // action after deletion
                     // Start a new sync cycle.
                     [self startNewSyncCycle:[TVRootViewCtlBox sharedBox] byUser:NO];
@@ -584,9 +584,9 @@
         }
     }
     NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
-    [d setObject:toKeep forKey:@"toKeep"];
-    [d setObject:toExpand forKey:@"toExpand"];
-    [d setObject:toCollapse forKey:@"toCollapse"];
+    [d setValue:toKeep forKey:@"toKeep"];
+    [d setValue:toExpand forKey:@"toExpand"];
+    [d setValue:toCollapse forKey:@"toCollapse"];
     return d;
 }
 

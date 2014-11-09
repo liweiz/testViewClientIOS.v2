@@ -73,7 +73,6 @@ extern CGFloat const gapY;
 @property (assign, nonatomic) CGRect appRect;
 @property (assign, nonatomic) CGFloat originX;
 @property (assign, nonatomic) CGFloat labelWidth;
-@property (assign, nonatomic) CGFloat gapY;
 
 @property (assign, nonatomic) BOOL serverIsAvailable;
 

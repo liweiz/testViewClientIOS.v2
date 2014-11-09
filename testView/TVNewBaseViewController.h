@@ -8,14 +8,12 @@
 
 #import <UIKit/UIKit.h>
 #import "TVNewViewController.h"
-#import "TVRootViewCtlBox.h"
 
 @interface TVNewBaseViewController : UIViewController
 
 @property (strong, nonatomic) NSManagedObjectContext *ctx;
 
 @property (strong, nonatomic) TVNewViewController *myNewViewCtl;
-@property (strong, nonatomic) TVRootViewCtlBox *box;
 @property (strong, nonatomic) TVSaveViewController *saveViewCtl;
 @property (assign, nonatomic) BOOL createNewOnly;
 @property (strong, nonatomic) NSString *cardToUpdateServerId;

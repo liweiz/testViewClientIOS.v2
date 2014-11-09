@@ -43,6 +43,7 @@
 		EE1997B01816F60000B5A993 /* langListLong.txt in Resources */ = {isa = PBXBuildFile; fileRef = EE1997AF1816F60000B5A993 /* langListLong.txt */; };
 		EE5F3B5D197E2F890031749E /* TVRootViewCtlBox.m in Sources */ = {isa = PBXBuildFile; fileRef = EE5F3B5C197E2F890031749E /* TVRootViewCtlBox.m */; };
 		EE6BDACD19AFE5F000545DAF /* TVCRUDChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = EE6BDACC19AFE5F000545DAF /* TVCRUDChannel.m */; };
+		EE6E0B411A0EC7870078AEC0 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE6E0B401A0EC7870078AEC0 /* Crashlytics.framework */; };
 		EE83C3C01991793B00269B0C /* TVTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EE83C3BF1991793B00269B0C /* TVTableViewController.m */; };
 		EE8407C019CFC96B00178462 /* TVNonBlockIndicator.m in Sources */ = {isa = PBXBuildFile; fileRef = EE8407BF19CFC96B00178462 /* TVNonBlockIndicator.m */; };
 		EE96665D198F47F800AA3A5C /* TVNewBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EE96665C198F47F800AA3A5C /* TVNewBaseViewController.m */; };
@@ -86,6 +87,7 @@
 
 /* Begin PBXFileReference section */
 		1FFB53C936964C7AB5438DCF /* libPods-testView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-testView.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A7E4FD2DACE19DD7C9B29758 /* Pods-testView.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-testView.release.xcconfig"; path = "Pods/Target Support Files/Pods-testView/Pods-testView.release.xcconfig"; sourceTree = "<group>"; };
 		D006DE7517B21CE600AA8B43 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		D0347973179EDD55006FFCF6 /* TVSearchBaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVSearchBaseViewController.h; sourceTree = "<group>"; };
 		D0347974179EDD55006FFCF6 /* TVSearchBaseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVSearchBaseViewController.m; sourceTree = "<group>"; };
@@ -124,6 +126,7 @@
 		D0A0AFA31932CBC000C6E11E /* TVRequesterTestCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVRequesterTestCase.m; sourceTree = "<group>"; };
 		D0AE0C5B1937756800514AD9 /* TVTestViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVTestViewController.h; sourceTree = "<group>"; };
 		D0AE0C5C1937756800514AD9 /* TVTestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVTestViewController.m; sourceTree = "<group>"; };
+		D7BB800BB20964DE5F143F58 /* Pods-testView.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-testView.debug.xcconfig"; path = "Pods/Target Support Files/Pods-testView/Pods-testView.debug.xcconfig"; sourceTree = "<group>"; };
 		EE1327011988348700EAD11D /* TVContentRootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVContentRootViewController.h; sourceTree = "<group>"; };
 		EE1327021988348700EAD11D /* TVContentRootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVContentRootViewController.m; sourceTree = "<group>"; };
 		EE1327041988364800EAD11D /* testView-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "testView-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -133,6 +136,7 @@
 		EE5F3B5C197E2F890031749E /* TVRootViewCtlBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVRootViewCtlBox.m; sourceTree = "<group>"; };
 		EE6BDACB19AFE5F000545DAF /* TVCRUDChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVCRUDChannel.h; sourceTree = "<group>"; };
 		EE6BDACC19AFE5F000545DAF /* TVCRUDChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVCRUDChannel.m; sourceTree = "<group>"; };
+		EE6E0B401A0EC7870078AEC0 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = "../../../../Google Drive/stilFresh/stilFresh/Crashlytics.framework"; sourceTree = "<group>"; };
 		EE83C3BE1991793B00269B0C /* TVTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVTableViewController.h; sourceTree = "<group>"; };
 		EE83C3BF1991793B00269B0C /* TVTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TVTableViewController.m; sourceTree = "<group>"; };
 		EE8407BE19CFC96B00178462 /* TVNonBlockIndicator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVNonBlockIndicator.h; sourceTree = "<group>"; };
@@ -190,7 +194,6 @@
 		EEFDD92F180F09050058A366 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		EEFDD931180F12CA0058A366 /* KeychainItemWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KeychainItemWrapper.h; path = ../KeychainItemWrapper.h; sourceTree = "<group>"; };
 		EEFDD932180F12CA0058A366 /* KeychainItemWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KeychainItemWrapper.m; path = ../KeychainItemWrapper.m; sourceTree = "<group>"; };
-		F15D67B5C15A426A87562F75 /* Pods-testView.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-testView.xcconfig"; path = "Pods/Pods-testView.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -205,6 +208,7 @@
 				D06A1A42179DC6A3003346F4 /* CoreData.framework in Frameworks */,
 				D06A1A40179DC6A3003346F4 /* UIKit.framework in Frameworks */,
 				D06A1A3C179DC6A3003346F4 /* Foundation.framework in Frameworks */,
+				EE6E0B411A0EC7870078AEC0 /* Crashlytics.framework in Frameworks */,
 				635FD5A6ECD34CC6957C973B /* libPods-testView.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -223,6 +227,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8EEC27A4E4C605E34672635C /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				D7BB800BB20964DE5F143F58 /* Pods-testView.debug.xcconfig */,
+				A7E4FD2DACE19DD7C9B29758 /* Pods-testView.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		D06A1A2F179DC6A3003346F4 = {
 			isa = PBXGroup;
 			children = (
@@ -230,7 +243,7 @@
 				D06A1A60179DC6A3003346F4 /* testViewTests */,
 				D06A1A3A179DC6A3003346F4 /* Frameworks */,
 				D06A1A39179DC6A3003346F4 /* Products */,
-				F15D67B5C15A426A87562F75 /* Pods-testView.xcconfig */,
+				8EEC27A4E4C605E34672635C /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -246,6 +259,7 @@
 		D06A1A3A179DC6A3003346F4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				EE6E0B401A0EC7870078AEC0 /* Crashlytics.framework */,
 				EEFDD92F180F09050058A366 /* Security.framework */,
 				D09097A217ECC63D003205C3 /* CFNetwork.framework */,
 				D006DE7517B21CE600AA8B43 /* QuartzCore.framework */,
@@ -571,7 +585,7 @@
 				ORGANIZATIONNAME = Liwei;
 				TargetAttributes = {
 					D06A1A37179DC6A3003346F4 = {
-						DevelopmentTeam = Y5ZM333AL6;
+						DevelopmentTeam = 4LRPEBVABG;
 					};
 					D06A1A57179DC6A3003346F4 = {
 						TestTargetID = D06A1A37179DC6A3003346F4;
@@ -644,7 +658,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Pods-testView-resources.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-testView/Pods-testView-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		E123967EAE3B460E8EB4C7B4 /* Check Pods Manifest.lock */ = {
@@ -827,7 +841,7 @@
 		};
 		D06A1A6B179DC6A4003346F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F15D67B5C15A426A87562F75 /* Pods-testView.xcconfig */;
+			baseConfigurationReference = D7BB800BB20964DE5F143F58 /* Pods-testView.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -840,13 +854,19 @@
 					/Users/liwei/Documents/testView,
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/CrashlyticsFramework-master",
+					/Users/liweizhang/Google,
+					Drive/stilFresh/stilFresh,
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "testView/testView-Prefix.pch";
 				INFOPLIST_FILE = "testView/testView-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-l\"Pods-testView-pop\"",
+					"-l\"c++\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "testView/Models/testView-Bridging-Header.h";
@@ -857,7 +877,7 @@
 		};
 		D06A1A6C179DC6A4003346F4 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F15D67B5C15A426A87562F75 /* Pods-testView.xcconfig */;
+			baseConfigurationReference = A7E4FD2DACE19DD7C9B29758 /* Pods-testView.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -870,13 +890,19 @@
 					/Users/liwei/Documents/testView,
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/CrashlyticsFramework-master",
+					/Users/liweizhang/Google,
+					Drive/stilFresh/stilFresh,
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "testView/testView-Prefix.pch";
 				INFOPLIST_FILE = "testView/testView-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-l\"Pods-testView-pop\"",
+					"-l\"c++\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "testView/Models/testView-Bridging-Header.h";

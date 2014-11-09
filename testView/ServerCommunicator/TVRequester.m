@@ -105,8 +105,8 @@
                                      TVUser *u1 = [crud getLoggedInUser];
                                      NSSet *s = [crud getObjInCarrier:self.ids entityName:@"TVCard"];
                                      NSMutableDictionary *d1 = [NSMutableDictionary dictionaryWithCapacity:0];
-                                     [d1 setObject:u1 forKey:@"user"];
-                                     [d1 setObject:s forKey:@"cards"];
+                                     [d1 setValue:u1 forKey:@"user"];
+                                     [d1 setValue:s forKey:@"cards"];
                                      __strong __typeof__(o1) strongO1 = weakO1;
                                      BOOL toProceed2 = NO;
                                      if (dnaIsNeeded) {

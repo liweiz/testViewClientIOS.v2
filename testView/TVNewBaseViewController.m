@@ -12,21 +12,13 @@
 #import "NSObject+DataHandler.h"
 #import "TVCRUDChannel.h"
 #import "TVQueueElement.h"
+#import "TVRootViewCtlBox.h"
 
 @interface TVNewBaseViewController ()
 
 @end
 
 @implementation TVNewBaseViewController
-
-@synthesize ctx;
-
-@synthesize myNewViewCtl;
-@synthesize box;
-@synthesize createNewOnly;
-@synthesize saveViewCtl;
-@synthesize cardToUpdateServerId;
-@synthesize cardToUpdateLocalId;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -115,7 +107,7 @@
         TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
             [crud userCreateOneCard:[self getReadyForCard]];
-            if ([crud saveWithCtx:crud.ctx]) {
+            if ([crud save]) {
                 [self dismissSaveView];
                 // Start a new sync cycle.
                 [self startNewSyncCycle:[TVRootViewCtlBox sharedBox] byUser:NO];
@@ -131,10 +123,10 @@
         // Nerver cancel user triggered operation on local db.
         TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
             TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-            TVCard *c = [crud getOneCard:[TVRootViewCtlBox sharedBox].cardIdInEditing inCtx:crud.ctx];
+            TVCard *c = [crud getOneCard:[TVRootViewCtlBox sharedBox].cardIdInEditing];
             if (c) {
                 [crud userUpdateOneCard:c by:[self getReadyForCard]];
-                if ([crud saveWithCtx:crud.ctx]) {
+                if ([crud save]) {
                     [self dismissSaveView];
                     // Start a new sync cycle.
                     [self startNewSyncCycle:[TVRootViewCtlBox sharedBox] byUser:NO];
@@ -150,13 +142,13 @@
 - (NSMutableDictionary *)getReadyForCard
 {
     NSMutableDictionary *d = [NSMutableDictionary dictionaryWithCapacity:0];
-    [d setObject:self.myNewViewCtl.myContextView.text forKey:@"context"];
-    [d setObject:self.myNewViewCtl.myTargetView.text forKey:@"target"];
-    [d setObject:self.myNewViewCtl.myTranslationView.text forKey:@"translation"];
-    [d setObject:self.myNewViewCtl.myDetailView.text forKey:@"detail"];
-    [d setObject:[TVRootViewCtlBox sharedBox].userServerId forKey:@"belongTo"];
-    [d setObject:[TVRootViewCtlBox sharedBox].sourceLang forKey:@"sourceLang"];
-    [d setObject:[TVRootViewCtlBox sharedBox].targetLang forKey:@"targetLang"];
+    [d setValue:self.myNewViewCtl.myContextView.text forKey:@"context"];
+    [d setValue:self.myNewViewCtl.myTargetView.text forKey:@"target"];
+    [d setValue:self.myNewViewCtl.myTranslationView.text forKey:@"translation"];
+    [d setValue:self.myNewViewCtl.myDetailView.text forKey:@"detail"];
+    [d setValue:[TVRootViewCtlBox sharedBox].userServerId forKey:@"belongTo"];
+    [d setValue:[TVRootViewCtlBox sharedBox].sourceLang forKey:@"sourceLang"];
+    [d setValue:[TVRootViewCtlBox sharedBox].targetLang forKey:@"targetLang"];
     return d;
 }
 

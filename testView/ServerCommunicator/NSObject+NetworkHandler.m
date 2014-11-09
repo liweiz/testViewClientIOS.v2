@@ -263,7 +263,7 @@
                      } else {
                          __block BOOL flag = NO;
                          // Internet is not available, clear the queue since it's impossible to have the rest ones successfully processed.
-                         [[(TVAppRootViewController *)[[[UIApplication sharedApplication] keyWindow] rootViewController] box].validDna setString:@""];
+                         [[TVRootViewCtlBox sharedBox].validDna setString:@""];
                      }
                  }];
             }];

@@ -45,6 +45,12 @@
 
 #pragma mark - Record Getter
 - (TVUser *)getLoggedInUser;
+- (TVCard *)getOneCard:(TVIdPair *)cardIds;
+- (NSArray *)getCards:(NSString *)userServerId;
 - (NSSet *)getObjInCarrier:(NSSet *)ids entityName:(NSString *)name;
+- (NSArray *)getObjs:(NSSet *)ids name:(NSString *)entityName;
+
+#pragma mark - Save
+- (BOOL)save;
 
 @end

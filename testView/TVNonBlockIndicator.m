@@ -10,9 +10,7 @@
 
 @implementation TVNonBlockIndicator
 
-@synthesize goDark, goLight;
-@synthesize isActive;
-@synthesize aniDuration;
+static CGFloat const aniDuration = 1;
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -20,26 +18,27 @@
     if (self) {
         // Initialization code
         self.backgroundColor = [UIColor redColor];
-        self.isActive = NO;
-        self.aniDuration = 5.0;
+        _isActive = YES;
 //        self.alpha = 0.5f;
-        if (!self.goDark) {
-            self.goDark = [POPBasicAnimation easeInAnimation];
-            self.goDark = [CABasicAnimation animationWithKeyPath:@"backgroundColor"];
-            [self.goDark setValue:@"goDark" forKey:@"animationName"];
-            self.goDark.delegate = self;
-            self.goDark.fromValue = (id)[UIColor lightTextColor].CGColor;
-            self.goDark.toValue = (id)[UIColor greenColor].CGColor;
-            self.goDark.duration = self.aniDuration;
+        if (!_goDark) {
+            _goDark = [POPBasicAnimation easeInAnimation];
+//            self.goDark = [CABasicAnimation animationWithKeyPath:@"backgroundColor"];
+            [_goDark setValue:@"goDark" forKey:@"animationName"];
+            _goDark.delegate = self;
+            _goDark.property = [POPAnimatableProperty propertyWithName:@"backgroundColor"];
+            _goDark.fromValue = CFBridgingRelease([UIColor lightTextColor].CGColor);
+            _goDark.toValue = CFBridgingRelease([UIColor greenColor].CGColor);
+            _goDark.duration = aniDuration;
         }
-        if (!self.goLight) {
-            self.goLight = [POPBasicAnimation easeOutAnimation];
-            self.goLight = [CABasicAnimation animationWithKeyPath:@"backgroundColor"];
-            [self.goLight setValue:@"goLight" forKey:@"animationName"];
-            self.goLight.delegate = self;
-            self.goLight.fromValue = (id)[UIColor greenColor].CGColor;
-            self.goLight.toValue = (id)[UIColor lightTextColor].CGColor;
-            self.goLight.duration = self.aniDuration;
+        if (!_goLight) {
+            _goLight = [POPBasicAnimation easeOutAnimation];
+//            self.goLight = [CABasicAnimation animationWithKeyPath:@"backgroundColor"];
+            [_goLight setValue:@"goLight" forKey:@"animationName"];
+            _goLight.property = [POPAnimatableProperty propertyWithName:@"backgroundColor"];
+            _goLight.delegate = self;
+            _goLight.fromValue = (id)[UIColor greenColor].CGColor;
+            _goLight.toValue = (id)[UIColor lightTextColor].CGColor;
+            _goLight.duration = aniDuration;
         }
     }
     return self;
@@ -49,7 +48,7 @@
 {
     [self.superview bringSubviewToFront:self];
     self.isActive = YES;
-    [self.layer addAnimation:self.goDark forKey:nil];
+    [self.layer pop_addAnimation:self.goDark forKey:@"goDark"];
 }
 
 - (void)stopAni
@@ -58,7 +57,7 @@
     [self.layer removeAllAnimations];
 }
 
-- (void)animationDidStart:(CAAnimation *)anim
+- (void)pop_animationDidStart:(CAAnimation *)anim
 {
     if (![self.superview.subviews.lastObject isEqual:self]) {
         [self.superview bringSubviewToFront:self];
@@ -66,7 +65,7 @@
     NSLog(@"animationDidStart");
 }
 
-- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
+- (void)pop_animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
 {
     if (![self.superview.subviews.lastObject isEqual:self]) {
         [self.superview bringSubviewToFront:self];
@@ -75,9 +74,9 @@
         if (self.isActive) {
             // Keep the animation on.
             if ([[anim valueForKey:@"animationName"] isEqualToString:@"goDark"]) {
-                [self.layer addAnimation:self.goLight forKey:nil];
+                [self.layer pop_addAnimation:self.goLight forKey:nil];
             } else if ([[anim valueForKey:@"animationName"] isEqualToString:@"goLight"]) {
-                [self.layer addAnimation:self.goDark forKey:nil];
+                [self.layer pop_addAnimation:self.goDark forKey:nil];
             }
         }
     }

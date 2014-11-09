@@ -491,7 +491,7 @@
     [box.validDna setString:s];
     TVQueueElement *o = [TVQueueElement blockOperationWithBlock:^{
         TVCRUDChannel *crud = [[TVCRUDChannel alloc] init];
-        [crud.dna setString:s];
+        crud.cycleDna = s;
         [crud syncCycle:userTriggered];
     }];
     o.cycleDna = s;

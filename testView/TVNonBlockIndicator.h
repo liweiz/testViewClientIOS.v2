@@ -16,7 +16,6 @@
 @property (strong, nonatomic) POPBasicAnimation *goLight;
 // This is used to identify if the view's animation is on.
 @property (assign, nonatomic) BOOL isActive;
-@property (assign, nonatomic) CGFloat aniDuration;
 
 - (void)startAni;
 - (void)stopAni;
