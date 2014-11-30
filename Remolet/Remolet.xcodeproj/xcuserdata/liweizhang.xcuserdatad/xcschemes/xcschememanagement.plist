@@ -4,29 +4,20 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>Pods-testView-pop.xcscheme</key>
+		<key>Remolet.xcscheme</key>
 		<dict>
-			<key>isShown</key>
-			<false/>
 			<key>orderHint</key>
-			<integer>2</integer>
-		</dict>
-		<key>Pods-testView.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-			<key>orderHint</key>
-			<integer>1</integer>
+			<integer>3</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>08661282D11B5BDE4F7DB18F</key>
+		<key>EE6CA1971A2B8F6F00E6FC9A</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>6DCF839F734DC6329E1521F0</key>
+		<key>EE6CA1AF1A2B8F6F00E6FC9A</key>
 		<dict>
 			<key>primary</key>
 			<true/>

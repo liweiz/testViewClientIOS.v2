@@ -1,0 +1,442 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		EE6CA19E1A2B8F6F00E6FC9A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6CA19D1A2B8F6F00E6FC9A /* AppDelegate.swift */; };
+		EE6CA1A11A2B8F6F00E6FC9A /* Remolet.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = EE6CA19F1A2B8F6F00E6FC9A /* Remolet.xcdatamodeld */; };
+		EE6CA1A31A2B8F6F00E6FC9A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6CA1A21A2B8F6F00E6FC9A /* ViewController.swift */; };
+		EE6CA1A61A2B8F6F00E6FC9A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EE6CA1A41A2B8F6F00E6FC9A /* Main.storyboard */; };
+		EE6CA1A81A2B8F6F00E6FC9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EE6CA1A71A2B8F6F00E6FC9A /* Images.xcassets */; };
+		EE6CA1AB1A2B8F6F00E6FC9A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = EE6CA1A91A2B8F6F00E6FC9A /* LaunchScreen.xib */; };
+		EE6CA1B71A2B8F6F00E6FC9A /* RemoletTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6CA1B61A2B8F6F00E6FC9A /* RemoletTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EE6CA1B11A2B8F6F00E6FC9A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EE6CA1901A2B8F6F00E6FC9A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EE6CA1971A2B8F6F00E6FC9A;
+			remoteInfo = Remolet;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		EE6CA1981A2B8F6F00E6FC9A /* Remolet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Remolet.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EE6CA19C1A2B8F6F00E6FC9A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EE6CA19D1A2B8F6F00E6FC9A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		EE6CA1A01A2B8F6F00E6FC9A /* Remolet.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Remolet.xcdatamodel; sourceTree = "<group>"; };
+		EE6CA1A21A2B8F6F00E6FC9A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		EE6CA1A51A2B8F6F00E6FC9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		EE6CA1A71A2B8F6F00E6FC9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		EE6CA1AA1A2B8F6F00E6FC9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
+		EE6CA1B01A2B8F6F00E6FC9A /* RemoletTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RemoletTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EE6CA1B51A2B8F6F00E6FC9A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EE6CA1B61A2B8F6F00E6FC9A /* RemoletTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoletTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EE6CA1951A2B8F6F00E6FC9A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EE6CA1AD1A2B8F6F00E6FC9A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		EE6CA18F1A2B8F6F00E6FC9A = {
+			isa = PBXGroup;
+			children = (
+				EE6CA19A1A2B8F6F00E6FC9A /* Remolet */,
+				EE6CA1B31A2B8F6F00E6FC9A /* RemoletTests */,
+				EE6CA1991A2B8F6F00E6FC9A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EE6CA1991A2B8F6F00E6FC9A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EE6CA1981A2B8F6F00E6FC9A /* Remolet.app */,
+				EE6CA1B01A2B8F6F00E6FC9A /* RemoletTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EE6CA19A1A2B8F6F00E6FC9A /* Remolet */ = {
+			isa = PBXGroup;
+			children = (
+				EE6CA19D1A2B8F6F00E6FC9A /* AppDelegate.swift */,
+				EE6CA1A21A2B8F6F00E6FC9A /* ViewController.swift */,
+				EE6CA1A41A2B8F6F00E6FC9A /* Main.storyboard */,
+				EE6CA1A71A2B8F6F00E6FC9A /* Images.xcassets */,
+				EE6CA1A91A2B8F6F00E6FC9A /* LaunchScreen.xib */,
+				EE6CA19F1A2B8F6F00E6FC9A /* Remolet.xcdatamodeld */,
+				EE6CA19B1A2B8F6F00E6FC9A /* Supporting Files */,
+			);
+			path = Remolet;
+			sourceTree = "<group>";
+		};
+		EE6CA19B1A2B8F6F00E6FC9A /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				EE6CA19C1A2B8F6F00E6FC9A /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		EE6CA1B31A2B8F6F00E6FC9A /* RemoletTests */ = {
+			isa = PBXGroup;
+			children = (
+				EE6CA1B61A2B8F6F00E6FC9A /* RemoletTests.swift */,
+				EE6CA1B41A2B8F6F00E6FC9A /* Supporting Files */,
+			);
+			path = RemoletTests;
+			sourceTree = "<group>";
+		};
+		EE6CA1B41A2B8F6F00E6FC9A /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				EE6CA1B51A2B8F6F00E6FC9A /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		EE6CA1971A2B8F6F00E6FC9A /* Remolet */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EE6CA1BA1A2B8F6F00E6FC9A /* Build configuration list for PBXNativeTarget "Remolet" */;
+			buildPhases = (
+				EE6CA1941A2B8F6F00E6FC9A /* Sources */,
+				EE6CA1951A2B8F6F00E6FC9A /* Frameworks */,
+				EE6CA1961A2B8F6F00E6FC9A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Remolet;
+			productName = Remolet;
+			productReference = EE6CA1981A2B8F6F00E6FC9A /* Remolet.app */;
+			productType = "com.apple.product-type.application";
+		};
+		EE6CA1AF1A2B8F6F00E6FC9A /* RemoletTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EE6CA1BD1A2B8F6F00E6FC9A /* Build configuration list for PBXNativeTarget "RemoletTests" */;
+			buildPhases = (
+				EE6CA1AC1A2B8F6F00E6FC9A /* Sources */,
+				EE6CA1AD1A2B8F6F00E6FC9A /* Frameworks */,
+				EE6CA1AE1A2B8F6F00E6FC9A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EE6CA1B21A2B8F6F00E6FC9A /* PBXTargetDependency */,
+			);
+			name = RemoletTests;
+			productName = RemoletTests;
+			productReference = EE6CA1B01A2B8F6F00E6FC9A /* RemoletTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EE6CA1901A2B8F6F00E6FC9A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0610;
+				ORGANIZATIONNAME = "Liwei Zhang";
+				TargetAttributes = {
+					EE6CA1971A2B8F6F00E6FC9A = {
+						CreatedOnToolsVersion = 6.1;
+						DevelopmentTeam = 4LRPEBVABG;
+					};
+					EE6CA1AF1A2B8F6F00E6FC9A = {
+						CreatedOnToolsVersion = 6.1;
+						TestTargetID = EE6CA1971A2B8F6F00E6FC9A;
+					};
+				};
+			};
+			buildConfigurationList = EE6CA1931A2B8F6F00E6FC9A /* Build configuration list for PBXProject "Remolet" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = EE6CA18F1A2B8F6F00E6FC9A;
+			productRefGroup = EE6CA1991A2B8F6F00E6FC9A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EE6CA1971A2B8F6F00E6FC9A /* Remolet */,
+				EE6CA1AF1A2B8F6F00E6FC9A /* RemoletTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EE6CA1961A2B8F6F00E6FC9A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EE6CA1A61A2B8F6F00E6FC9A /* Main.storyboard in Resources */,
+				EE6CA1AB1A2B8F6F00E6FC9A /* LaunchScreen.xib in Resources */,
+				EE6CA1A81A2B8F6F00E6FC9A /* Images.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EE6CA1AE1A2B8F6F00E6FC9A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EE6CA1941A2B8F6F00E6FC9A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EE6CA1A31A2B8F6F00E6FC9A /* ViewController.swift in Sources */,
+				EE6CA1A11A2B8F6F00E6FC9A /* Remolet.xcdatamodeld in Sources */,
+				EE6CA19E1A2B8F6F00E6FC9A /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EE6CA1AC1A2B8F6F00E6FC9A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EE6CA1B71A2B8F6F00E6FC9A /* RemoletTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EE6CA1B21A2B8F6F00E6FC9A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EE6CA1971A2B8F6F00E6FC9A /* Remolet */;
+			targetProxy = EE6CA1B11A2B8F6F00E6FC9A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		EE6CA1A41A2B8F6F00E6FC9A /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				EE6CA1A51A2B8F6F00E6FC9A /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		EE6CA1A91A2B8F6F00E6FC9A /* LaunchScreen.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				EE6CA1AA1A2B8F6F00E6FC9A /* Base */,
+			);
+			name = LaunchScreen.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		EE6CA1B81A2B8F6F00E6FC9A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		EE6CA1B91A2B8F6F00E6FC9A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		EE6CA1BB1A2B8F6F00E6FC9A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Remolet/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		EE6CA1BC1A2B8F6F00E6FC9A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Remolet/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		EE6CA1BE1A2B8F6F00E6FC9A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = RemoletTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Remolet.app/Remolet";
+			};
+			name = Debug;
+		};
+		EE6CA1BF1A2B8F6F00E6FC9A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = RemoletTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Remolet.app/Remolet";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EE6CA1931A2B8F6F00E6FC9A /* Build configuration list for PBXProject "Remolet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EE6CA1B81A2B8F6F00E6FC9A /* Debug */,
+				EE6CA1B91A2B8F6F00E6FC9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EE6CA1BA1A2B8F6F00E6FC9A /* Build configuration list for PBXNativeTarget "Remolet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EE6CA1BB1A2B8F6F00E6FC9A /* Debug */,
+				EE6CA1BC1A2B8F6F00E6FC9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		EE6CA1BD1A2B8F6F00E6FC9A /* Build configuration list for PBXNativeTarget "RemoletTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EE6CA1BE1A2B8F6F00E6FC9A /* Debug */,
+				EE6CA1BF1A2B8F6F00E6FC9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		EE6CA19F1A2B8F6F00E6FC9A /* Remolet.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				EE6CA1A01A2B8F6F00E6FC9A /* Remolet.xcdatamodel */,
+			);
+			currentVersion = EE6CA1A01A2B8F6F00E6FC9A /* Remolet.xcdatamodel */;
+			path = Remolet.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = EE6CA1901A2B8F6F00E6FC9A /* Project object */;
+}
