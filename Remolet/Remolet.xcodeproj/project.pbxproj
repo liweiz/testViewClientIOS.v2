@@ -14,6 +14,10 @@
 		EE6CA1A81A2B8F6F00E6FC9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EE6CA1A71A2B8F6F00E6FC9A /* Images.xcassets */; };
 		EE6CA1AB1A2B8F6F00E6FC9A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = EE6CA1A91A2B8F6F00E6FC9A /* LaunchScreen.xib */; };
 		EE6CA1B71A2B8F6F00E6FC9A /* RemoletTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6CA1B61A2B8F6F00E6FC9A /* RemoletTests.swift */; };
+		EE6CA1C11A2BFE5B00E6FC9A /* REOperationMgr.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6CA1C01A2BFE5B00E6FC9A /* REOperationMgr.swift */; };
+		EECA24F51A2FA076006E703F /* SQLite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EECA24EC1A2FA054006E703F /* SQLite.framework */; };
+		EECA24F61A2FA098006E703F /* SQLite.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = EECA24EC1A2FA054006E703F /* SQLite.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		EED0EFB51A2CE703003BD758 /* REDbWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = EED0EFB41A2CE703003BD758 /* REDbWorker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,7 +28,55 @@
 			remoteGlobalIDString = EE6CA1971A2B8F6F00E6FC9A;
 			remoteInfo = Remolet;
 		};
+		EECA24EB1A2FA054006E703F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EECA24E41A2FA054006E703F /* SQLite.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DC3773F319C8CBB3004FCF85;
+			remoteInfo = "SQLite iOS";
+		};
+		EECA24ED1A2FA054006E703F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EECA24E41A2FA054006E703F /* SQLite.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DC3773FE19C8CBB3004FCF85;
+			remoteInfo = "SQLite iOS Tests";
+		};
+		EECA24EF1A2FA054006E703F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EECA24E41A2FA054006E703F /* SQLite.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DC37741419C8CC2F004FCF85;
+			remoteInfo = "SQLite Mac";
+		};
+		EECA24F11A2FA054006E703F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EECA24E41A2FA054006E703F /* SQLite.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DC37741E19C8CC2F004FCF85;
+			remoteInfo = "SQLite Mac Tests";
+		};
+		EECA24F31A2FA069006E703F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EECA24E41A2FA054006E703F /* SQLite.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = DC3773F219C8CBB3004FCF85;
+			remoteInfo = "SQLite iOS";
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		EECF991D1A2E52AE004100D4 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				EECA24F61A2FA098006E703F /* SQLite.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		EE6CA1981A2B8F6F00E6FC9A /* Remolet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Remolet.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -38,6 +90,10 @@
 		EE6CA1B01A2B8F6F00E6FC9A /* RemoletTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RemoletTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE6CA1B51A2B8F6F00E6FC9A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EE6CA1B61A2B8F6F00E6FC9A /* RemoletTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoletTests.swift; sourceTree = "<group>"; };
+		EE6CA1C01A2BFE5B00E6FC9A /* REOperationMgr.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = REOperationMgr.swift; sourceTree = "<group>"; };
+		EECA24E41A2FA054006E703F /* SQLite.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SQLite.xcodeproj; path = "../../../../../../Downloads/SQLite.swift-master/SQLite.xcodeproj"; sourceTree = "<group>"; };
+		EED04BB71A32BAB700A9FFFF /* MyPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MyPlayground.playground; sourceTree = "<group>"; };
+		EED0EFB41A2CE703003BD758 /* REDbWorker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = REDbWorker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,6 +101,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EECA24F51A2FA076006E703F /* SQLite.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,10 +138,14 @@
 			children = (
 				EE6CA19D1A2B8F6F00E6FC9A /* AppDelegate.swift */,
 				EE6CA1A21A2B8F6F00E6FC9A /* ViewController.swift */,
+				EE6CA1C01A2BFE5B00E6FC9A /* REOperationMgr.swift */,
+				EED0EFB41A2CE703003BD758 /* REDbWorker.swift */,
+				EED04BB71A32BAB700A9FFFF /* MyPlayground.playground */,
 				EE6CA1A41A2B8F6F00E6FC9A /* Main.storyboard */,
 				EE6CA1A71A2B8F6F00E6FC9A /* Images.xcassets */,
 				EE6CA1A91A2B8F6F00E6FC9A /* LaunchScreen.xib */,
 				EE6CA19F1A2B8F6F00E6FC9A /* Remolet.xcdatamodeld */,
+				EED17F131A2D8BD8004A1AEE /* Db */,
 				EE6CA19B1A2B8F6F00E6FC9A /* Supporting Files */,
 			);
 			path = Remolet;
@@ -115,6 +176,25 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		EECA24E51A2FA054006E703F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EECA24EC1A2FA054006E703F /* SQLite.framework */,
+				EECA24EE1A2FA054006E703F /* SQLite iOS Tests.xctest */,
+				EECA24F01A2FA054006E703F /* SQLite.framework */,
+				EECA24F21A2FA054006E703F /* SQLite Mac Tests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EED17F131A2D8BD8004A1AEE /* Db */ = {
+			isa = PBXGroup;
+			children = (
+				EECA24E41A2FA054006E703F /* SQLite.xcodeproj */,
+			);
+			name = Db;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -125,10 +205,12 @@
 				EE6CA1941A2B8F6F00E6FC9A /* Sources */,
 				EE6CA1951A2B8F6F00E6FC9A /* Frameworks */,
 				EE6CA1961A2B8F6F00E6FC9A /* Resources */,
+				EECF991D1A2E52AE004100D4 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				EECA24F41A2FA069006E703F /* PBXTargetDependency */,
 			);
 			name = Remolet;
 			productName = Remolet;
@@ -183,6 +265,12 @@
 			mainGroup = EE6CA18F1A2B8F6F00E6FC9A;
 			productRefGroup = EE6CA1991A2B8F6F00E6FC9A /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = EECA24E51A2FA054006E703F /* Products */;
+					ProjectRef = EECA24E41A2FA054006E703F /* SQLite.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				EE6CA1971A2B8F6F00E6FC9A /* Remolet */,
@@ -190,6 +278,37 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		EECA24EC1A2FA054006E703F /* SQLite.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SQLite.framework;
+			remoteRef = EECA24EB1A2FA054006E703F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		EECA24EE1A2FA054006E703F /* SQLite iOS Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "SQLite iOS Tests.xctest";
+			remoteRef = EECA24ED1A2FA054006E703F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		EECA24F01A2FA054006E703F /* SQLite.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SQLite.framework;
+			remoteRef = EECA24EF1A2FA054006E703F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		EECA24F21A2FA054006E703F /* SQLite Mac Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "SQLite Mac Tests.xctest";
+			remoteRef = EECA24F11A2FA054006E703F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		EE6CA1961A2B8F6F00E6FC9A /* Resources */ = {
@@ -216,7 +335,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EED0EFB51A2CE703003BD758 /* REDbWorker.swift in Sources */,
 				EE6CA1A31A2B8F6F00E6FC9A /* ViewController.swift in Sources */,
+				EE6CA1C11A2BFE5B00E6FC9A /* REOperationMgr.swift in Sources */,
 				EE6CA1A11A2B8F6F00E6FC9A /* Remolet.xcdatamodeld in Sources */,
 				EE6CA19E1A2B8F6F00E6FC9A /* AppDelegate.swift in Sources */,
 			);
@@ -237,6 +358,11 @@
 			isa = PBXTargetDependency;
 			target = EE6CA1971A2B8F6F00E6FC9A /* Remolet */;
 			targetProxy = EE6CA1B11A2B8F6F00E6FC9A /* PBXContainerItemProxy */;
+		};
+		EECA24F41A2FA069006E703F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "SQLite iOS";
+			targetProxy = EECA24F31A2FA069006E703F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -341,11 +467,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Remolet/realm-cocoa-0.88.0/ios",
+					"$(PROJECT_DIR)/Remolet/realm-cocoa-0.88.0/osx",
+					"$(PROJECT_DIR)/Remolet",
+				);
 				INFOPLIST_FILE = Remolet/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -353,11 +488,19 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Remolet/realm-cocoa-0.88.0/ios",
+					"$(PROJECT_DIR)/Remolet/realm-cocoa-0.88.0/osx",
+					"$(PROJECT_DIR)/Remolet",
+				);
 				INFOPLIST_FILE = Remolet/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 			};
 			name = Release;
 		};
@@ -414,6 +557,7 @@
 				EE6CA1BC1A2B8F6F00E6FC9A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		EE6CA1BD1A2B8F6F00E6FC9A /* Build configuration list for PBXNativeTarget "RemoletTests" */ = {
 			isa = XCConfigurationList;
@@ -422,6 +566,7 @@
 				EE6CA1BF1A2B8F6F00E6FC9A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
