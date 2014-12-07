@@ -24,3 +24,10 @@ func ss() -> Bool {
 }
 
 ss()
+
+
+struct d {
+    var u = 1
+}
+
+var dd = d()
