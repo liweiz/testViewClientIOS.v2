@@ -31,3 +31,14 @@ struct d {
 }
 
 var dd = d()
+
+struct a {
+    var x = "chi"
+    var y = "ri"
+}
+
+let x1 = a()
+
+let x2 = a()
+
+if x1 == x2 { println("YES") }

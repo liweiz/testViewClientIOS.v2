@@ -149,6 +149,8 @@ func setupTables(db:Database) -> (files: Query, users: Query, cards: Query, reqI
 
 let tables = setupTables(db)
 
+// MARK: - CRUD
+
 func insertFile(#db: Database, #f: File) -> Int? {
     return tables.files.insert(lastModifiedAtLocal <- f.lastModifiedAtLocal0, lastModifiedAtServer <- f.lastModifiedAtServer0, locallyDeleted <- f.locallyDeleted0, serverId <- f.serverId0, versionNo <- f.versionNo0, targetLang <- f.targetLang0, sourceLang <- f.sourceLang0)
 }
@@ -229,7 +231,7 @@ func getCards(#userServerId: String) -> [CardToShow] {
     return r;
 }
 
-func getFile(#rowId: Int) -> File {
+func getFile(#rowId: Int) -> File? {
     var f = File()
     for r in tables.cards.filter(rowid == rowId) {
         f.lastModifiedAtLocal0 = r.get(lastModifiedAtLocal)
@@ -240,27 +242,91 @@ func getFile(#rowId: Int) -> File {
         f.sourceLang0 = r.get(sourceLang)
         f.targetLang0 = r.get(targetLang)
         f.versionNo0 = r.get(versionNo)
-        break
+        return f
     }
-    return f
+    return nil
 }
 
-func getCard(#rowId: Int) -> Card {
-    var f = File()
+func getUser(#rowId: Int) -> User? {
+    var u = User()
+    for r in tables.users.filter(rowid == rowId) {
+        u.activated0 = r.get(activated)
+        u.deviceInfoId0 = r.get(deviceInfoId)
+        u.deviceUuid0 = r.get(deviceUuid)
+        u.email0 = r.get(email)
+        u.isLoggedIn0 = r.get(isLoggedIn)
+        u.isSharing0 = r.get(isSharing)
+        u.rememberMe0 = r.get(rememberMe)
+        u.sortOption0 = r.get(sortOption)
+        u.linkTo0 = r.get(linkTo)
+        return u
+    }
+    return nil
+}
+
+func getCard(#rowId: Int) -> Card? {
+    var c = Card()
     for r in tables.cards.filter(rowid == rowId) {
-        f.lastModifiedAtLocal0 = r.get(lastModifiedAtLocal)
-        f.lastModifiedAtServer0 = r.get(lastModifiedAtServer)
-        f.locallyDeleted0 = r.get(locallyDeleted)
-        f.rowid0 = rowId
-        f.serverId0 = r.get(serverId)
-        f.sourceLang0 = r.get(sourceLang)
-        f.targetLang0 = r.get(targetLang)
-        f.versionNo0 = r.get(versionNo)
-        break
+        c.belongTo0 = r.get(belongTo)
+        c.collectedAt0 = r.get(collectedAt)
+        c.context0 = r.get(context)
+        c.detail0 = r.get(detail)
+        c.target0 = r.get(target)
+        c.translation0 = r.get(translation)
+        c.linkTo0 = r.get(linkTo)
+        return c
     }
-    return f
+    return nil
 }
 
+func getReqIdCandidate(#rowId: Int) -> ReqIdCandidate? {
+    var e = ReqIdCandidate()
+    for r in tables.reqIdCandidates.filter(rowid == rowId) {
+        e.lastModifiedAtLocal0 = r.get(lastModifiedAtLocal)
+        e.createdAtLocal0 = r.get(createdAtLocal)
+        e.done0 = r.get(done)
+        e.editAction0 = r.get(editAction)
+        e.operationVersion0 = r.get(operationVersion)
+        e.reqId0 = r.get(reqId)
+        e.linkTo0 = r.get(linkTo)
+        return e
+    }
+    return nil
+}
+
+typealias rowIdServerIdPairs = [Int: String]
+
+typealias dataSourceSnapshot = [CardToShow]
+typealias dataSourceSnapshotIndex = [Int]
+var dataSourceSnapshots = [dataSourceSnapshot]()
+
+func getIndexArray(shot: dataSourceSnapshot) -> dataSourceSnapshotIndex {
+    var d = dataSourceSnapshotIndex()
+    for c in shot {
+        d += [c.rowid0]
+    }
+    return d
+}
+
+func getIndexPath(#rowId: Int, #snapshot: dataSourceSnapshot, #snapshotIndex: dataSourceSnapshotIndex, #sec: Int) -> NSIndexPath? {
+    if let n = find(snapshotIndex, rowId) {
+        return NSIndexPath(forRow: n, inSection: sec)
+    }
+    return nil
+}
+
+// To identify whether the editing operation is on a locally existing record. If yes, return the rowid.
+func checkIfExistingLocally(#serverId: String, #rowId: Int, #pairs: rowIdServerIdPairs) -> Int? {
+    if rowId != 0 {
+        // Locally existing
+        return rowId
+    } else {
+        for i in pairs.keys {
+            if pairs[i] == serverId {return i}
+        }
+        return nil
+    }
+}
 
 
 
