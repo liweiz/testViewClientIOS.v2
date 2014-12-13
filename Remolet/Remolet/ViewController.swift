@@ -46,8 +46,23 @@ let gapS: CGFloat = 10
 let gapM: CGFloat = 15
 let gapL: CGFloat = 20
 
-func setupInputViewCtl(aFrame: CGRect) -> UIViewController {
-    var ctl = UIViewController()
+class inputViewController: UIViewController, UIScrollViewDelegate, UITextViewDelegate {
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    var sectionOnDuty: Int = 0
+    let sectionStops: [CGFloat] = inputStops
+    var wordCounter: UILabel
+    let inputs: [UITextView]
+    var startPositionY: CGFloat
+    var dragStartPointY: CGFloat
+    var targetPositionY: CGFloat
+}
+
+
+
+func setupInputViewCtl(aFrame: CGRect) -> inputViewController {
+    var ctl = inputViewController()
     ctl.view = UIView(frame: aFrame)
     var aInputView = setupInputView(aFrame: appRect)
     ctl.view.addSubview(aInputView)
@@ -117,16 +132,15 @@ func setupInputView(#aFrame: CGRect) -> UIScrollView {
 func configInputs(inputs: [UITextView], onView: UIView) {
     for u in inputs {
         u.backgroundColor = UIColor.yellowColor()
-        let lineH: CGFloat = 1
-        var bottomLine = UIView(frame: CGRectMake(0, u.frame.height - lineH, u.frame.width, lineH))
-        bottomLine.backgroundColor = UIColor.blackColor()
-        u.addSubview(bottomLine)
         u.font = fontM
         u.textColor = UIColor.greenColor()
         onView.addSubview(u)
+        let lineH: CGFloat = 0.5
+        var bottomLine = UIView(frame: CGRectMake(0 + CGRectGetMinX(u.frame), CGRectGetMaxY(u.frame) - lineH, u.frame.width, lineH))
+        bottomLine.backgroundColor = UIColor.blackColor()
+        onView.addSubview(bottomLine)
     }
 }
-
 
 
 

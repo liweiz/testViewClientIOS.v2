@@ -62,7 +62,7 @@
  if (self.sectionNo == 0) {
  // Only possible to move to the section below
  // Target up section is the section itself
- newOffset = CGPointMake(0, [self stopChoiceUp:0 down:self.stopCamContext dragStart:self.startPosition dragEnd:self.targetPosition startSection:0]);
+ newOffset = CGPointMake(0, [self stopChoiceUp:0 down:self.stopCamContext dragStart:self.start Position dragEnd:self.targetPosition startSection:0]);
  } else if (self.sectionNo == 1) {
  newOffset = CGPointMake(0, [self stopChoiceUp:0 down:self.stopContextTarget dragStart:self.startPosition dragEnd:self.targetPosition startSection:self.stopCamContext]);
  } else if (self.sectionNo == 2) {
