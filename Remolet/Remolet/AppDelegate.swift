@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window = UIWindow(frame: appRect)
         self.window!.backgroundColor = UIColor.whiteColor()
         self.window!.makeKeyAndVisible()
-        self.window!.rootViewController = RootViewController()
+        self.window!.rootViewController = RootViewCtl()
         
         return true
     }

@@ -10,15 +10,13 @@
 		EE163D6C1A33F19D0069AE51 /* SQLite.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = EED2A3051A33F0F500E6405F /* SQLite.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		EE6CA19E1A2B8F6F00E6FC9A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6CA19D1A2B8F6F00E6FC9A /* AppDelegate.swift */; };
 		EE6CA1A11A2B8F6F00E6FC9A /* Remolet.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = EE6CA19F1A2B8F6F00E6FC9A /* Remolet.xcdatamodeld */; };
-		EE6CA1A31A2B8F6F00E6FC9A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6CA1A21A2B8F6F00E6FC9A /* ViewController.swift */; };
 		EE6CA1A81A2B8F6F00E6FC9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EE6CA1A71A2B8F6F00E6FC9A /* Images.xcassets */; };
 		EE6CA1AB1A2B8F6F00E6FC9A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = EE6CA1A91A2B8F6F00E6FC9A /* LaunchScreen.xib */; };
 		EE6CA1B71A2B8F6F00E6FC9A /* RemoletTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6CA1B61A2B8F6F00E6FC9A /* RemoletTests.swift */; };
-		EE6CA1C11A2BFE5B00E6FC9A /* REOperationMgr.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6CA1C01A2BFE5B00E6FC9A /* REOperationMgr.swift */; };
-		EECE16791A34DB220017F984 /* REDataWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = EECE16781A34DB220017F984 /* REDataWorker.swift */; };
-		EECE167B1A3555630017F984 /* REListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EECE167A1A3555630017F984 /* REListView.swift */; };
-		EED0EFB51A2CE703003BD758 /* REDbWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = EED0EFB41A2CE703003BD758 /* REDbWorker.swift */; };
+		EECD15C91A7F191C00032E21 /* InfiniteHorizontalScrolledPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EECD15C81A7F191C00032E21 /* InfiniteHorizontalScrolledPageView.swift */; };
+		EED0F4F11A8005C700FA1977 /* VerticalScrollSwitchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EED0F4F01A8005C700FA1977 /* VerticalScrollSwitchView.swift */; };
 		EED2A30E1A33F14B00E6405F /* SQLite.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EED2A3051A33F0F500E6405F /* SQLite.framework */; };
+		EEDB05D41A871A8400801902 /* RootViewCtl.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEDB05D31A871A8400801902 /* RootViewCtl.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -91,11 +89,14 @@
 		EE6CA1B51A2B8F6F00E6FC9A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EE6CA1B61A2B8F6F00E6FC9A /* RemoletTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoletTests.swift; sourceTree = "<group>"; };
 		EE6CA1C01A2BFE5B00E6FC9A /* REOperationMgr.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = REOperationMgr.swift; sourceTree = "<group>"; };
+		EECD15C81A7F191C00032E21 /* InfiniteHorizontalScrolledPageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InfiniteHorizontalScrolledPageView.swift; sourceTree = "<group>"; };
 		EECE16781A34DB220017F984 /* REDataWorker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = REDataWorker.swift; sourceTree = "<group>"; };
 		EECE167A1A3555630017F984 /* REListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = REListView.swift; sourceTree = "<group>"; };
 		EED04BB71A32BAB700A9FFFF /* MyPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MyPlayground.playground; sourceTree = "<group>"; };
 		EED0EFB41A2CE703003BD758 /* REDbWorker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = REDbWorker.swift; sourceTree = "<group>"; };
+		EED0F4F01A8005C700FA1977 /* VerticalScrollSwitchView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VerticalScrollSwitchView.swift; sourceTree = "<group>"; };
 		EED2A2FD1A33F0F400E6405F /* SQLite.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SQLite.xcodeproj; path = "../../../../../../Downloads/SQLite.swift-master/SQLite.xcodeproj"; sourceTree = "<group>"; };
+		EEDB05D31A871A8400801902 /* RootViewCtl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RootViewCtl.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,11 +140,11 @@
 			isa = PBXGroup;
 			children = (
 				EE6CA19D1A2B8F6F00E6FC9A /* AppDelegate.swift */,
+				EEDB05D31A871A8400801902 /* RootViewCtl.swift */,
 				EE6CA1A21A2B8F6F00E6FC9A /* ViewController.swift */,
-				EE6CA1C01A2BFE5B00E6FC9A /* REOperationMgr.swift */,
-				EECE16781A34DB220017F984 /* REDataWorker.swift */,
-				EED0EFB41A2CE703003BD758 /* REDbWorker.swift */,
-				EECE167A1A3555630017F984 /* REListView.swift */,
+				EECD15C81A7F191C00032E21 /* InfiniteHorizontalScrolledPageView.swift */,
+				EED0F4F01A8005C700FA1977 /* VerticalScrollSwitchView.swift */,
+				EECD15C71A7F16A200032E21 /* Files Not In Use */,
 				EED04BB71A32BAB700A9FFFF /* MyPlayground.playground */,
 				EE6CA1A71A2B8F6F00E6FC9A /* Images.xcassets */,
 				EE6CA1A91A2B8F6F00E6FC9A /* LaunchScreen.xib */,
@@ -177,6 +178,17 @@
 				EE6CA1B51A2B8F6F00E6FC9A /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		EECD15C71A7F16A200032E21 /* Files Not In Use */ = {
+			isa = PBXGroup;
+			children = (
+				EE6CA1C01A2BFE5B00E6FC9A /* REOperationMgr.swift */,
+				EECE16781A34DB220017F984 /* REDataWorker.swift */,
+				EED0EFB41A2CE703003BD758 /* REDbWorker.swift */,
+				EECE167A1A3555630017F984 /* REListView.swift */,
+			);
+			name = "Files Not In Use";
 			sourceTree = "<group>";
 		};
 		EED17F131A2D8BD8004A1AEE /* Db */ = {
@@ -337,13 +349,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EECE167B1A3555630017F984 /* REListView.swift in Sources */,
-				EED0EFB51A2CE703003BD758 /* REDbWorker.swift in Sources */,
-				EE6CA1A31A2B8F6F00E6FC9A /* ViewController.swift in Sources */,
-				EE6CA1C11A2BFE5B00E6FC9A /* REOperationMgr.swift in Sources */,
+				EED0F4F11A8005C700FA1977 /* VerticalScrollSwitchView.swift in Sources */,
 				EE6CA1A11A2B8F6F00E6FC9A /* Remolet.xcdatamodeld in Sources */,
-				EECE16791A34DB220017F984 /* REDataWorker.swift in Sources */,
 				EE6CA19E1A2B8F6F00E6FC9A /* AppDelegate.swift in Sources */,
+				EEDB05D41A871A8400801902 /* RootViewCtl.swift in Sources */,
+				EECD15C91A7F191C00032E21 /* InfiniteHorizontalScrolledPageView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

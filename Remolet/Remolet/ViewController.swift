@@ -40,11 +40,8 @@ func setupCoreViewCtl(aFrame: CGRect) -> UIViewController {
     return ctl
 }
 
-let appRect = CGRectMake(0, 0, UIScreen.mainScreen().applicationFrame.width, UIScreen.mainScreen().applicationFrame.height)
-let gapXs: CGFloat = 2
-let gapS: CGFloat = 10
-let gapM: CGFloat = 15
-let gapL: CGFloat = 20
+
+
 
 class inputViewController: UIViewController, UIScrollViewDelegate, UITextViewDelegate {
     required init(coder aDecoder: NSCoder) {
