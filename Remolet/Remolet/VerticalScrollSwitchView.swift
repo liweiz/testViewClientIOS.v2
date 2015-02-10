@@ -16,20 +16,23 @@ class inputViewCtl: UIViewController {
     override func loadView() {
         view = UIView(frame: appRectZero)
         base = VerticalScrollSwitchView(frame: view.frame)
+        base.delegate = base
         let w = view.frame.width
         let h = view.frame.height
-        target = ViewSet(frame: CGRectMake(zeroCGFloat, zeroCGFloat, w, getViewSetHeight(1)))
+        target = ViewSet(frame: CGRectMake(zeroCGFloat, base.frame.height, w, getViewSetHeight(1)))
         translation = ViewSet(frame: CGRectMake(zeroCGFloat, CGRectGetMaxY(target.frame), w, getViewSetHeight(1)))
         context = ViewSet(frame: CGRectMake(zeroCGFloat, CGRectGetMaxY(translation.frame), w, getViewSetHeight(3)))
         detail = ViewSet(frame: CGRectMake(zeroCGFloat, CGRectGetMaxY(context.frame), w, getViewSetHeight(3)))
         // Make sure the height is tall enough to show last input on top of the screen.
-        base.contentSize = CGSizeMake(base.frame.width, CGRectGetMinY(detail.frame) + appRect.height)
-        base.stops = [CGRectGetMaxY(target.frame), CGRectGetMaxY(translation.frame), CGRectGetMaxY(context.frame)]
+        base.contentSize = CGSizeMake(base.frame.width, CGRectGetMinY(detail.frame) + appRect.height + base.frame.height * 2)
+        base.stops = [CGRectGetMinY(target.frame), CGRectGetMaxY(target.frame), CGRectGetMaxY(translation.frame), CGRectGetMaxY(context.frame), CGRectGetMaxY(detail.frame)]
+        base.basePositionY = base.stops.first!
         base.viewSets = [target, translation, context, detail]
         base.addSubview(target)
         base.addSubview(translation)
         base.addSubview(context)
         base.addSubview(detail)
+        base.contentOffset = CGPointMake(0, CGRectGetMinY(target.frame))
         view.addSubview(base)
         target.inputPlaceholder.text = "Word(s)"
         translation.inputPlaceholder.text = "Translation"
@@ -42,7 +45,7 @@ class inputViewCtl: UIViewController {
 }
 
 class VerticalScrollSwitchView: UIScrollView, UIScrollViewDelegate {
-    // basePositionY is always the upper stop.
+    // basePositionY is always the second upper stop.
     var basePositionY: CGFloat = 0
     var targetPositionY: CGFloat = 0
     var dragStartPointY: CGFloat = 0
@@ -60,7 +63,9 @@ class VerticalScrollSwitchView: UIScrollView, UIScrollViewDelegate {
     func scrollViewWillEndDragging(scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         targetPositionY = targetContentOffset.memory.y
         targetContentOffset.memory.y = getNextStop(allStops, dragStartPointY, scrollView.contentOffset.y, targetPositionY, basePositionY)
+        println("target: \(targetContentOffset.memory.y)")
         basePositionY = targetContentOffset.memory.y
+        println("base: \(basePositionY)")
     }
     func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
         if let u = getViewSetBetweenStops(allStops, basePositionY, viewSets) {
@@ -77,7 +82,7 @@ class ViewSet: UIView, UITextViewDelegate {
     var characterLimit: Int = 0
     var characterCount: Int {
         get {
-            return countElements(input!.text)
+            return count(input!.text)
         }
     }
     var characterAvailable: Int {
@@ -107,8 +112,8 @@ class ViewSet: UIView, UITextViewDelegate {
         
         input = TextInput(frame: CGRectMake(gapM, gapM, self.frame.width - gapM * twoCGFloat, self.frame.height - gapM * twoCGFloat))
         inputPlaceholder = UILabel(frame: input!.frame)
-        self.addSubview(inputPlaceholder!)
         self.addSubview(input!)
+        self.addSubview(inputPlaceholder!)
     }
     // <UITextViewDelegate>
     func textViewDidBeginEditing(textView: UITextView) {
@@ -173,31 +178,33 @@ two senarioes:
 // the 2nd point
 // direction is determined by drag end point and initial target deceleration point
 // If targetPosition == startPosition, which means no decelaration, set start as the startPositoin
-func getNextStop(allStops: [CGFloat], dragStartY: CGFloat, dragEndY: CGFloat, targetY: CGFloat, baseY: CGFloat) -> CGFloat {
-    let r = getUpDownStops(allStops, baseY)
+func getNextStop(allStops: [CGFloat], dragStartOffsetY: CGFloat, dragEndOffsetY: CGFloat, targetOffsetY: CGFloat, baseOffsetY: CGFloat) -> CGFloat {
+    let r = getUpDownStops(allStops, baseOffsetY)
     var upDistance: CGFloat = -1
     var downDistance: CGFloat = -1
     if r.up >= 0 {
-        upDistance = baseY - r.up
+        upDistance = baseOffsetY - r.up
     }
     if r.down >= 0 {
-        downDistance = r.down - baseY
+        downDistance = r.down - baseOffsetY
     }
     var detectedDistance: CGFloat
-    if targetY != dragEndY {
-        detectedDistance = targetY - dragEndY
+    println("dragEndOffsetY: \(dragEndOffsetY)")
+    // Use targetOffsetY - dragEndOffsetY as indicator for swipe direction and distance is good untill there is no further place to swipe, such as both vertical ends, which lead back to the edge points instead of going further. To resolve this, we provide extra space on both ends to let the targetOffsetY / dragEndOffsetY detection work again for direction indication.
+    if targetOffsetY != dragEndOffsetY {
+        detectedDistance = targetOffsetY - dragEndOffsetY
     } else {
-        detectedDistance = dragEndY - dragStartY
+        detectedDistance = dragEndOffsetY - baseOffsetY
     }
-    if detectedDistance >= upDistance / 2 && upDistance >= 0 && allStops[allStops.count - 2] != baseY {
+    if detectedDistance >= downDistance / 2 && downDistance >= 0 && allStops[allStops.count - 3] != baseOffsetY {
         // ContentOffset becomes larger, view moves upwards, go to stop below
         return r.down
     }
-    if detectedDistance <= -downDistance / 2 && downDistance >= 0 && allStops[0] != baseY {
+    if detectedDistance < -upDistance / 2 && upDistance >= 0 && allStops[1] != baseOffsetY {
         // ContentOffset becomes smaller, view moves downwards, go to stop above
         return r.up
     }
-    return baseY
+    return baseOffsetY
 }
 
 func getUpDownStops(allStops: [CGFloat], basePositionY: CGFloat) -> (up: CGFloat, down: CGFloat) {
