@@ -31,6 +31,7 @@ class RootViewCtl: UIViewController {
         mainViewsBase.delegate = mainViewsBase
         mainViewsBase.pagingEnabled = true
         mainViewsBase.contentOffset = CGPointMake(view.frame.width, 0)
+        mainViewsBase.bounces = false
         view.addSubview(mainViewsBase)
         
         inputCtl = inputViewCtl()

@@ -16,9 +16,12 @@ import UIKit
 */
 class InfiniteHorizontalScrolledPageView: UIScrollView, UIScrollViewDelegate {
     var viewsToRotate: [UIView]!
-    func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
-        if let r = recenter(scrollView, viewsToRotate) {
-            viewsToRotate = r
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        if contentOffset.x == 0 || contentOffset.x == frame.width * 2 {
+            if let r = recenter(self, viewsToRotate) {
+                viewsToRotate = r
+            }
         }
     }
 }
