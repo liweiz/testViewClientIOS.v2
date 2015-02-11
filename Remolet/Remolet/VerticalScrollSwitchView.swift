@@ -15,7 +15,7 @@ class inputViewCtl: UIViewController {
     var fontUsed: UIFont!
     var viewSets = [ViewSet]()
     override func loadView() {
-        view = UIView(frame: appRectZero)
+        view = TapToActView(frame: appRectZero)
         base = VerticalScrollSwitchView(frame: view.frame)
         base.delegate = base
         let w = view.frame.width
@@ -43,8 +43,6 @@ class inputViewCtl: UIViewController {
         for s in viewSets {
             NSNotificationCenter.defaultCenter().addObserver(self, selector: "scrollToSelected:", name: "viewSetSelected", object: s)
         }
-        let tapToDeselect = UITapGestureRecognizer(target: self, action: "deselectViewSets")
-        base.addGestureRecognizer(tapToDeselect)
     }
     func getViewSetHeight(lineNo: CGFloat) -> CGFloat {
         return gapM * twoCGFloat + fontUsed.lineHeight * lineNo
