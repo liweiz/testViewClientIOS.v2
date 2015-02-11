@@ -21,14 +21,15 @@ let fontSizeS = CGFloat(14)
 let fontSizeM = CGFloat(20)
 let fontSizeL = CGFloat(96)
 
-class RootViewCtl: UIViewController {
+class RootViewCtl: UIViewController, UIScrollViewDelegate {
     var mainViewsBase: InfiniteHorizontalScrolledPageView!
     var inputCtl: inputViewCtl!
+    var mainViewBaseTargetX: CGFloat = -1
     override func loadView() {
         view = UIView(frame: appRectZero)
         mainViewsBase = InfiniteHorizontalScrolledPageView(frame: view.frame)
         mainViewsBase.contentSize = CGSizeMake(view.frame.width * CGFloat(3), view.frame.height)
-        mainViewsBase.delegate = mainViewsBase
+        mainViewsBase.delegate = self
         mainViewsBase.pagingEnabled = true
         mainViewsBase.contentOffset = CGPointMake(view.frame.width, 0)
         mainViewsBase.bounces = false
@@ -47,5 +48,41 @@ class RootViewCtl: UIViewController {
         mainViewsBase.addSubview(view2)
         
         mainViewsBase.viewsToRotate = [inputCtl.view, view1, view2]
+    }
+    
+    func actUponView(v: UIView) {
+        if v.isEqual(inputCtl.view) {
+            if inputCtl.target.input.text == "" {
+                inputCtl.target.userTriggered = true
+                inputCtl.target.isSelected = true
+            }
+        } else {
+            inputCtl.deselectViewSets()
+        }
+    }
+    // Handle each view's tasks when a view stops on the screen.
+    // To do this, it is necessary to know when a view is finally stops and which one is on the screen.
+    // 1. contentOffset is on one of the edge points
+    // 2. no user drag occurs again
+    // 3. scroll target is reached
+    func scrollViewDidScroll(scrollView: UIScrollView) {
+        var i = -1
+        if mainViewBaseTargetX == 0 {
+            i = 0
+        } else if mainViewBaseTargetX == mainViewsBase.frame.width * 2 {
+            i = 2
+        }
+        if i >= 0 {
+            if scrollView.contentOffset.x == mainViewBaseTargetX {
+                mainViewBaseTargetX = -1
+                actUponView(mainViewsBase.viewsToRotate[i])
+            }
+        }
+    }
+    func scrollViewWillBeginDragging(scrollView: UIScrollView) {
+        mainViewBaseTargetX = -1
+    }
+    func scrollViewWillEndDragging(scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        mainViewBaseTargetX = targetContentOffset.memory.x
     }
 }

@@ -13,6 +13,7 @@ class inputViewCtl: UIViewController {
     var base: VerticalScrollSwitchView!
     var target, translation, detail, context: ViewSet!
     var fontUsed: UIFont!
+    var viewSets = [ViewSet]()
     override func loadView() {
         view = UIView(frame: appRectZero)
         base = VerticalScrollSwitchView(frame: view.frame)
@@ -27,7 +28,7 @@ class inputViewCtl: UIViewController {
         base.contentSize = CGSizeMake(base.frame.width, CGRectGetMinY(detail.frame) + appRect.height + base.frame.height * 2)
         base.stops = [CGRectGetMinY(target.frame), CGRectGetMaxY(target.frame), CGRectGetMaxY(translation.frame), CGRectGetMaxY(context.frame), CGRectGetMaxY(detail.frame)]
         base.basePositionY = base.stops.first!
-        base.viewSets = [target, translation, context, detail]
+        viewSets = [target, translation, context, detail]
         base.addSubview(target)
         base.addSubview(translation)
         base.addSubview(context)
@@ -38,20 +39,57 @@ class inputViewCtl: UIViewController {
         translation.inputPlaceholder.text = "Translation"
         context.inputPlaceholder.text = "Example"
         detail.inputPlaceholder.text = "Detailed explanation"
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "selectViewSet:", name: "verticalStopChanged", object: base)
+        for s in viewSets {
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: "scrollToSelected:", name: "viewSetSelected", object: s)
+        }
+        let tapToDeselect = UITapGestureRecognizer(target: self, action: "deselectViewSets")
+        base.addGestureRecognizer(tapToDeselect)
     }
     func getViewSetHeight(lineNo: CGFloat) -> CGFloat {
         return gapM * twoCGFloat + fontUsed.lineHeight * lineNo
     }
+    func selectViewSet(note: NSNotification) {
+        if let o = note.object as? VerticalScrollSwitchView {
+            if let i = find(o.allStops, o.basePositionY) {
+                let x = viewSets[i - 1]
+                x.userTriggered = false
+                x.isSelected = true
+            }
+        }
+    }
+    func deselectViewSets() {
+        for v in viewSets {
+            if v.isSelected {
+                v.isSelected = false
+            }
+        }
+    }
+    func scrollToSelected(note: NSNotification) {
+        if let v = note.object as? ViewSet {
+            if let i = find(viewSets, v) {
+                let y = base.allStops[i + 1]
+                base.setContentOffset(CGPointMake(0, y), animated: true)
+            }
+        }
+    }
 }
 
 class VerticalScrollSwitchView: UIScrollView, UIScrollViewDelegate {
+    var userTriggered = true
     // basePositionY is always the second upper stop.
-    var basePositionY: CGFloat = 0
+    var basePositionY: CGFloat = 0 {
+        didSet {
+            if userTriggered {
+                NSNotificationCenter.defaultCenter().postNotificationName("verticalStopChanged", object: self)
+            }
+        }
+    }
     var targetPositionY: CGFloat = 0
     var dragStartPointY: CGFloat = 0
     var stops = [CGFloat]()
     // All subviews between any two adjacent stops are attached on a master UIView, called viewSet. All master UIViews are in the viewSets.
-    var viewSets = [UIView]()
+    
     var allStops: [CGFloat] {
         get {
             return getAllStops(stops, 0, contentSize.height)
@@ -67,18 +105,19 @@ class VerticalScrollSwitchView: UIScrollView, UIScrollViewDelegate {
         basePositionY = targetContentOffset.memory.y
         println("base: \(basePositionY)")
     }
-    func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
-        if let u = getViewSetBetweenStops(allStops, basePositionY, viewSets) {
-            
-        }
-    }
+//    func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
+//        if let u = getViewSetBetweenStops(allStops, basePositionY, viewSets) {
+//            
+//        }
+//    }
 }
 
 class ViewSet: UIView, UITextViewDelegate {
+    var userTriggered = true
     var input: TextInput!
     var inputPlaceholder: UILabel!
-    var highlightColor: UIColor = UIColor.blackColor()
-    var dehighlightColor: UIColor = UIColor.blackColor()
+    var highlightColor: UIColor = UIColor.grayColor()
+    var dehighlightColor: UIColor = UIColor.blueColor()
     var characterLimit: Int = 0
     var characterCount: Int {
         get {
@@ -95,11 +134,18 @@ class ViewSet: UIView, UITextViewDelegate {
             if isSelected {
                 inputPlaceholder.hidden = true
                 input.backgroundColor = highlightColor
-                NSNotificationCenter.defaultCenter().postNotificationName("viewSetSelected", object: self)
+                self.input.becomeFirstResponder()
+                if userTriggered {
+                    NSNotificationCenter.defaultCenter().postNotificationName("viewSetSelected", object: self)
+                }
+                
             } else {
+                self.endEditing(true)
                 inputPlaceholder.hidden = false
                 input.backgroundColor = dehighlightColor
-                NSNotificationCenter.defaultCenter().postNotificationName("viewSetDeselected", object: self)
+                if userTriggered {
+                    NSNotificationCenter.defaultCenter().postNotificationName("viewSetDeselected", object: self)
+                }
             }
         }
     }
@@ -118,14 +164,14 @@ class ViewSet: UIView, UITextViewDelegate {
     // <UITextViewDelegate>
     func textViewDidBeginEditing(textView: UITextView) {
         // Show character count / hide placeholder / highlight view
-        NSNotificationCenter.defaultCenter().postNotificationName("editBegin", object: self)
+        isSelected = true
         NSNotificationCenter.defaultCenter().postNotificationName("updateTextCount", object: self)
     }
     func textViewDidChange(textView: UITextView) {
         NSNotificationCenter.defaultCenter().postNotificationName("updateTextCount", object: self)
     }
     func textViewDidEndEditing(textView: UITextView) {
-        NSNotificationCenter.defaultCenter().postNotificationName("editEnd", object: self)
+        isSelected = false
     }
 }
 

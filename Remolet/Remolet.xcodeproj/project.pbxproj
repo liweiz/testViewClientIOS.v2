@@ -101,9 +101,9 @@
 			children = (
 				EE6CA19D1A2B8F6F00E6FC9A /* AppDelegate.swift */,
 				EEDB05D31A871A8400801902 /* RootViewCtl.swift */,
-				EE6CA1A21A2B8F6F00E6FC9A /* ViewController.swift */,
 				EECD15C81A7F191C00032E21 /* InfiniteHorizontalScrolledPageView.swift */,
 				EED0F4F01A8005C700FA1977 /* VerticalScrollSwitchView.swift */,
+				EE6CA1A21A2B8F6F00E6FC9A /* ViewController.swift */,
 				EECD15C71A7F16A200032E21 /* Files Not In Use */,
 				EED04BB71A32BAB700A9FFFF /* MyPlayground.playground */,
 				EE6CA1A71A2B8F6F00E6FC9A /* Images.xcassets */,
