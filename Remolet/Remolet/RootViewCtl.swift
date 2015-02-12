@@ -52,8 +52,10 @@ class RootViewCtl: UIViewController, UIScrollViewDelegate {
     
     func actUponView(v: UIView) {
         if v.isEqual(inputCtl.view) {
+            inputCtl.base.setContentOffset(CGPointMake(0, inputCtl.base.allStops[1]), animated: true)
+            inputCtl.base.userTriggered = false
+            inputCtl.base.basePositionY = inputCtl.base.allStops[1]
             if inputCtl.target.input.text == "" {
-                inputCtl.target.userTriggered = true
                 inputCtl.target.isSelected = true
             }
         } else {

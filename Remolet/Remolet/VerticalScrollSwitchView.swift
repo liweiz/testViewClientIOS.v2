@@ -39,7 +39,7 @@ class inputViewCtl: UIViewController {
         translation.inputPlaceholder.text = "Translation"
         context.inputPlaceholder.text = "Example"
         detail.inputPlaceholder.text = "Detailed explanation"
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "selectViewSet:", name: "verticalStopChanged", object: base)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "selectViewSet:", name: "verticalStopChangedByUserScrolling", object: base)
         for s in viewSets {
             NSNotificationCenter.defaultCenter().addObserver(self, selector: "scrollToSelected:", name: "viewSetSelected", object: s)
         }
@@ -51,7 +51,6 @@ class inputViewCtl: UIViewController {
         if let o = note.object as? VerticalScrollSwitchView {
             if let i = find(o.allStops, o.basePositionY) {
                 let x = viewSets[i - 1]
-                x.userTriggered = false
                 x.isSelected = true
             }
         }
@@ -68,6 +67,8 @@ class inputViewCtl: UIViewController {
             if let i = find(viewSets, v) {
                 let y = base.allStops[i + 1]
                 base.setContentOffset(CGPointMake(0, y), animated: true)
+                base.userTriggered = false
+                base.basePositionY = y
             }
         }
     }
@@ -79,7 +80,7 @@ class VerticalScrollSwitchView: UIScrollView, UIScrollViewDelegate {
     var basePositionY: CGFloat = 0 {
         didSet {
             if userTriggered {
-                NSNotificationCenter.defaultCenter().postNotificationName("verticalStopChanged", object: self)
+                NSNotificationCenter.defaultCenter().postNotificationName("verticalStopChangedByUserScrolling", object: self)
             }
         }
     }
@@ -100,6 +101,7 @@ class VerticalScrollSwitchView: UIScrollView, UIScrollViewDelegate {
         targetPositionY = targetContentOffset.memory.y
         targetContentOffset.memory.y = getNextStop(allStops, dragStartPointY, scrollView.contentOffset.y, targetPositionY, basePositionY)
         println("target: \(targetContentOffset.memory.y)")
+        userTriggered = true
         basePositionY = targetContentOffset.memory.y
         println("base: \(basePositionY)")
     }
@@ -111,7 +113,6 @@ class VerticalScrollSwitchView: UIScrollView, UIScrollViewDelegate {
 }
 
 class ViewSet: UIView, UITextViewDelegate {
-    var userTriggered = true
     var input: TextInput!
     var inputPlaceholder: UILabel!
     var highlightColor: UIColor = UIColor.grayColor()
@@ -132,18 +133,16 @@ class ViewSet: UIView, UITextViewDelegate {
             if isSelected {
                 inputPlaceholder.hidden = true
                 input.backgroundColor = highlightColor
-                self.input.becomeFirstResponder()
-                if userTriggered {
+                if self.input.isFirstResponder() {
                     NSNotificationCenter.defaultCenter().postNotificationName("viewSetSelected", object: self)
+                } else {
+                    self.input.becomeFirstResponder()
                 }
                 
             } else {
                 self.endEditing(true)
                 inputPlaceholder.hidden = false
                 input.backgroundColor = dehighlightColor
-                if userTriggered {
-                    NSNotificationCenter.defaultCenter().postNotificationName("viewSetDeselected", object: self)
-                }
             }
         }
     }
@@ -155,6 +154,7 @@ class ViewSet: UIView, UITextViewDelegate {
         super.init(frame: frame)
         
         input = TextInput(frame: CGRectMake(gapM, gapM, self.frame.width - gapM * twoCGFloat, self.frame.height - gapM * twoCGFloat))
+        input.delegate = self
         inputPlaceholder = UILabel(frame: input!.frame)
         self.addSubview(input!)
         self.addSubview(inputPlaceholder!)
