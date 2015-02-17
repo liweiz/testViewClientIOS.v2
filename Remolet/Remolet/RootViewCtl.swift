@@ -23,7 +23,7 @@ let fontSizeL = CGFloat(96)
 
 class RootViewCtl: UIViewController, UIScrollViewDelegate {
     var mainViewsBase: InfiniteHorizontalScrolledPageView!
-    var inputCtl: inputViewCtl!
+    var inputCtl: InputViewCtl!
     var mainViewBaseTargetX: CGFloat = -1
     override func loadView() {
         view = UIView(frame: appRectZero)
@@ -35,7 +35,7 @@ class RootViewCtl: UIViewController, UIScrollViewDelegate {
         mainViewsBase.bounces = false
         view.addSubview(mainViewsBase)
         
-        inputCtl = inputViewCtl()
+        inputCtl = InputViewCtl()
         inputCtl.fontUsed = UIFont.systemFontOfSize(fontSizeL)
         mainViewsBase.addSubview(inputCtl.view)
         inputCtl.view.backgroundColor = UIColor.greenColor()
