@@ -24,6 +24,7 @@ let fontSizeL = CGFloat(96)
 class RootViewCtl: UIViewController, UIScrollViewDelegate {
     var mainViewsBase: InfiniteHorizontalScrolledPageView!
     var inputCtl: InputViewCtl!
+    var commitInputView: LongPressThenSwipeActionView!
     var mainViewBaseTargetX: CGFloat = -1
     override func loadView() {
         view = UIView(frame: appRectZero)
@@ -35,10 +36,18 @@ class RootViewCtl: UIViewController, UIScrollViewDelegate {
         mainViewsBase.bounces = false
         view.addSubview(mainViewsBase)
         
+        commitInputView = LongPressThenSwipeActionView(frame: appRectZero)
+        commitInputView.backgroundColor = UIColor.grayColor()
+        commitInputView.contentSize = CGSizeMake(appRectZero.width, appRectZero.height * 2)
+        mainViewsBase.addSubview(commitInputView)
+        
         inputCtl = InputViewCtl()
         inputCtl.fontUsed = UIFont.systemFontOfSize(fontSizeL)
-        mainViewsBase.addSubview(inputCtl.view)
+        self.addChildViewController(inputCtl)
+        commitInputView.addSubview(inputCtl.view)
+        inputCtl.didMoveToParentViewController(self)
         inputCtl.view.backgroundColor = UIColor.greenColor()
+        commitInputView.viewToOperate = inputCtl.view
         
         var view1 = UIView(frame: CGRectMake(appRect.width, 0, appRect.width, appRect.height))
         view1.backgroundColor = UIColor.yellowColor()
@@ -47,7 +56,7 @@ class RootViewCtl: UIViewController, UIScrollViewDelegate {
         view2.backgroundColor = UIColor.blueColor()
         mainViewsBase.addSubview(view2)
         
-        mainViewsBase.viewsToRotate = [inputCtl.view, view1, view2]
+        mainViewsBase.viewsToRotate = [commitInputView, view1, view2]
     }
     
     func actUponView(v: UIView) {

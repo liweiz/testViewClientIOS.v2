@@ -15,6 +15,9 @@ class CardsViewCtl: UITableViewController {
         super.init(style: style)
         
     }
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dbSnapshots[0].count
     }
@@ -33,6 +36,6 @@ class CardsViewCtl: UITableViewController {
         return cell
     }
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        <#code#>
+        
     }
 }

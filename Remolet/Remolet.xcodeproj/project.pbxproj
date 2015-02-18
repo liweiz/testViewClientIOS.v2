@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		215587BBC2DC90B92AC56EEA /* libPods-RemoletTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7AA71AB5AD4B8B6B921E6316 /* libPods-RemoletTests.a */; };
 		EE6CA19E1A2B8F6F00E6FC9A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6CA19D1A2B8F6F00E6FC9A /* AppDelegate.swift */; };
 		EE6CA1A81A2B8F6F00E6FC9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EE6CA1A71A2B8F6F00E6FC9A /* Images.xcassets */; };
 		EE6CA1B71A2B8F6F00E6FC9A /* RemoletTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6CA1B61A2B8F6F00E6FC9A /* RemoletTests.swift */; };
@@ -46,11 +45,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		30CF1E62AB9370F7F0F10F1F /* Pods-Remolet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Remolet.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Remolet/Pods-Remolet.debug.xcconfig"; sourceTree = "<group>"; };
 		7AA71AB5AD4B8B6B921E6316 /* libPods-RemoletTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RemoletTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EBF336473E8042FC79EC30B /* libPods-Remolet.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Remolet.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		BBB887A9BE40C2CA22AD2534 /* Pods-Remolet.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Remolet.release.xcconfig"; path = "Pods/Target Support Files/Pods-Remolet/Pods-Remolet.release.xcconfig"; sourceTree = "<group>"; };
-		D0882CF44482A31970B350C3 /* Pods-RemoletTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RemoletTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-RemoletTests/Pods-RemoletTests.release.xcconfig"; sourceTree = "<group>"; };
 		EE6CA1981A2B8F6F00E6FC9A /* Remolet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Remolet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE6CA19C1A2B8F6F00E6FC9A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EE6CA19D1A2B8F6F00E6FC9A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -75,7 +71,6 @@
 		EED0EFB41A2CE703003BD758 /* REDbWorker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = REDbWorker.swift; sourceTree = "<group>"; };
 		EED0F4F01A8005C700FA1977 /* VerticalScrollSwitchView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VerticalScrollSwitchView.swift; sourceTree = "<group>"; };
 		EEDB05D31A871A8400801902 /* RootViewCtl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RootViewCtl.swift; sourceTree = "<group>"; };
-		FF236AAE10797DE3B8B9EB3B /* Pods-RemoletTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RemoletTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RemoletTests/Pods-RemoletTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,31 +86,18 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				215587BBC2DC90B92AC56EEA /* libPods-RemoletTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		DC86FFD21FE6F219ACC9E973 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				30CF1E62AB9370F7F0F10F1F /* Pods-Remolet.debug.xcconfig */,
-				BBB887A9BE40C2CA22AD2534 /* Pods-Remolet.release.xcconfig */,
-				FF236AAE10797DE3B8B9EB3B /* Pods-RemoletTests.debug.xcconfig */,
-				D0882CF44482A31970B350C3 /* Pods-RemoletTests.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
 		EE6CA18F1A2B8F6F00E6FC9A = {
 			isa = PBXGroup;
 			children = (
 				EE6CA19A1A2B8F6F00E6FC9A /* Remolet */,
 				EE6CA1B31A2B8F6F00E6FC9A /* RemoletTests */,
 				EE6CA1991A2B8F6F00E6FC9A /* Products */,
-				DC86FFD21FE6F219ACC9E973 /* Pods */,
 				FD37469A4612C5356CA1BCFD /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -213,12 +195,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = EE6CA1BA1A2B8F6F00E6FC9A /* Build configuration list for PBXNativeTarget "Remolet" */;
 			buildPhases = (
-				5FE24D946509B01FB980802E /* Check Pods Manifest.lock */,
 				EE6CA1941A2B8F6F00E6FC9A /* Sources */,
 				EE6CA1951A2B8F6F00E6FC9A /* Frameworks */,
 				EE6CA1961A2B8F6F00E6FC9A /* Resources */,
 				EECF991D1A2E52AE004100D4 /* CopyFiles */,
-				4FED008DB03EFC7FDF44832A /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -233,11 +213,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = EE6CA1BD1A2B8F6F00E6FC9A /* Build configuration list for PBXNativeTarget "RemoletTests" */;
 			buildPhases = (
-				B2C906F83D679638F714F78E /* Check Pods Manifest.lock */,
 				EE6CA1AC1A2B8F6F00E6FC9A /* Sources */,
 				EE6CA1AD1A2B8F6F00E6FC9A /* Frameworks */,
 				EE6CA1AE1A2B8F6F00E6FC9A /* Resources */,
-				7BCDE34821987A3BA3A9B58F /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -304,69 +282,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		4FED008DB03EFC7FDF44832A /* Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Remolet/Pods-Remolet-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		5FE24D946509B01FB980802E /* Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Check Pods Manifest.lock";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-		7BCDE34821987A3BA3A9B58F /* Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-RemoletTests/Pods-RemoletTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		B2C906F83D679638F714F78E /* Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Check Pods Manifest.lock";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		EE6CA1941A2B8F6F00E6FC9A /* Sources */ = {
@@ -495,7 +410,6 @@
 		};
 		EE6CA1BB1A2B8F6F00E6FC9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 30CF1E62AB9370F7F0F10F1F /* Pods-Remolet.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -517,7 +431,6 @@
 		};
 		EE6CA1BC1A2B8F6F00E6FC9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BBB887A9BE40C2CA22AD2534 /* Pods-Remolet.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -538,7 +451,6 @@
 		};
 		EE6CA1BE1A2B8F6F00E6FC9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FF236AAE10797DE3B8B9EB3B /* Pods-RemoletTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -558,7 +470,6 @@
 		};
 		EE6CA1BF1A2B8F6F00E6FC9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D0882CF44482A31970B350C3 /* Pods-RemoletTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (

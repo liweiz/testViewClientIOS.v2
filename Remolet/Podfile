@@ -3,12 +3,9 @@
 
 target 'Remolet' do
 
-#pod "Realm"
-
 end
 
 target 'RemoletTests' do
 
-#pod "Realm/Headers"
-
 end
+
