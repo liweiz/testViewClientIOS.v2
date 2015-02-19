@@ -10,6 +10,8 @@ import Foundation
 import UIKit
 import QuartzCore
 
+
+
 class LongPressThenSwipeActionView: UIScrollView, UIScrollViewDelegate {
     var viewToOperate: UIView! {
         didSet {
@@ -22,6 +24,7 @@ class LongPressThenSwipeActionView: UIScrollView, UIScrollViewDelegate {
     var actOnSwipeDown: (() -> ())?
     var shrink, enlarge, becomeVisiable: CAAnimation!
     var show: CAAnimationGroup!
+    var acceptScrollByOtherView = false
     override init(frame: CGRect) {
         super.init(frame: frame)
         longPress = UILongPressGestureRecognizer(target: self, action: "toSwipeMode")
@@ -53,34 +56,79 @@ class LongPressThenSwipeActionView: UIScrollView, UIScrollViewDelegate {
         }
     }
     override func layoutSubviews() {
-        if self.contentOffset.y == self.contentSize.height - self.frame.height || (self.contentOffset.y == 0 && self.contentSize.height > self.frame.height * 2) {
+        if contentOffset.y == contentSize.height - frame.height || (contentOffset.y == 0 && contentSize.height > frame.height * 2) {
             // Action on swipe completed, reset and showing viewToOperate again.
-            if self.contentSize.height > self.frame.height * 2 {
-                self.setContentOffset(CGPointMake(0, self.frame.height), animated: false)
+            if contentSize.height > frame.height * 2 {
+                setContentOffset(CGPointMake(0, frame.height), animated: false)
             } else {
-                self.setContentOffset(CGPointZero, animated: false)
+                setContentOffset(CGPointZero, animated: false)
             }
-            self.tap.enabled = false
-            self.longPress.enabled = true
-            self.scrollEnabled = false
+            tap.enabled = false
+            longPress.enabled = true
+            scrollEnabled = false
             viewToOperate.layer.addAnimation(show, forKey: "show")
         }
     }
     var longPress: UILongPressGestureRecognizer!
+    var touchStartY: CGFloat?
     func toSwipeMode() {
+        var v = UIApplication.sharedApplication().keyWindow?.rootViewController?.view
         if longPress.state == UIGestureRecognizerState.Began {
+            println("longPress: UIGestureRecognizerState Began")
+            touchStartY = longPress.locationInView(v).y
             viewToOperate.layer.removeAllAnimations()
-            self.longPress.enabled = false
-            self.tap.enabled = true
-            self.scrollEnabled = true
             viewToOperate.layer.addAnimation(shrink, forKey: "shrink")
+//            longPress.removeTarget(self, action: "toSwipeMode")
+//            longPress.cancelsTouchesInView = false
+        } else if longPress.state == UIGestureRecognizerState.Cancelled {
+            println("longPress: UIGestureRecognizerState Cancelled")
+        } else if longPress.state == UIGestureRecognizerState.Changed {
+            println("longPress: UIGestureRecognizerState Changed")
+            if let t = touchStartY {
+                setContentOffset(CGPointMake(0, contentOffset.y + t - longPress.locationOfTouch(0, inView: self).y), animated: false)
+            }
+        } else if longPress.state == UIGestureRecognizerState.Ended {
+            println("longPress: UIGestureRecognizerState Ended")
+            longPress.enabled = false
+            tap.enabled = true
+            scrollEnabled = true
+            if let t = touchStartY {
+                var p = CGFloat(0)
+                let l = frame.height * 0.3
+                let distanceMoved = longPress.locationInView(v).y
+//                var startOffsetY = CGFloat(0)
+                if contentSize.height == frame.height * 2 {
+                    println("t: \(t)")
+                    println("longPress.locationOfTouch: \(distanceMoved)")
+                    if t - distanceMoved > l {
+                        p = frame.height
+                    } else {
+                        p = 0
+                    }
+                } else {
+                    if t - distanceMoved > l {
+                        p = frame.height
+                    } else if distanceMoved - t > l {
+                        p = 0
+                    } else {
+                        p = frame.height * 2
+                    }
+                }
+                setContentOffset(CGPointMake(0, p), animated: true)
+            }
+            touchStartY = nil
+        } else if longPress.state == UIGestureRecognizerState.Failed {
+            println("longPress: UIGestureRecognizerState Failed")
+        } else if longPress.state == UIGestureRecognizerState.Possible {
+            println("longPress: UIGestureRecognizerState Possible")
         }
     }
     var tap: UITapGestureRecognizer!
     func exitSwipeMode() {
-        self.tap.enabled = false
-        self.longPress.enabled = true
-        self.scrollEnabled = false
+        tap.enabled = false
+        longPress.enabled = true
+        longPress.cancelsTouchesInView = true
+        scrollEnabled = false
         viewToOperate.layer.addAnimation(enlarge, forKey: "enlarge")
         viewToOperate.layer.removeAnimationForKey("shrink")
     }
@@ -139,5 +187,4 @@ class LongPressThenSwipeActionView: UIScrollView, UIScrollViewDelegate {
             }
         }
     }
-
 }

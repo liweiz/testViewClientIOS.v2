@@ -30,6 +30,7 @@ class VerticalScrollSwitchView: UIScrollView, UIScrollViewDelegate {
             return getAllStops(stops, 0, contentSize.height)
         }
     }
+    var viewToForwardTouch: UIView!
     func scrollViewWillBeginDragging(scrollView: UIScrollView) {
         dragStartPointY = scrollView.contentOffset.y
     }
@@ -41,12 +42,8 @@ class VerticalScrollSwitchView: UIScrollView, UIScrollViewDelegate {
         basePositionY = targetContentOffset.memory.y
         println("base: \(basePositionY)")
     }
-//    func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
-//        if let u = getViewSetBetweenStops(allStops, basePositionY, viewSets) {
-//            
-//        }
-//    }
 }
+
 
 class ViewSet: UIView, UITextViewDelegate {
     var input: TextInput!

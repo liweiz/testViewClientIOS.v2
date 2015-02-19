@@ -42,15 +42,26 @@ class RootViewCtl: UIViewController, UIScrollViewDelegate {
         mainViewsBase.addSubview(commitInputView)
         
         inputCtl = InputViewCtl()
+        
         inputCtl.fontUsed = UIFont.systemFontOfSize(fontSizeL)
         self.addChildViewController(inputCtl)
         commitInputView.addSubview(inputCtl.view)
         inputCtl.didMoveToParentViewController(self)
         inputCtl.view.backgroundColor = UIColor.greenColor()
         commitInputView.viewToOperate = inputCtl.view
+        inputCtl.base.viewToForwardTouch = commitInputView
         
         var view1 = UIView(frame: CGRectMake(appRect.width, 0, appRect.width, appRect.height))
         view1.backgroundColor = UIColor.yellowColor()
+//        var viewT = UIScrollView(frame: appRectZero)
+//        viewT.scrollEnabled = false
+//        viewT.contentSize = CGSizeMake(appRectZero.width, appRectZero.height * 2)
+//        var vLong = UILongPressGestureRecognizer(target: self, action: "d:")
+//        var vSwipe = UISwipeGestureRecognizer(target: self, action: "move:")
+//        vSwipe.direction = UISwipeGestureRecognizerDirection.Down | UISwipeGestureRecognizerDirection.Up
+//        viewT.addGestureRecognizer(vLong)
+//        viewT.addGestureRecognizer(vSwipe)
+//        view1.addSubview(viewT)
         mainViewsBase.addSubview(view1)
         var view2 = UIView(frame: CGRectMake(appRect.width * twoCGFloat, 0, appRect.width, appRect.height))
         view2.backgroundColor = UIColor.blueColor()
@@ -58,7 +69,18 @@ class RootViewCtl: UIViewController, UIScrollViewDelegate {
         
         mainViewsBase.viewsToRotate = [commitInputView, view1, view2]
     }
-    
+//    func d(s: UIGestureRecognizer) {
+//        if s.state == UIGestureRecognizerState.Began {
+//            println("DDDDDDD")
+//            s.enabled = false
+//        }
+//    }
+//    func move(s: UIGestureRecognizer) {
+//        if s.state == UIGestureRecognizerState.Began {
+//            println("kkkkkk")
+//            s.enabled = false
+//        }
+//    }
     func actUponView(v: UIView) {
         if v.isEqual(inputCtl.view) {
             inputCtl.base.setContentOffset(CGPointMake(0, inputCtl.base.allStops[1]), animated: true)
