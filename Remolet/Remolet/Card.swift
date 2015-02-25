@@ -8,6 +8,31 @@
 
 import Foundation
 
+var sampleCard = Card()
+//sampleCard.sourceLang = "English"
+//sampleCard.targetLang = "简体中文"
+//sampleCard.target = "justify"
+//sampleCard.translation = "找理由"
+//sampleCard.context = "But Manning is one of the greatest of all time and it is hard to justify asking him to take a pay cut."
+//sampleCard.detail = "随便什么理由"
+
+var sampleCount = 0
+
+func getOneSampleCard() -> Card {
+    var s = sampleCard
+    s.target = sampleCard.target + String(sampleCount)
+    sampleCount++
+    return s
+}
+
+func getSamples(n: Int) -> [Card] {
+    var c = [Card]()
+    for i in 0...(n - 1) {
+        c.append(getOneSampleCard())
+    }
+    return c
+}
+
 struct Card {
     // Language to be translated.
     var sourceLang = ""

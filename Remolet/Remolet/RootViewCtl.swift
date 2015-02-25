@@ -27,6 +27,8 @@ class RootViewCtl: UIViewController, UIScrollViewDelegate {
     var commitInputView: LongPressThenSwipeActionView!
     var mainViewBaseTargetX: CGFloat = -1
     override func loadView() {
+        var samples = getSamples(30)
+        
         view = UIView(frame: appRectZero)
         mainViewsBase = InfiniteHorizontalScrolledPageView(frame: view.frame)
         mainViewsBase.contentSize = CGSizeMake(view.frame.width * CGFloat(3), view.frame.height)
@@ -53,6 +55,10 @@ class RootViewCtl: UIViewController, UIScrollViewDelegate {
         
         var view1 = UIView(frame: CGRectMake(appRect.width, 0, appRect.width, appRect.height))
         view1.backgroundColor = UIColor.yellowColor()
+        var textCtl = MoveThenExpandTextViewCtl()
+        textCtl.rectToShowOn = appRectZero
+        view1.addSubview(textCtl.view)
+        
 //        var viewT = UIScrollView(frame: appRectZero)
 //        viewT.scrollEnabled = false
 //        viewT.contentSize = CGSizeMake(appRectZero.width, appRectZero.height * 2)
@@ -118,4 +124,6 @@ class RootViewCtl: UIViewController, UIScrollViewDelegate {
     func scrollViewWillEndDragging(scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         mainViewBaseTargetX = targetContentOffset.memory.x
     }
+    
+
 }
