@@ -65,6 +65,7 @@
 		EEBAF7F41A8BEAEB00CDD975 /* TapToActView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TapToActView.swift; sourceTree = "<group>"; };
 		EEBCB4B71A99186B001D1DF9 /* ContentsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentsView.swift; sourceTree = "<group>"; };
 		EEBD7D241A9C268000C74A87 /* MoveThenExpandTextViewCtl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MoveThenExpandTextViewCtl.swift; sourceTree = "<group>"; };
+		EEC3D4101AA37E3000F4669D /* UnusedFunctions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnusedFunctions.swift; sourceTree = "<group>"; };
 		EECA76161A91BCDA0077E9AE /* Card.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 		EECA76181A91BE920077E9AE /* ListCtl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListCtl.swift; sourceTree = "<group>"; };
 		EECA761A1A91C6880077E9AE /* CardsViewCtl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CardsViewCtl.swift; sourceTree = "<group>"; };
@@ -173,6 +174,7 @@
 				EECE16781A34DB220017F984 /* REDataWorker.swift */,
 				EED0EFB41A2CE703003BD758 /* REDbWorker.swift */,
 				EECE167A1A3555630017F984 /* REListView.swift */,
+				EEC3D4101AA37E3000F4669D /* UnusedFunctions.swift */,
 			);
 			name = "Files Not In Use";
 			sourceTree = "<group>";
