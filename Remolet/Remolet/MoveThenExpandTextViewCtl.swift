@@ -27,7 +27,7 @@ class MoveThenExpandTextViewCtl: UIViewController, NSLayoutManagerDelegate {
     var text: NSString! // Mismatched text (text not in fullContent), should be handled before use this ctl.
     var textA: NSAttributedString!
     var base: MoveThenExpandTextView!
-    var rectToShowOn: CGRect!
+    var rectSizeToShowOn: CGSize!
     var textStartFromLeft = true
     let initialHiddenWidth = CGFloat(5000)
     var textViewToShow: UITextView!
@@ -47,7 +47,7 @@ class MoveThenExpandTextViewCtl: UIViewController, NSLayoutManagerDelegate {
         get {
             // Have to be the same as the textViewToShow since difference in its padding and inset would change the size.
             var tempView = getTextViewToShow(20, isFinal: true)
-            return tempView.frame.origin
+            return CGPointMake(tempView.frame.origin.x + initialBaseContentOffset.x, tempView.frame.origin.y + initialBaseContentOffset.y)
         }
     }
     var initialStatus = false
@@ -56,18 +56,21 @@ class MoveThenExpandTextViewCtl: UIViewController, NSLayoutManagerDelegate {
         fullContentA = NSAttributedString(string: fullContent as String)
         textA = NSAttributedString(string: text as String)
         fullContentStorage = NSTextStorage(string: fullContent as String)
-        initialBaseContentOffset = CGPointMake(rectToShowOn.width, rectToShowOn.height)
-        view = UIView(frame: rectToShowOn)
+        initialBaseContentOffset = CGPointMake(rectSizeToShowOn.width, rectSizeToShowOn.height)
+        view = UIView(frame: CGRectMake(0, 0, rectSizeToShowOn.width, rectSizeToShowOn.height))
         view.backgroundColor = UIColor.purpleColor()
-        base = MoveThenExpandTextView(frame: CGRectMake(0, 0, rectToShowOn.width, rectToShowOn.height))
+        base = MoveThenExpandTextView(frame: CGRectMake(0, 0, rectSizeToShowOn.width, rectSizeToShowOn.height))
         // Make it large enough in all directions to
         base.contentSize = CGSizeMake(base.frame.width * 3, base.frame.height * 3)
-        base.contentOffset = CGPointMake(base.frame.width, base.frame.height)
         base.backgroundColor = UIColor.grayColor()
+        base.initialContentOffset = initialBaseContentOffset
+        base.contentOffset = initialBaseContentOffset
+        
         // textViews
         textViewHidden = getTextViewHidden()
-        textViewToShow = UITextView(frame: CGRectMake(base.frame.width, base.frame.height, base.frame.width, base.frame.height))
-        textViewToShow.layoutManager.delegate = self
+        textViewToShow = getTextViewToShow(10, isFinal: false)
+        base.textViewToShow = textViewToShow
+        base.textViewHidden = textViewHidden
         textViewHidden.attributedText = fullContentA.attributedSubstringFromRange(NSMakeRange(0, fullContentA.length - textA.length))
         textViewToShow.backgroundColor = UIColor.clearColor()
         
@@ -77,52 +80,40 @@ class MoveThenExpandTextViewCtl: UIViewController, NSLayoutManagerDelegate {
         view.addSubview(base)
         base.addSubview(textViewHidden)
         base.addSubview(textViewToShow)
-        base.initialContentOffset = initialBaseContentOffset
-        base.contentOffset = initialBaseContentOffset
-        base.textViewToShow = textViewToShow
-        base.textViewHidden = textViewHidden
-        
+        let tap = UITapGestureRecognizer(target: self, action: "launchAnimation")
+        view.addGestureRecognizer(tap)
     }
     func adjustTextViewOriginToMatch(glyphPointInBase: CGPoint, view: UITextView) {
         view.frame = CGRectMake(glyphPointInBase.x - (view.textContainerInset.left + view.textContainer.lineFragmentPadding), glyphPointInBase.y - view.textContainerInset.top, view.frame.width, view.frame.height)
     }
-    var animaitonCount = 1
     func layoutManager(layoutManager: NSLayoutManager, didCompleteLayoutForTextContainer textContainer: NSTextContainer?, atEnd layoutFinishedFlag: Bool) {
         if layoutFinishedFlag {
             if layoutManager.isEqual(textViewHidden.layoutManager) {
                 // Initial adjustment
                 if textViewHidden.textContainer.size.width == initialHiddenWidth {
                     // Shrink hidden's width
-                    textViewHidden.frame.size = CGSizeMake(textViewHidden.layoutManager.usedRectForTextContainer(textViewHidden.textContainer).width, textViewHidden.frame.height)
-//                    textViewHidden.textContainer.size = CGSizeMake(textViewHidden.layoutManager.usedRectForTextContainer(textViewHidden.textContainer).width, 100)
+                    textViewHidden.textContainer.size = CGSizeMake(textViewHidden.layoutManager.usedRectForTextContainer(textViewHidden.textContainer).width, textViewHidden.frame.height)
                     
                     println("\(textViewHidden.frame)")
                 }
-                // Update shown everytime after hidden's been updated
+                // Update shown every time after hidden's been updated
                 let usedRange = textViewHidden.layoutManager.characterRangeForGlyphRange(textViewHidden.layoutManager.glyphRangeForBoundingRect(CGRectMake(0, 0, 5, 5), inTextContainer: textViewHidden.textContainer), actualGlyphRange: nil)
                 textViewToShow.attributedText = fullContentA.attributedSubstringFromRange(NSMakeRange(usedRange.length, fullContentA.length - usedRange.length))
             } else if layoutManager.isEqual(textViewToShow.layoutManager) {
-                if animaitonCount == 1 {
-                    initialStatus = true
-                    launchAnimation()
-                    animaitonCount--
-                }
                 
             }
         }
     }
-    func layoutManager(layoutManager: NSLayoutManager, textContainer: NSTextContainer, didChangeGeometryFromSize oldSize: CGSize) {
-        if layoutManager.isEqual(textViewHidden.layoutManager) {
+    func launchAnimation() {
+        initialStatus = true
+        if initialStatus {
             if textViewHidden.frame.width == initialHiddenWidth {
                 textViewHidden.frame = CGRectMake(textViewHidden.frame.origin.x, textViewHidden.frame.origin.y, textViewHidden.textContainer.size.width, textViewHidden.frame.height)
             }
-        }
-    }
-    func launchAnimation() {
-        if initialStatus {
             base.initialViewOrigin = textViewToShow.frame.origin
             base.shownViewOrigin = shownPoint
             base.initialTextHiddenWidth = textViewHidden.frame.width
+            base.readyToMove = true
             base.moveAwayFromInitialPoint()
         } else if finalStatus {
             
@@ -138,14 +129,14 @@ class MoveThenExpandTextViewCtl: UIViewController, NSLayoutManagerDelegate {
         return r
     }
     func getTextViewToShow(gap: CGFloat, isFinal: Bool) -> UITextView {
-        var r = UITextView(frame: CGRectMake(gap, 0, rectToShowOn.width - gap * 2, base.frame.height))
+        var r = UITextView(frame: CGRectMake(gap, 0, rectSizeToShowOn.width - gap * 2, base.frame.height))
         r.contentInset = UIEdgeInsetsZero
         r.textContainer.lineFragmentPadding = 0
         r.layoutManager.delegate = self
         r.userInteractionEnabled = false
         if isFinal {
             r.attributedText = fullContentA
-            r.frame.origin = CGPointMake(gap, (rectToShowOn.height - r.layoutManager.usedRectForTextContainer(r.textContainer).height) / 2)
+            r.frame.origin = CGPointMake(gap, (rectSizeToShowOn.height - r.layoutManager.usedRectForTextContainer(r.textContainer).height) / 2)
         }
         return r
     }
@@ -178,7 +169,7 @@ class MoveThenExpandTextView: UIScrollView, UIScrollViewDelegate {
     }
     var targetContentOffset:CGPoint {
         get {
-            return CGPointMake(initialContentOffset.x + shownViewOrigin.x - initialViewOrigin.x, initialContentOffset.y + shownViewOrigin.y - initialViewOrigin.y)
+            return CGPointMake(initialContentOffset.x - (shownViewOrigin.x - initialViewOrigin.x), initialContentOffset.y - (shownViewOrigin.y - initialViewOrigin.y))
         }
     }
     override func layoutSubviews() {
@@ -193,16 +184,14 @@ class MoveThenExpandTextView: UIScrollView, UIScrollViewDelegate {
         super.init(frame: frame)
     }
     func moveAwayFromInitialPoint() {
-        readyToMove = false
         setContentOffset(targetContentOffset, animated: true)
     }
     func moveBackToInitialPoint() {
-        readyToMove = false
         setContentOffset(initialContentOffset, animated: true)
     }
-    func scrollViewDidEndScrollingAnimation(scrollView: UIScrollView) {
-        readyToMove = true
-    }
+//    func scrollViewDidEndScrollingAnimation(scrollView: UIScrollView) {
+//        readyToMove = true
+//    }
 }
 
 
