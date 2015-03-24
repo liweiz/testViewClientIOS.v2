@@ -20,6 +20,8 @@ let twoCGFloat = CGFloat(2)
 let fontSizeS = CGFloat(14)
 let fontSizeM = CGFloat(20)
 let fontSizeL = CGFloat(96)
+let dourceLangDirectionStartFromLeft = true
+let targetLangDirectionStartFromLeft = true
 
 class RootViewCtl: UIViewController, UIScrollViewDelegate {
     var mainViewsBase: InfiniteHorizontalScrolledPageView!

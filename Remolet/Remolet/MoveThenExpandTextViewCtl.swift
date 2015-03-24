@@ -93,8 +93,6 @@ class MoveThenExpandTextViewCtl: UIViewController, NSLayoutManagerDelegate {
                 if textViewHidden.textContainer.size.width == initialHiddenWidth {
                     // Shrink hidden's width
                     textViewHidden.textContainer.size = CGSizeMake(textViewHidden.layoutManager.usedRectForTextContainer(textViewHidden.textContainer).width, textViewHidden.frame.height)
-                    
-                    println("\(textViewHidden.frame)")
                 }
                 // Update shown every time after hidden's been updated
                 let usedRange = textViewHidden.layoutManager.characterRangeForGlyphRange(textViewHidden.layoutManager.glyphRangeForBoundingRect(CGRectMake(0, 0, 5, 5), inTextContainer: textViewHidden.textContainer), actualGlyphRange: nil)
@@ -121,31 +119,27 @@ class MoveThenExpandTextViewCtl: UIViewController, NSLayoutManagerDelegate {
     }
     func getTextViewHidden() -> UITextView {
         var r = UITextView(frame: CGRectMake(0, 0, initialHiddenWidth, base.frame.height))
-        r.contentInset = UIEdgeInsetsZero
-        r.textContainer.lineBreakMode = NSLineBreakMode.ByCharWrapping
-        r.textContainer.lineFragmentPadding = 0
-        r.layoutManager.delegate = self
-        r.userInteractionEnabled = false
+        configTextView(r)
         return r
     }
     func getTextViewToShow(gap: CGFloat, isFinal: Bool) -> UITextView {
         var r = UITextView(frame: CGRectMake(gap, 0, rectSizeToShowOn.width - gap * 2, base.frame.height))
-        r.contentInset = UIEdgeInsetsZero
-        r.textContainer.lineFragmentPadding = 0
-        r.layoutManager.delegate = self
-        r.userInteractionEnabled = false
+        configTextView(r)
         if isFinal {
             r.attributedText = fullContentA
             r.frame.origin = CGPointMake(gap, (rectSizeToShowOn.height - r.layoutManager.usedRectForTextContainer(r.textContainer).height) / 2)
         }
         return r
     }
+    func configTextView(view: UITextView) {
+        view.contentInset = UIEdgeInsetsZero
+        view.textContainer.lineBreakMode = NSLineBreakMode.ByCharWrapping
+        view.textContainer.lineFragmentPadding = 0
+        view.layoutManager.delegate = self
+        view.userInteractionEnabled = false
+    }
 }
 
-//println("used rect: \(textViewHidden.layoutManager.usedRectForTextContainer(textViewHidden.textContainer))")
-//println("container rect: \(textViewHidden.textContainer.size))")
-//println("glyphRangeForBoundingRect: \(textViewHidden.layoutManager.glyphRangeForBoundingRect(CGRectMake(0, 0, 5, 5), inTextContainer: textViewHidden.textContainer)))")
-//println("view size: \(textViewHidden.frame.size))")
 
 class MoveThenExpandTextView: UIScrollView, UIScrollViewDelegate {
     var readyToMove = false
@@ -174,7 +168,8 @@ class MoveThenExpandTextView: UIScrollView, UIScrollViewDelegate {
     }
     override func layoutSubviews() {
         if readyToMove {
-            textViewHidden.frame = CGRectMake(textViewHidden.frame.origin.x, textViewHidden.frame.origin.y, abs(contentOffset.y - initialContentOffset.y) / yDistance * initialTextHiddenWidth, textViewHidden.frame.height)
+            textViewHidden.frame = CGRectMake(textViewHidden.frame.origin.x, textViewHidden.frame.origin.y, (1 - abs(contentOffset.y - initialViewOrigin.y) / yDistance) * initialTextHiddenWidth, textViewHidden.frame.height)
+            println("abs: \(abs(contentOffset.y - initialViewOrigin.y))")
         }
     }
     required init(coder aDecoder: NSCoder) {
