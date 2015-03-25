@@ -20,9 +20,16 @@ class WordToContextCtl: UIViewController {
     var base: UIScrollView!
     var viewWithFullContent: UITextView! // Final status for the textView
     var visiableRect: CGRect!
+    var lineTextViews: [SyncedTextView]!
+    var lineExtraTextViews: [SyncedTextView]!
+    var textCharacterRange: NSRange {
+        get {
+            return fullContent.rangeOfString(text as String)
+        }
+    }
     var textGlyphRange: NSRange {
         get {
-            return viewWithFullContent.layoutManager.glyphRangeForCharacterRange(fullContent.rangeOfString(text as String), actualCharacterRange: nil)
+            return viewWithFullContent.layoutManager.glyphRangeForCharacterRange(textCharacterRange, actualCharacterRange: nil)
         }
     }
     
@@ -32,34 +39,46 @@ class WordToContextCtl: UIViewController {
         view.addSubview(viewWithFullContent)
         let textRect = viewWithFullContent.layoutManager.boundingRectForGlyphRange(textGlyphRange, inTextContainer: viewWithFullContent.textContainer)
     }
-
+    // Synced lines
     func generateSyncedLines(firstGlyphOriginInCtlView: CGPoint) {
         let sampleTextView = getTextViewInOneLine()
-        let ranges = getCharacterRangesDecomposedTextShownInViewWithFullContent()
-        var lines = [SyncedOneLineView]()
-        for r in ranges {
-            var l = SyncedOneLineView(sampleTextView: sampleTextView, rectVisiable: visiableRect), textViewOrigin: <#CGPoint#>)
-        }
-    }
-    func generateLinesOnCtlView(firstGlyphOriginInCtlView: CGPoint, sampleTextView: UITextView, charRanges: [NSRange]) -> (views: [SyncedTextView], extraViews: [SyncedTextView?]) {
-        let firstOrigin = getFirstLineTextViewOrigin(sampleTextView, pointInCtlView: firstGlyphOriginInCtlView)
-        var textViews = [UITextView]()
+        let cRanges = getCharacterRangesDecomposedTextShownInViewWithFullContent()
+        let textViews = generateLinesOnCtlView(firstGlyphOriginInCtlView, sampleTextView: sampleTextView, charRanges: cRanges)
+        lineTextViews = [SyncedTextView]()
+        lineExtraTextViews = [SyncedTextView]()
         var i = 0
-        for r in charRanges {
-            var t = UITextView(frame: CGRectMake(firstOrigin.x - visiableRect.width * CGFloat(i), firstOrigin.y + sampleTextView.textContainer.size.height * CGFloat(i), sampleTextView.frame.width, sampleTextView.frame.height))
-            configTextView(t)
-            t.attributedText = setGlyphsVisiability(sampleTextView.attributedText, r, textColor)
-            view.addSubview(t)
-            textViews.append(t)
+        for v in textViews.0 {
+            var mainPart = SyncedTextView(textViewToInsert: textViews.mainView[i], rectVisiable: visiableRect)
+            lineTextViews.append(mainPart)
+            var extraPart = SyncedTextView(textViewToInsert: textViews.extraView[i], rectVisiable: visiableRect)
+            lineExtraTextViews.append(extraPart)
             i++
         }
-        var views = [SyncedTextView]()
-        var extraViews = [SyncedTextView?]()
-        for v in textViews {
-            var mainPart = SyncedTextView(textViewToInsert: v, rectVisiable: visiableRect)
-            views.append(mainPart)
-            
+    }
+    func generateLinesOnCtlView(firstGlyphOriginInCtlView: CGPoint, sampleTextView: UITextView, charRanges: ([NSRange], [NSRange])) -> (mainView: [UITextView], extraView: [UITextView]) {
+        let firstOrigin = getFirstLineTextViewOrigin(sampleTextView, pointInCtlView: firstGlyphOriginInCtlView)
+        var mainViews = [UITextView]()
+        var extraViews = [UITextView]()
+        var i = 0
+        for r in charRanges.0 {
+            var x = generateTextViewsForOneLine(firstOrigin, charRanges: charRanges, sampleTextView: sampleTextView, lineNo: i)
+            mainViews.append(x.mainView)
+            extraViews.append(x.mainView)
+            i++
         }
+        return (mainViews, extraViews)
+    }
+    func generateTextViewsForOneLine(firstViewOrigin: CGPoint, charRanges: ([NSRange], [NSRange]), sampleTextView: UITextView, lineNo: Int) -> (mainView: UITextView, extraView: UITextView) {
+        var main = generateTextView(firstViewOrigin, charRange: charRanges.0[lineNo], sampleTextView: sampleTextView, lineNo: lineNo)
+        var extra = generateTextView(firstViewOrigin, charRange: charRanges.1[lineNo], sampleTextView: sampleTextView, lineNo: lineNo)
+        return (main, extra)
+    }
+    func generateTextView(firstViewOrigin: CGPoint, charRange: NSRange, sampleTextView: UITextView, lineNo: Int) -> UITextView {
+        var t = UITextView(frame: CGRectMake(firstViewOrigin.x - visiableRect.width * CGFloat(lineNo), firstViewOrigin.y + sampleTextView.textContainer.size.height * CGFloat(lineNo), sampleTextView.frame.width, sampleTextView.frame.height))
+        configTextView(t)
+        t.attributedText = setGlyphsVisiability(sampleTextView.attributedText, charRange, textColor)
+        view.addSubview(t)
+        return t
     }
     func getFirstLineTextViewOrigin(sampleTextView: UITextView, pointInCtlView: CGPoint) -> CGPoint {
         let originInTextView = boundingRectOriginForGlyphRange(sampleTextView, sampleTextView.layoutManager.glyphRangeForCharacterRange(fullContent.rangeOfString(text as String), actualCharacterRange: nil))
@@ -89,19 +108,23 @@ class WordToContextCtl: UIViewController {
         view.textContainer.lineFragmentPadding = 0
     }
     
-    func getCharacterRangesDecomposedTextShownInViewWithFullContent() -> [NSRange] {
+    func getCharacterRangesDecomposedTextShownInViewWithFullContent() -> (mainRange: [NSRange], rangeLeft: [NSRange]) {
         let rectForText = viewWithFullContent.layoutManager.boundingRectForGlyphRange(textGlyphRange, inTextContainer: viewWithFullContent.textContainer)
-        var r = [NSRange]()
+        var mainRange = [NSRange]()
+        var rangeLeft = [NSRange]()
         var glyphLocation = textGlyphRange.location
         do {
             let startingGlyphRect = viewWithFullContent.layoutManager.lineFragmentRectForGlyphAtIndex(glyphLocation, effectiveRange: nil)
             let lineGlyphRange = viewWithFullContent.layoutManager.glyphRangeForBoundingRect(startingGlyphRect, inTextContainer: viewWithFullContent.textContainer)
             let headLocation = lineGlyphRange.location < textGlyphRange.location ? textGlyphRange.location : lineGlyphRange.location
             let endLocation = lineGlyphRange.location + lineGlyphRange.length - 1 > textGlyphRange.location + textGlyphRange.length - 1 ? textGlyphRange.location + textGlyphRange.length - 1 : lineGlyphRange.location + lineGlyphRange.length - 1
-            r.append(viewWithFullContent.layoutManager.characterRangeForGlyphRange(NSMakeRange(headLocation, endLocation - headLocation + 1), actualGlyphRange: nil))
+            mainRange.append(viewWithFullContent.layoutManager.characterRangeForGlyphRange(NSMakeRange(headLocation, endLocation - headLocation + 1), actualGlyphRange: nil))
             glyphLocation = endLocation + 1
         } while glyphLocation < textGlyphRange.location + textGlyphRange.length - 1
-        return r
+        for r in mainRange {
+            rangeLeft.append(NSMakeRange(r.location + r.length, textCharacterRange.length - r.length))
+        }
+        return (mainRange, rangeLeft)
     }
     func getFinalCharacterRangeForRect(rect: CGRect) -> NSRange {
         return viewWithFullContent.layoutManager.characterRangeForGlyphRange(viewWithFullContent.layoutManager.glyphRangeForBoundingRect(rect, inTextContainer: viewWithFullContent.textContainer), actualGlyphRange: nil)
@@ -112,6 +135,17 @@ class WordToContextCtl: UIViewController {
 
 class SyncedTextView: UIScrollView {
     var textView: UITextView!
+    var visiableCharacterRange: NSRange!
+    var visiableGlyphRange: NSRange {
+        get {
+            return textView.layoutManager.glyphRangeForCharacterRange(visiableCharacterRange, actualCharacterRange: nil)
+        }
+    }
+    var visiableGlyphsRectX: CGFloat {
+        get {
+            return textView.frame.origin.x + textView.textContainer.lineFragmentPadding + textView.textContainerInset.left + textView.layoutManager.boundingRectForGlyphRange(visiableGlyphRange, inTextContainer: textView.textContainer).origin.x
+        }
+    }
     init(textViewToInsert: UITextView, rectVisiable: CGRect) {
         super.init(frame: CGRectMake(rectVisiable.origin.x, textViewToInsert.frame.origin.y, rectVisiable.width, rectVisiable.height))
         contentSize = CGSizeMake(rectVisiable.width * 3, rectVisiable.height)
