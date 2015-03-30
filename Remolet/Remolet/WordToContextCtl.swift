@@ -38,7 +38,13 @@ class WordToContextCtl: UIViewController {
         viewWithFullContent = getViewWithFullContent(10)
         view.addSubview(viewWithFullContent)
         let textRect = viewWithFullContent.layoutManager.boundingRectForGlyphRange(textGlyphRange, inTextContainer: viewWithFullContent.textContainer)
+        base = UIScrollView(frame: view.frame)
+        base.contentSize = CGSizeMake(view.frame.width, view.frame.height * 3)
+        base.contentOffset = CGPointMake(0, view.frame.height)
     }
+    // Sync trigger
+    func
+    
     // Synced lines
     func generateSyncedLines(firstGlyphOriginInCtlView: CGPoint) {
         let sampleTextView = getTextViewInOneLine()
@@ -135,6 +141,20 @@ class WordToContextCtl: UIViewController {
 
 class SyncedTextView: UIScrollView {
     var textView: UITextView!
+    var nextLineTextViewsInChain: [SyncedTextView]!
+    var nextLineExtraTextViewsInChain: [SyncedTextView]!
+    var nextViews: [SyncedTextView] {
+        get {
+            return nextLineTextViewsInChain + nextLineExtraTextViewsInChain
+        }
+    }
+    override func setContentOffset(contentOffset: CGPoint, animated: Bool) {
+        lastRecordedContentOffsetX = contentOffset.x
+        super.setContentOffset(contentOffset, animated: animated)
+    }
+    var lastRecordedContentOffsetX: CGFloat!
+    var isTrigger = false
+    var xDifferenceToLastView: CGFloat!
     var visiableCharacterRange: NSRange!
     var visiableGlyphRange: NSRange {
         get {
@@ -158,7 +178,37 @@ class SyncedTextView: UIScrollView {
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
-    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        if isTrigger {
+            let delta = contentOffset.x - lastRecordedContentOffsetX
+            lastRecordedContentOffsetX = contentOffset.x
+            for v in nextViews {
+                v.contentOffset = CGPointMake(v.contentOffset.x + delta, v.contentOffset.y)
+            }
+        }
+    }
+    // There are two stage of the transition: 1. every SyncedTextView changes its contentOffset synchronistically till expected position for first glyph in the text range is reached 2. adjust line wrap one line after another. This method is used on stage 2. So it's only used on extraTextView.
+    func adjustToMatchLineWrap() {
+        if nextLineExtraTextViewsInChain.count > 0 {
+            var r0 = nextLineTextViewsInChain
+            r0.removeAtIndex(0)
+            var r1 = nextLineExtraTextViewsInChain
+            r1.removeAtIndex(0)
+            nextLineExtraTextViewsInChain[0].nextLineTextViewsInChain = r0
+            nextLineExtraTextViewsInChain[0].nextLineExtraTextViewsInChain = r1
+        }
+        if visiableGlyphsRectX >= contentOffset.x + frame.width {
+            // Whole visiable part is not visiable now.
+            if nextLineExtraTextViewsInChain.count > 0 {
+                nextLineExtraTextViewsInChain[0].adjustToMatchLineWrap()
+            }
+        } else {
+            // Visiable part is still visiable.
+            isTrigger = true
+            setContentOffset(CGPointMake(visiableGlyphsRectX, contentOffset.y) , animated: true)
+        }
+    }
 }
 
 
