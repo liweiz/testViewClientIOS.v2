@@ -44,8 +44,8 @@ class WordToContextCtl: UIViewController {
         return CGPointMake(firstGlyphOriginAfterFullContent.x - firstGlyphOriginBeforeFullContent.x, firstGlyphOriginAfterFullContent.y - firstGlyphOriginBeforeFullContent.y)
     }
     
-    var animatedLineTextViews: [SyncedTextView]! // To animate each line's changes.
-    var animatedLineExtraTextViews: [SyncedTextView]! // To animate each line's adaption to line wrap.
+    var animatedLineTextViews: [AnimatableOneLineTextView]! // To animate each line's changes.
+    var animatedLineExtraTextViews: [AnimatableOneLineTextView]! // To animate each line's adaption to line wrap.
     
     
     override func loadView() {
@@ -57,89 +57,11 @@ class WordToContextCtl: UIViewController {
         base.contentSize = CGSizeMake(view.frame.width, view.frame.height * 3)
         base.contentOffset = CGPointMake(0, view.frame.height)
     }
-    // Animation trigger
-    func startWithTransitionToFullContent() {
-        transitToFullContent(true)
-    }
-    func startWithTransitionFromFullContent() {
-        transitToFullContent(false)
-        transitFromFullContent(true)
-    }
-    
-    func transitToFullContent(animated: Bool) {
-        base.setContentOffset(CGPointMake(base.contentOffset.x, base.contentOffset.y + distanceToMoveToFullContent.y), animated: animated)
-        let a = animatedLineTextViews[0] as SyncedTextView
-        a.setContentOffset(CGPointMake(a.contentOffset.x + distanceToMoveToFullContent.x, a.contentOffset.y) , animated: animated)
-    }
-    func transitFromFullContent(animated: Bool) {
-        base.setContentOffset(CGPointMake(base.contentOffset.x, base.contentOffset.y - distanceToMoveToFullContent.y), animated: animated)
-        let a = animatedLineTextViews[0] as SyncedTextView
-        a.setContentOffset(CGPointMake(a.contentOffset.x - distanceToMoveToFullContent.x, a.contentOffset.y) , animated: animated)
-    }
-    
-    // Animated lines
-    func generateSyncedLines(firstGlyphOriginInCtlView: CGPoint) {
-        let sampleTextView = getTextViewInOneAnimatedLine()
-        let cRanges = getDecomposedCharacterRangesForAnimatedLines()
-        let textViews = generateAnimatedLinesOnCtlView(firstGlyphOriginInCtlView, sampleTextView: sampleTextView, charRanges: cRanges)
-        animatedLineTextViews = [SyncedTextView]()
-        animatedLineExtraTextViews = [SyncedTextView]()
-        var i = 0
-        for v in textViews.0 {
-            var mainPart = SyncedTextView(textViewToInsert: textViews.mainView[i], rectVisiable: visiableRect)
-            animatedLineTextViews.append(mainPart)
-            var extraPart = SyncedTextView(textViewToInsert: textViews.extraView[i], rectVisiable: visiableRect)
-            animatedLineExtraTextViews.append(extraPart)
-            i++
-        }
-    }
-    func generateAnimatedLinesOnCtlView(firstGlyphOriginInCtlView: CGPoint, sampleTextView: UITextView, charRanges: ([NSRange], [NSRange])) -> (mainView: [UITextView], extraView: [UITextView]) {
-        var firstAnimatedLineOriginBeforeFullContent = getFirstAnimatedLineTextViewOrigin(sampleTextView, pointInCtlView: firstGlyphOriginInCtlView)
-        var mainViews = [UITextView]()
-        var extraViews = [UITextView]()
-        var i = 0
-        for r in charRanges.0 {
-            var x = generateTextViewsForOneAnimatedLine(firstAnimatedLineOriginBeforeFullContent, charRanges: charRanges, sampleTextView: sampleTextView, lineNo: i)
-            mainViews.append(x.mainView)
-            extraViews.append(x.mainView)
-            i++
-        }
-        return (mainViews, extraViews)
-    }
-    func generateTextViewsForOneAnimatedLine(firstAnimatedLineTextViewOrigin: CGPoint, charRanges: ([NSRange], [NSRange]), sampleTextView: UITextView, lineNo: Int) -> (mainView: UITextView, extraView: UITextView) {
-        var main = generateAnimatedLineTextView(firstAnimatedLineTextViewOrigin, charRange: charRanges.0[lineNo], sampleTextView: sampleTextView, lineNo: lineNo)
-        var extra = generateAnimatedLineTextView(firstAnimatedLineTextViewOrigin, charRange: charRanges.1[lineNo], sampleTextView: sampleTextView, lineNo: lineNo)
-        return (main, extra)
-    }
-    func generateAnimatedLineTextView(firstAnimatedLineTextViewOrigin: CGPoint, charRange: NSRange, sampleTextView: UITextView, lineNo: Int) -> UITextView {
-        var t = UITextView(frame: CGRectMake(firstAnimatedLineTextViewOrigin.x - visiableRect.width * CGFloat(lineNo), firstAnimatedLineTextViewOrigin.y + sampleTextView.textContainer.size.height * CGFloat(lineNo), sampleTextView.frame.width, sampleTextView.frame.height))
-        configTextView(t)
-        t.attributedText = setGlyphsVisiability(sampleTextView.attributedText, charRange, textColor)
-        view.addSubview(t)
-        return t
-    }
-    func getFirstAnimatedLineTextViewOrigin(sampleTextView: UITextView, pointInCtlView: CGPoint) -> CGPoint {
-        let glyphOriginInTextView = boundingRectOriginForGlyphRange(sampleTextView, sampleTextView.layoutManager.glyphRangeForCharacterRange(fullContent.rangeOfString(text as String), actualCharacterRange: nil))
-        return originToMatchPoint(pointInCtlView, glyphOriginInTextView)
-    }
-    func getViewWithFullContent(gap: CGFloat) -> UITextView {
-        var r = UITextView(frame: CGRectMake(gap, 0, sizeShownForFullContent.width - gap * 2, sizeShownForFullContent.height))
-        configTextView(r)
-        r.attributedText = fullContentA
-        let rect = r.layoutManager.usedRectForTextContainer(r.textContainer)
-        r.frame = CGRectMake(r.frame.origin.x, (sizeShownForFullContent.height - rect.height) / 2, r.frame.width, rect.height)
-        return r
-    }
-    
-    
-    
-    
-    
 }
 
 // MARK: - Animatable textView
 
-class AnimatableTextViewCtl: UIViewController {
+class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
     var originalViewToMock: UITextView! // Prerequisite
     var highlightColor = UIColor.blackColor()
     var normalColor = UIColor.grayColor()
@@ -174,44 +96,74 @@ class AnimatableTextViewCtl: UIViewController {
         }
     }
     
-    var animatedLineMainView = [AnimatableOneLineTextView]()
-    var animatedLineExtraView = [AnimatableOneLineTextView]()
-    
-    func refreshLines() {
-        refreshLinesInfo()
-        var i = 0
-        for r in glyphRangesInOriginalViewToMock {
-            if i + 1 > animatedLineMainView.count {
-                let l0 = getOneAnimatableOneLineTextView(lineRectsInOriginalViewToMock[i].origin, width: view.frame.width, height: view.frame.height)
-                view.addSubview(l0)
-                animatedLineMainView.append(l0)
+    var animatedLineMainViews = [AnimatableOneLineTextView]()
+    var animatedLineExtraViews = [AnimatableOneLineTextView]()
+    var animatedLineViews: [AnimatableOneLineTextView] {
+        return animatedLineMainViews + animatedLineExtraViews
+    }
+    var isExpanded = false
+    // Transition
+    func transitToExpanded(animated: Bool) {
+        animatedLineExtraViews[0].adjustToMatchLineWrap(animated)
+    }
+    func transitToCollapsed(animated: Bool) {
+        let a = animatedLineExtraViews.reverse()
+        let b = animatedLineMainViews.reverse()
+        for v in a {
+            for k in v.nextLineExtraTextViewsInChain {
+                k.setContentOffset(CGPointMake(k.contentOffset.x - v.extraXTiggere, k.contentOffset.y), animated: true)
             }
-            if i + 1 > animatedLineExtraView.count {
-                let l1 = getOneAnimatableOneLineTextView(lineRectsInOriginalViewToMock[i].origin, width: view.frame.width, height: view.frame.height)
-                view.addSubview(l1)
-                animatedLineExtraView.append(l1)
-            }
-            i++
-        }
-        for v in animatedLineMainView {
-            
-        }
-        for v in animatedLineExtraView {
-            
         }
     }
-    func refreshAnimatableOneLineTextViews(inout views: [AnimatableOneLineTextView]) {
-        var i = 0
-        for r in glyphRangesInOriginalViewToMock {
-            if i + 1 > views.count {
-                let l = getOneAnimatableOneLineTextView(lineRectsInOriginalViewToMock[i].origin, width: view.frame.width, height: view.frame.height)
-                view.addSubview(l)
-                views.append(l)
+    func scrollViewDidEndScrollingAnimation(scrollView: UIScrollView) {
+        if scrollView.isKindOfClass(AnimatableOneLineTextView) {
+            let s = scrollView as! AnimatableOneLineTextView
+            if let i = find(animatedLineExtraViews, s) {
+                if i + 1 < animatedLineExtraViews.count {
+                    animatedLineExtraViews[i + 1].adjustToMatchLineWrap(true)
+                }
             }
-            i++
         }
-        for v in views {
-            
+    }
+    // Refresh animatableLines
+    func refreshLines() {
+        refreshLinesInfo()
+        refreshAnimatableOneLineTextViews(&animatedLineMainViews)
+        refreshAnimatableOneLineTextViews(&animatedLineExtraViews)
+    }
+    func refreshAnimatableOneLineTextViews(inout views: [AnimatableOneLineTextView]) {
+        // Match the number of views.
+        var y = views.count - lineRectsInOriginalViewToMock.count
+        if y > 0 {
+            do {
+                views.last!.removeFromSuperview()
+                views.removeLast()
+                y--
+            } while y > 0
+        } else if y < 0 {
+            var i = 0
+            for r in glyphRangesInOriginalViewToMock {
+                if i + 1 > views.count {
+                    let l = getOneAnimatableOneLineTextView(lineRectsInOriginalViewToMock[i].origin, width: view.frame.width, height: view.frame.height)
+                    l.delegate = self
+                    view.addSubview(l)
+                    views.append(l)
+                }
+                i++
+            }
+        }
+        // Adjust appearance.
+        if views.count > 0 {
+            var j = 0
+            let isForMain = views[0].isEqual(animatedLineMainViews[0]) ? true : false
+            for v in views {
+                // Reset contentOffset
+                v.setContentOffset(CGPointMake(-view.frame.width * CGFloat(j), 0), animated: false)
+                // Reset visiability.
+                let charRange = isForMain ? NSMakeRange(0, lastGlyphIndexesInLinesInOriginalViewToMock[j]) : NSMakeRange(firstExtraGlyphIndexesInLinesInOriginalViewToMock[j], (v.textView.attributedText.string as NSString).length - firstExtraGlyphIndexesInLinesInOriginalViewToMock[j])
+                v.textView.attributedText = setGlyphsVisiability(v.textView.attributedText, charRange, highlightColor)
+                j++
+            }
         }
     }
     func refreshLinesInfo() {
@@ -230,7 +182,6 @@ class AnimatableTextViewCtl: UIViewController {
                 lineNo++
             } while g.length > (lineNo == 0 ? 0 : glyphRangesInOriginalViewToMock.last!.location + glyphRangesInOriginalViewToMock.last!.length - 1)
         }
-        
     }
     
     func getOneAnimatableOneLineTextView(origin: CGPoint, width: CGFloat = 2000, height: CGFloat = 100) -> AnimatableOneLineTextView {
@@ -245,24 +196,6 @@ class AnimatableTextViewCtl: UIViewController {
         view.textContainer.lineFragmentPadding = 0
         view.showsHorizontalScrollIndicator = false
         view.showsVerticalScrollIndicator = false
-    }
-    
-    func refreshDecomposedCharacterRangesForAnimatedLines() -> (mainRange: [NSRange], rangeLeft: [NSRange]) {
-        var mainRange = [NSRange]()
-        var rangeLeft = [NSRange]()
-//        var glyphLocation = highlightedTextGlyphRangeInOriginalViewToMock.location
-        do {
-            let startingGlyphRect = originalViewToMock.layoutManager.lineFragmentRectForGlyphAtIndex(0, effectiveRange: nil)
-            let lineGlyphRange = originalViewToMock.layoutManager.glyphRangeForBoundingRect(startingGlyphRect, inTextContainer: originalViewToMock.textContainer)
-            let headLocation = lineGlyphRange.location < highlightedTextGlyphRangeInOriginalViewToMock.location ? highlightedTextGlyphRangeInOriginalViewToMock.location : lineGlyphRange.location
-            let endLocation = lineGlyphRange.location + lineGlyphRange.length - 1 > highlightedTextGlyphRangeInOriginalViewToMock.location + highlightedTextGlyphRangeInOriginalViewToMock.length - 1 ? highlightedTextGlyphRangeInOriginalViewToMock.location + highlightedTextGlyphRangeInOriginalViewToMock.length - 1 : lineGlyphRange.location + lineGlyphRange.length - 1
-            mainRange.append(originalViewToMock.layoutManager.characterRangeForGlyphRange(NSMakeRange(headLocation, endLocation - headLocation + 1), actualGlyphRange: nil))
-            glyphLocation = endLocation + 1
-        } while glyphLocation < highlightedTextGlyphRangeInOriginalViewToMock.location + highlightedTextGlyphRangeInOriginalViewToMock.length - 1
-        for r in mainRange {
-            rangeLeft.append(NSMakeRange(r.location + r.length, highlightedTextCharacterRange.length - r.length))
-        }
-        return (mainRange, rangeLeft)
     }
     func getCharacterRangeFullContentViewForRect(rect: CGRect) -> NSRange {
         return originalViewToMock.layoutManager.characterRangeForGlyphRange(originalViewToMock.layoutManager.glyphRangeForBoundingRect(rect, inTextContainer: originalViewToMock.textContainer), actualGlyphRange: nil)
@@ -281,10 +214,11 @@ class AnimatableOneLineTextView: UIScrollView {
         }
     }
     override func setContentOffset(contentOffset: CGPoint, animated: Bool) {
-        lastRecordedContentOffsetX = contentOffset.x
+        baseContentOffsetX = contentOffset.x
         super.setContentOffset(contentOffset, animated: animated)
     }
-    var lastRecordedContentOffsetX: CGFloat!
+    var baseContentOffsetX: CGFloat!
+    var extraXTiggered = CGFloat(0) // Store distance moved triggered by this on x axis.
     var isTrigger = false
     var xDifferenceToLastView: CGFloat!
     var visiableCharacterRange: NSRange!
@@ -307,35 +241,51 @@ class AnimatableOneLineTextView: UIScrollView {
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        if isTrigger {
-            let delta = contentOffset.x - lastRecordedContentOffsetX
-            lastRecordedContentOffsetX = contentOffset.x
-            for v in nextViews {
-                v.contentOffset = CGPointMake(v.contentOffset.x + delta, v.contentOffset.y)
-            }
-        }
-    }
+    
     // There are two stage of the transition: 1. every SyncedTextView changes its contentOffset synchronistically till expected position for first glyph in the text range is reached 2. adjust line wrap one line after another. This method is used on stage 2. So it's only used on extraTextView.
-    func adjustToMatchLineWrap() {
-        if nextLineExtraTextViewsInChain.count > 0 {
+    func adjustToMatchLineWrap(animated: Bool) {
+        if nextLineExtraTextViewsInChain.count > 1 {
             var r0 = nextLineTextViewsInChain
             r0.removeAtIndex(0)
             var r1 = nextLineExtraTextViewsInChain
             r1.removeAtIndex(0)
             nextLineExtraTextViewsInChain[0].nextLineTextViewsInChain = r0
             nextLineExtraTextViewsInChain[0].nextLineExtraTextViewsInChain = r1
+        } else {
+            return
+        }
+        for v in nextViews {
+            v.baseContentOffsetX = v.contentOffset.x
         }
         if visiableGlyphsRectX >= contentOffset.x + frame.width {
             // Whole visiable part is not visiable now.
-            if nextLineExtraTextViewsInChain.count > 0 {
-                nextLineExtraTextViewsInChain[0].adjustToMatchLineWrap()
-            }
+            proceedToNext(animated)
         } else {
             // Visiable part is still visiable.
             isTrigger = true
-            setContentOffset(CGPointMake(visiableGlyphsRectX, contentOffset.y) , animated: true)
+            baseContentOffsetX = contentOffset.x
+            extraXTiggered = visiableGlyphsRectX - contentOffset.x
+            setContentOffset(CGPointMake(visiableGlyphsRectX, contentOffset.y) , animated: animated)
+            if !animated {
+                updateFollowersContentOffset()
+                proceedToNext(animated)
+            }
+        }
+    }
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        if isTrigger {
+            updateFollowersContentOffset()
+        }
+    }
+    func proceedToNext(animated: Bool) {
+        if nextLineExtraTextViewsInChain.count > 0 {
+            nextLineExtraTextViewsInChain[0].adjustToMatchLineWrap(animated)
+        }
+    }
+    func updateFollowersContentOffset() {
+        for v in nextViews {
+            v.contentOffset = CGPointMake(v.baseContentOffsetX + extraXTiggered, v.contentOffset.y)
         }
     }
 }
