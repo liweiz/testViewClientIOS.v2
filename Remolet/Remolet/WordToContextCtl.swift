@@ -103,24 +103,38 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
     }
     var isExpanded = false
     // Transition
+    func transitToCollapsedAtLanuch() {
+        transitToExpanded(false)
+        transitToCollapsed(true)
+    }
     func transitToExpanded(animated: Bool) {
         animatedLineExtraViews[0].adjustToMatchLineWrap(animated)
+        if !animated {
+            isExpanded = true
+        }
     }
     func transitToCollapsed(animated: Bool) {
-        let a = animatedLineExtraViews.reverse()
-        let b = animatedLineMainViews.reverse()
-        for v in a {
-            for k in v.nextLineExtraTextViewsInChain {
-                k.setContentOffset(CGPointMake(k.contentOffset.x - v.extraXTiggere, k.contentOffset.y), animated: true)
-            }
+        if animatedLineExtraViews.count > 0 {
+            let a = animatedLineExtraViews.reverse()
+            a[0].setContentOffset(CGPointMake(a[0].contentOffset.x - a[0].extraXTiggered, a[0].contentOffset.y), animated: true)
         }
     }
     func scrollViewDidEndScrollingAnimation(scrollView: UIScrollView) {
         if scrollView.isKindOfClass(AnimatableOneLineTextView) {
             let s = scrollView as! AnimatableOneLineTextView
             if let i = find(animatedLineExtraViews, s) {
-                if i + 1 < animatedLineExtraViews.count {
-                    animatedLineExtraViews[i + 1].adjustToMatchLineWrap(true)
+                if isExpanded {
+                    if i - 1 >= 0 {
+                        animatedLineExtraViews[i - 1].setContentOffset(CGPointMake(animatedLineExtraViews[i - 1].contentOffset.x - animatedLineExtraViews[i - 1].extraXTiggered, animatedLineExtraViews[i - 1].contentOffset.y), animated: true)
+                    } else {
+                        isExpanded = false
+                    }
+                } else {
+                    if i + 1 < animatedLineExtraViews.count {
+                        animatedLineExtraViews[i + 1].adjustToMatchLineWrap(true)
+                    } else {
+                        isExpanded = true
+                    }
                 }
             }
         }
