@@ -10,53 +10,28 @@ import Foundation
 import UIKit
 // NSLayoutManager works only with NSRange. It's easier to get NSRange from NSString instead of Range<String.Index> (http://stackoverflow.com/questions/27040924/nsrange-from-swift-range)
 
-func testWordToContextCtl() -> WordToContextCtl {
-    let ctl = WordToContextCtl()
-    ctl.firstGlyphOriginBeforeFullContent = CGPointMake(30, 10)
-    ctl.fullContent = "When the user taps in an editable text view, that text view becomes the first responder and automatically asks the system to display the associated keyboard. Because the appearance of the keyboard has the potential to obscure portions of your user interface, it is up to you to make sure that does not happen by repositioning any views that might be obscured. Some system views, like table views, help you by scrolling the first responder into view automatically. If the first responder is at the bottom of the scrolling region, however, you may still need to resize or reposition the scroll view itself to ensure the first responder is visible."
-    ctl.text = "Some system views, like table views, help you by scrolling the first responder into view automatically. If the first responder is at the bottom of the scrolling region, however, you may still need to resize or reposition the scroll view itself to ensure the first responder is visible."
-    ctl.fullContentA = NSMutableAttributedString(string: ctl.fullContent as String)
-    ctl.textA = NSMutableAttributedString(string: ctl.text as String)
+func testAnimatableTextViewCtl(onCtl: RootViewCtl, viewToAttachOn: UIView) -> AnimatableTextViewCtl {
+    let ctl = AnimatableTextViewCtl()
+    let oX = CGFloat(20)
+    let oY = CGFloat(40)
+    let o = UITextView(frame: CGRectMake(oX, oY, appRect.width - oX * 2, appRect.height - oY))
+    let fullContent = "When the user taps in an editable text view, that text view becomes the first responder and automatically asks the system to display the associated keyboard. Because the appearance of the keyboard has the potential to obscure portions of your user interface, it is up to you to make sure that does not happen by repositioning any views that might be obscured. Some system views, like table views, help you by scrolling the first responder into view automatically. If the first responder is at the bottom of the scrolling region, however, you may still need to resize or reposition the scroll view itself to ensure the first responder is visible."
+    o.attributedText = NSAttributedString(string: fullContent)
+    o.contentInset = UIEdgeInsetsZero
+    o.textContainer.lineFragmentPadding = 0
+    o.showsHorizontalScrollIndicator = false
+    o.showsVerticalScrollIndicator = false
+    ctl.originalViewToMock = o
+    ctl.maxWidth = o.frame.width
+    ctl.attriFullText = NSMutableAttributedString(string: o.attributedText.string)
+    ctl.attriTextToHighlight = NSMutableAttributedString(string: "Some system views, like table views, help you by scrolling the first responder into view automatically. If the first responder is at the bottom of the scrolling region, however, you may still need to resize or reposition the scroll view itself to ensure the first responder is visible.")
+    viewToAttachOn.addSubview(o)
+    o.hidden = true
+    o.backgroundColor = UIColor.greenColor()
+    onCtl.addChildViewController(ctl)
+    ctl.didMoveToParentViewController(onCtl)
+    viewToAttachOn.addSubview(ctl.view)
     return ctl
-}
-
-class WordToContextCtl: UIViewController {
-    var isShowingFullContent = false
-    var base: UIScrollView!
-    
-    var fullContent: NSString!
-    var fullContentA: NSAttributedString!
-    var textColor = UIColor.greenColor()
-    var text: NSString! // Mismatched text (text not in fullContent), should be handled before use this ctl.
-    var textA: NSAttributedString!
-    
-    var sizeShownForFullContent: CGSize!
-    var visiableRect: CGRect {
-        return CGRectMake((view.frame.width - sizeShownForFullContent.width) / 2, (view.frame.height - sizeShownForFullContent.height) / 2, sizeShownForFullContent.width, sizeShownForFullContent.height)
-    }
-    var viewWithFullContent: UITextView! // Final status for the textView
-    var firstGlyphOriginBeforeFullContent: CGPoint! // In ctl.view's coordinates.
-    
-    var firstGlyphOriginAfterFullContent: CGPoint! { // In ctl.view's coordinates.
-        return view.convertPoint(boundingRectOriginForGlyphRange(viewWithFullContent, NSMakeRange(textGlyphRangeInFullContentView.location, 1)), fromView: viewWithFullContent)
-    }
-    var distanceToMoveToFullContent: CGPoint { // Use point as a container to store distances on both directions.
-        return CGPointMake(firstGlyphOriginAfterFullContent.x - firstGlyphOriginBeforeFullContent.x, firstGlyphOriginAfterFullContent.y - firstGlyphOriginBeforeFullContent.y)
-    }
-    
-    var animatedLineTextViews: [AnimatableOneLineTextView]! // To animate each line's changes.
-    var animatedLineExtraTextViews: [AnimatableOneLineTextView]! // To animate each line's adaption to line wrap.
-    
-    
-    override func loadView() {
-        view = UIView(frame: CGRectMake(0, 0, sizeShownForFullContent.width, sizeShownForFullContent.height))
-        viewWithFullContent = getViewWithFullContent(10)
-        view.addSubview(viewWithFullContent)
-        let textRectInFullContentView = viewWithFullContent.layoutManager.boundingRectForGlyphRange(textGlyphRangeInFullContentView, inTextContainer: viewWithFullContent.textContainer)
-        base = UIScrollView(frame: view.frame)
-        base.contentSize = CGSizeMake(view.frame.width, view.frame.height * 3)
-        base.contentOffset = CGPointMake(0, view.frame.height)
-    }
 }
 
 // MARK: - Animatable textView
@@ -71,6 +46,7 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
     
     var glyphRangesInOriginalViewToMock = [NSRange]()
     var lineRectsInOriginalViewToMock = [CGRect]()
+    
     var lastGlyphIndexesInLinesInOriginalViewToMock: [Int] {
         var i = [Int]()
         for r in glyphRangesInOriginalViewToMock {
@@ -102,6 +78,12 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
         return animatedLineMainViews + animatedLineExtraViews
     }
     var isExpanded = false
+    
+    override func loadView() {
+        view = UIView(frame: originalViewToMock.frame)
+        refreshLines()
+    }
+    
     // Transition
     func transitToCollapsedAtLanuch() {
         transitToExpanded(false)
@@ -158,7 +140,7 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
             var i = 0
             for r in glyphRangesInOriginalViewToMock {
                 if i + 1 > views.count {
-                    let l = getOneAnimatableOneLineTextView(lineRectsInOriginalViewToMock[i].origin, width: view.frame.width, height: view.frame.height)
+                    let l = getOneAnimatableOneLineTextView(CGPointMake(lineRectsInOriginalViewToMock[0].origin.x, lineRectsInOriginalViewToMock[i].origin.y))
                     l.delegate = self
                     view.addSubview(l)
                     views.append(l)
@@ -186,16 +168,17 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
         let s = originalViewToMock.attributedText.string as NSString
         let g = originalViewToMock.layoutManager.glyphRangeForCharacterRange(NSMakeRange(0, s.length), actualCharacterRange: nil)
         if g.length > 0 {
-            var lineNo = 0
-            do {
-                let lastLineRect = lineNo > 0 ? lineRectsInOriginalViewToMock[lineNo - 1] : CGRectZero
+            var lineIndex = 0
+            while g.length > (lineIndex == 0 ? 0 : glyphRangesInOriginalViewToMock.last!.location + glyphRangesInOriginalViewToMock.last!.length) {
+                let lastLineRect = lineIndex > 0 ? lineRectsInOriginalViewToMock[lineIndex - 1] : CGRectZero
                 let lineGlyphRange = originalViewToMock.layoutManager.glyphRangeForBoundingRect(CGRectMake(0, lastLineRect.maxY + 1, 1, 1), inTextContainer: originalViewToMock.textContainer)
                 let lineRect = originalViewToMock.layoutManager.boundingRectForGlyphRange(lineGlyphRange, inTextContainer: originalViewToMock.textContainer)
                 glyphRangesInOriginalViewToMock.append(lineGlyphRange)
                 lineRectsInOriginalViewToMock.append(lineRect)
-                lineNo++
-            } while g.length > (lineNo == 0 ? 0 : glyphRangesInOriginalViewToMock.last!.location + glyphRangesInOriginalViewToMock.last!.length - 1)
+                lineIndex++
+            }
         }
+        
     }
     
     func getOneAnimatableOneLineTextView(origin: CGPoint, width: CGFloat = 2000, height: CGFloat = 100) -> AnimatableOneLineTextView {
@@ -205,7 +188,7 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
         return AnimatableOneLineTextView(textViewToInsert: r, rect: CGRectMake(origin.x, origin.y, width, height))
     }
     func configTextView(view: UITextView) {
-        view.backgroundColor = UIColor.clearColor()
+        view.backgroundColor = UIColor.blueColor()
         view.contentInset = UIEdgeInsetsZero
         view.textContainer.lineFragmentPadding = 0
         view.showsHorizontalScrollIndicator = false
