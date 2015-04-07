@@ -131,17 +131,20 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
         // Match the number of views.
         var y = views.count - lineRectsInOriginalViewToMock.count
         if y > 0 {
-            do {
+            while y > 0 {
                 views.last!.removeFromSuperview()
                 views.removeLast()
                 y--
-            } while y > 0
+            }
         } else if y < 0 {
             var i = 0
             for r in glyphRangesInOriginalViewToMock {
                 if i + 1 > views.count {
                     let l = getOneAnimatableOneLineTextView(CGPointMake(lineRectsInOriginalViewToMock[0].origin.x, lineRectsInOriginalViewToMock[i].origin.y))
+                    println("origin.x: \(lineRectsInOriginalViewToMock[0].origin.x)")
                     l.delegate = self
+//                    l.alpha = 0.8
+//                    l.backgroundColor = UIColor.redColor()
                     view.addSubview(l)
                     views.append(l)
                 }
@@ -154,7 +157,7 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
             let isForMain = views[0].isEqual(animatedLineMainViews[0]) ? true : false
             for v in views {
                 // Reset contentOffset
-                v.setContentOffset(CGPointMake(-view.frame.width * CGFloat(j), 0), animated: false)
+                v.setContentOffset(CGPointMake(view.frame.width * CGFloat(j), 0), animated: false)
                 // Reset visiability.
                 let charRange = isForMain ? NSMakeRange(0, lastGlyphIndexesInLinesInOriginalViewToMock[j]) : NSMakeRange(firstExtraGlyphIndexesInLinesInOriginalViewToMock[j], (v.textView.attributedText.string as NSString).length - firstExtraGlyphIndexesInLinesInOriginalViewToMock[j])
                 v.textView.attributedText = setGlyphsVisiability(v.textView.attributedText, charRange, highlightColor)
@@ -181,14 +184,15 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
         
     }
     
-    func getOneAnimatableOneLineTextView(origin: CGPoint, width: CGFloat = 2000, height: CGFloat = 100) -> AnimatableOneLineTextView {
+    func getOneAnimatableOneLineTextView(origin: CGPoint, width: CGFloat = 10000, height: CGFloat = 100) -> AnimatableOneLineTextView {
         var r = UITextView(frame: CGRectMake(0, 0, width, height))
         configTextView(r)
         r.attributedText = attriFullText
-        return AnimatableOneLineTextView(textViewToInsert: r, rect: CGRectMake(origin.x, origin.y, width, height))
+        return AnimatableOneLineTextView(textViewToInsert: r, rect: CGRectMake(origin.x, origin.y, view.frame.width - origin.x * 2, height))
     }
     func configTextView(view: UITextView) {
-        view.backgroundColor = UIColor.blueColor()
+        view.backgroundColor = UIColor.clearColor()
+//        view.alpha = 0.5
         view.contentInset = UIEdgeInsetsZero
         view.textContainer.lineFragmentPadding = 0
         view.showsHorizontalScrollIndicator = false
@@ -206,9 +210,7 @@ class AnimatableOneLineTextView: UIScrollView {
     var nextLineTextViewsInChain: [AnimatableOneLineTextView]!
     var nextLineExtraTextViewsInChain: [AnimatableOneLineTextView]!
     var nextViews: [AnimatableOneLineTextView] {
-        get {
-            return nextLineTextViewsInChain + nextLineExtraTextViewsInChain
-        }
+        return nextLineTextViewsInChain + nextLineExtraTextViewsInChain
     }
     override func setContentOffset(contentOffset: CGPoint, animated: Bool) {
         baseContentOffsetX = contentOffset.x
@@ -220,17 +222,13 @@ class AnimatableOneLineTextView: UIScrollView {
     var xDifferenceToLastView: CGFloat!
     var visiableCharacterRange: NSRange!
     var visiableGlyphRange: NSRange {
-        get {
-            return textView.layoutManager.glyphRangeForCharacterRange(visiableCharacterRange, actualCharacterRange: nil)
-        }
+        return textView.layoutManager.glyphRangeForCharacterRange(visiableCharacterRange, actualCharacterRange: nil)
     }
     var visiableGlyphsRectX: CGFloat {
-        get {
-            return textView.frame.origin.x + textView.textContainer.lineFragmentPadding + textView.textContainerInset.left + textView.layoutManager.boundingRectForGlyphRange(visiableGlyphRange, inTextContainer: textView.textContainer).origin.x
-        }
+        return textView.frame.origin.x + textView.textContainer.lineFragmentPadding + textView.textContainerInset.left + textView.layoutManager.boundingRectForGlyphRange(visiableGlyphRange, inTextContainer: textView.textContainer).origin.x
     }
     init(textViewToInsert: UITextView, rect: CGRect) {
-        super.init(frame: CGRectMake(rect.origin.x, rect.origin.y, rect.width, rect.height))
+        super.init(frame: rect)
         contentSize = CGSizeMake(textViewToInsert.frame.width * 3, textViewToInsert.frame.height)
         textView = textViewToInsert
         addSubview(textView)
