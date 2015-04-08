@@ -31,6 +31,9 @@ func testAnimatableTextViewCtl(onCtl: RootViewCtl, viewToAttachOn: UIView) -> An
     onCtl.addChildViewController(ctl)
     ctl.didMoveToParentViewController(onCtl)
     viewToAttachOn.addSubview(ctl.view)
+    
+    var tap = UITapGestureRecognizer(target: ctl, action: "expandByTap")
+    ctl.view.addGestureRecognizer(tap)
     return ctl
 }
 
@@ -89,6 +92,9 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
         transitToExpanded(false)
         transitToCollapsed(true)
     }
+    func expandByTap() {
+        transitToExpanded(true)
+    }
     func transitToExpanded(animated: Bool) {
         animatedLineExtraViews[0].adjustToMatchLineWrap(animated)
         if !animated {
@@ -126,6 +132,14 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
         refreshLinesInfo()
         refreshAnimatableOneLineTextViews(&animatedLineMainViews)
         refreshAnimatableOneLineTextViews(&animatedLineExtraViews)
+        if animatedLineExtraViews.count > 0 {
+            var r0 = animatedLineMainViews
+            r0.removeAtIndex(0)
+            (animatedLineExtraViews[0] as AnimatableOneLineTextView).nextLineTextViewsInChain = r0
+            var r1 = animatedLineExtraViews
+            r1.removeAtIndex(0)
+            (animatedLineExtraViews[0] as AnimatableOneLineTextView).nextLineExtraTextViewsInChain = r1
+        }
     }
     func refreshAnimatableOneLineTextViews(inout views: [AnimatableOneLineTextView]) {
         // Match the number of views.
@@ -141,7 +155,6 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
             for r in glyphRangesInOriginalViewToMock {
                 if i + 1 > views.count {
                     let l = getOneAnimatableOneLineTextView(CGPointMake(lineRectsInOriginalViewToMock[0].origin.x, lineRectsInOriginalViewToMock[i].origin.y))
-                    println("origin.x: \(lineRectsInOriginalViewToMock[0].origin.x)")
                     l.delegate = self
 //                    l.alpha = 0.8
 //                    l.backgroundColor = UIColor.redColor()
@@ -159,8 +172,9 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
                 // Reset contentOffset
                 v.setContentOffset(CGPointMake(view.frame.width * CGFloat(j), 0), animated: false)
                 // Reset visiability.
-                let charRange = isForMain ? NSMakeRange(0, lastGlyphIndexesInLinesInOriginalViewToMock[j]) : NSMakeRange(firstExtraGlyphIndexesInLinesInOriginalViewToMock[j], (v.textView.attributedText.string as NSString).length - firstExtraGlyphIndexesInLinesInOriginalViewToMock[j])
-                v.textView.attributedText = setGlyphsVisiability(v.textView.attributedText, charRange, highlightColor)
+                let charRange = isForMain ? NSMakeRange(0, lastGlyphIndexesInLinesInOriginalViewToMock[j] + 1) : NSMakeRange(firstExtraGlyphIndexesInLinesInOriginalViewToMock[j], (v.textView.attributedText.string as NSString).length - firstExtraGlyphIndexesInLinesInOriginalViewToMock[j])
+                v.textView.attributedText = setGlyphsVisiability(attriFullText, charRange, highlightColor)
+                v.visiableCharacterRange = charRange
                 j++
             }
         }
@@ -207,20 +221,16 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
 
 class AnimatableOneLineTextView: UIScrollView {
     var textView: UITextView!
-    var nextLineTextViewsInChain: [AnimatableOneLineTextView]!
-    var nextLineExtraTextViewsInChain: [AnimatableOneLineTextView]!
+    var nextLineTextViewsInChain: [AnimatableOneLineTextView]! // Prerequisite for nextLineExtraTextViewsInChain items
+    var nextLineExtraTextViewsInChain: [AnimatableOneLineTextView]! // Prerequisite for nextLineExtraTextViewsInChain items
     var nextViews: [AnimatableOneLineTextView] {
         return nextLineTextViewsInChain + nextLineExtraTextViewsInChain
-    }
-    override func setContentOffset(contentOffset: CGPoint, animated: Bool) {
-        baseContentOffsetX = contentOffset.x
-        super.setContentOffset(contentOffset, animated: animated)
     }
     var baseContentOffsetX: CGFloat!
     var extraXTiggered = CGFloat(0) // Store distance moved triggered by this on x axis.
     var isTrigger = false
     var xDifferenceToLastView: CGFloat!
-    var visiableCharacterRange: NSRange!
+    var visiableCharacterRange: NSRange! // Used by lineExtraView to hide the visiable part.
     var visiableGlyphRange: NSRange {
         return textView.layoutManager.glyphRangeForCharacterRange(visiableCharacterRange, actualCharacterRange: nil)
     }
@@ -249,6 +259,7 @@ class AnimatableOneLineTextView: UIScrollView {
         } else {
             return
         }
+        baseContentOffsetX = contentOffset.x
         for v in nextViews {
             v.baseContentOffsetX = v.contentOffset.x
         }
@@ -258,11 +269,11 @@ class AnimatableOneLineTextView: UIScrollView {
         } else {
             // Visiable part is still visiable.
             isTrigger = true
-            baseContentOffsetX = contentOffset.x
-            extraXTiggered = visiableGlyphsRectX - contentOffset.x
-            setContentOffset(CGPointMake(visiableGlyphsRectX, contentOffset.y) , animated: animated)
+            extraXTiggered = visiableGlyphsRectX - contentOffset.x - frame.width
+            println("extraXTiggered: \(extraXTiggered)")
+            setContentOffset(CGPointMake(baseContentOffsetX + extraXTiggered, contentOffset.y), animated: animated)
             if !animated {
-                updateFollowersContentOffset()
+                updateFollowersContentOffset(contentOffset.x - baseContentOffsetX)
                 proceedToNext(animated)
             }
         }
@@ -270,7 +281,8 @@ class AnimatableOneLineTextView: UIScrollView {
     override func layoutSubviews() {
         super.layoutSubviews()
         if isTrigger {
-            updateFollowersContentOffset()
+            println("delta: \(contentOffset.x - baseContentOffsetX)")
+            updateFollowersContentOffset(contentOffset.x - baseContentOffsetX)
         }
     }
     func proceedToNext(animated: Bool) {
@@ -278,9 +290,9 @@ class AnimatableOneLineTextView: UIScrollView {
             nextLineExtraTextViewsInChain[0].adjustToMatchLineWrap(animated)
         }
     }
-    func updateFollowersContentOffset() {
+    func updateFollowersContentOffset(deltaOnX: CGFloat) {
         for v in nextViews {
-            v.contentOffset = CGPointMake(v.baseContentOffsetX + extraXTiggered, v.contentOffset.y)
+            v.contentOffset = CGPointMake(v.baseContentOffsetX + deltaOnX, v.contentOffset.y)
         }
     }
 }
@@ -299,8 +311,8 @@ func boundingRectOriginForGlyphRange(textView: UITextView, glyphRange: NSRange) 
 
 func setGlyphsVisiability(aString: NSAttributedString, charRange: NSRange, color: UIColor) -> NSMutableAttributedString {
     var s = NSMutableAttributedString(attributedString: aString)
-    s.addAttribute("NSForegroundColorAttributeName", value: UIColor.clearColor(), range: NSMakeRange(0, (s.string as NSString).length))
-    s.addAttribute("NSForegroundColorAttributeName", value: color, range: charRange)
+    s.addAttribute(NSForegroundColorAttributeName, value: UIColor.clearColor(), range: NSMakeRange(0, (s.string as NSString).length))
+    s.addAttribute(NSForegroundColorAttributeName, value: color, range: charRange)
     return s
 }
 
