@@ -93,6 +93,7 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
         transitToCollapsed(true)
     }
     func expandByTap() {
+        view.userInteractionEnabled = false
         transitToExpanded(true)
     }
     func transitToExpanded(animated: Bool) {
@@ -249,7 +250,7 @@ class AnimatableOneLineTextView: UIScrollView {
     
     // There are two stage of the transition: 1. every SyncedTextView changes its contentOffset synchronistically till expected position for first glyph in the text range is reached 2. adjust line wrap one line after another. This method is used on stage 2. So it's only used on extraTextView.
     func adjustToMatchLineWrap(animated: Bool) {
-        if nextLineExtraTextViewsInChain.count > 1 {
+        if nextLineExtraTextViewsInChain.count > 0 {
             var r0 = nextLineTextViewsInChain
             r0.removeAtIndex(0)
             var r1 = nextLineExtraTextViewsInChain
@@ -270,7 +271,6 @@ class AnimatableOneLineTextView: UIScrollView {
             // Visiable part is still visiable.
             isTrigger = true
             extraXTiggered = visiableGlyphsRectX - contentOffset.x - frame.width
-            println("extraXTiggered: \(extraXTiggered)")
             setContentOffset(CGPointMake(baseContentOffsetX + extraXTiggered, contentOffset.y), animated: animated)
             if !animated {
                 updateFollowersContentOffset(contentOffset.x - baseContentOffsetX)
@@ -281,7 +281,6 @@ class AnimatableOneLineTextView: UIScrollView {
     override func layoutSubviews() {
         super.layoutSubviews()
         if isTrigger {
-            println("delta: \(contentOffset.x - baseContentOffsetX)")
             updateFollowersContentOffset(contentOffset.x - baseContentOffsetX)
         }
     }
