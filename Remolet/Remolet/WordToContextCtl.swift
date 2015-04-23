@@ -157,8 +157,6 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
                 if i + 1 > views.count {
                     let l = getOneAnimatableOneLineTextView(CGPointMake(lineRectsInOriginalViewToMock[0].origin.x, lineRectsInOriginalViewToMock[i].origin.y))
                     l.delegate = self
-//                    l.alpha = 0.8
-//                    l.backgroundColor = UIColor.redColor()
                     view.addSubview(l)
                     views.append(l)
                 }
@@ -166,6 +164,9 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
             }
         }
         // Adjust appearance.
+        refreshAppearance(&views)
+    }
+    func refreshAppearance(inout views: [AnimatableOneLineTextView]) {
         if views.count > 0 {
             var j = 0
             let isForMain = views[0].isEqual(animatedLineMainViews[0]) ? true : false
@@ -173,7 +174,7 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
                 // Reset contentOffset
                 v.setContentOffset(CGPointMake(view.frame.width * CGFloat(j), 0), animated: false)
                 // Reset visiability.
-                let charRange = isForMain ? NSMakeRange(0, lastGlyphIndexesInLinesInOriginalViewToMock[j] + 1) : NSMakeRange(firstExtraGlyphIndexesInLinesInOriginalViewToMock[j], (v.textView.attributedText.string as NSString).length - firstExtraGlyphIndexesInLinesInOriginalViewToMock[j])
+                let charRange = isForMain ? NSMakeRange(highlightedTextCharacterRange.location, lastGlyphIndexesInLinesInOriginalViewToMock[j] + 1) : NSMakeRange(firstExtraGlyphIndexesInLinesInOriginalViewToMock[j], (v.textView.attributedText.string as NSString).length - firstExtraGlyphIndexesInLinesInOriginalViewToMock[j])
                 v.textView.attributedText = setGlyphsVisiability(attriFullText, charRange, highlightColor)
                 v.visiableCharacterRange = charRange
                 j++
@@ -240,6 +241,7 @@ class AnimatableOneLineTextView: UIScrollView {
     }
     init(textViewToInsert: UITextView, rect: CGRect) {
         super.init(frame: rect)
+        decelerationRate = UIScrollViewDecelerationRateFast
         contentSize = CGSizeMake(textViewToInsert.frame.width * 3, textViewToInsert.frame.height)
         textView = textViewToInsert
         addSubview(textView)
