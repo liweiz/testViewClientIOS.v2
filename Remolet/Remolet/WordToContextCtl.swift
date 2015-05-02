@@ -11,26 +11,35 @@ import UIKit
 // NSLayoutManager works only with NSRange. It's easier to get NSRange from NSString instead of Range<String.Index> (http://stackoverflow.com/questions/27040924/nsrange-from-swift-range)
 
 func testAnimatableTextViewCtl(onCtl: RootViewCtl, viewToAttachOn: UIView) -> AnimatableTextViewCtl {
+    return setupAnimatableTextViewCtl(onCtl, viewToAttachOn, "When the user taps in an editable text view, that text view becomes the first responder and automatically asks the system to display the associated keyboard. Because the appearance of the keyboard has the potential to obscure portions of your user interface, it is up to you to make sure that does not happen by repositioning any views that might be obscured. Some system views, like table views, help you by scrolling the first responder into view automatically. If the first responder is at the bottom of the scrolling region, however, you may still need to resize or reposition the scroll view itself to ensure the first responder is visible.", "Some system views, like table views, help you by scrolling the first responder into view automatically. If the first responder is at the bottom of the scrolling region, however, you may still need to resize or reposition the scroll view itself to ensure the first responder is visible.")
+}
+
+func setupAnimatableTextViewCtl(onCtl: RootViewCtl, viewToAttachOn: UIView, fullContent: String, toHighlight: String) -> AnimatableTextViewCtl {
     let ctl = AnimatableTextViewCtl()
-    let oX = CGFloat(20)
+    let oX = CGFloat(70)
     let oY = CGFloat(40)
+    ctl.firstGlyphOriginFromListInCtlView = CGPointMake(oX, oY)
     let o = UITextView(frame: CGRectMake(oX, oY, appRect.width - oX * 2, appRect.height - oY))
-    let fullContent = "When the user taps in an editable text view, that text view becomes the first responder and automatically asks the system to display the associated keyboard. Because the appearance of the keyboard has the potential to obscure portions of your user interface, it is up to you to make sure that does not happen by repositioning any views that might be obscured. Some system views, like table views, help you by scrolling the first responder into view automatically. If the first responder is at the bottom of the scrolling region, however, you may still need to resize or reposition the scroll view itself to ensure the first responder is visible."
     o.attributedText = NSAttributedString(string: fullContent)
     o.contentInset = UIEdgeInsetsZero
     o.textContainer.lineFragmentPadding = 0
     o.showsHorizontalScrollIndicator = false
     o.showsVerticalScrollIndicator = false
     ctl.originalViewToMock = o
-    ctl.maxWidth = o.frame.width
-    ctl.attriFullText = NSMutableAttributedString(string: o.attributedText.string)
-    ctl.attriTextToHighlight = NSMutableAttributedString(string: "Some system views, like table views, help you by scrolling the first responder into view automatically. If the first responder is at the bottom of the scrolling region, however, you may still need to resize or reposition the scroll view itself to ensure the first responder is visible.")
+    ctl.attriTextToHighlight = NSMutableAttributedString(string: toHighlight)
     viewToAttachOn.addSubview(o)
     o.hidden = true
     o.backgroundColor = UIColor.greenColor()
     onCtl.addChildViewController(ctl)
     ctl.didMoveToParentViewController(onCtl)
     viewToAttachOn.addSubview(ctl.view)
+    
+    
+    
+    ctl.verticalAdjuster = UIScrollView(frame: ctl.view.frame)
+    ctl.verticalAdjuster.contentSize = CGSizeMake(ctl.verticalAdjuster.frame.width, ctl.verticalAdjuster.frame.height * 3)
+    ctl.verticalAdjuster.contentOffset = CGPointMake(0, ctl.verticalAdjuster.frame.height)
+    ctl.view.addSubview(ctl.verticalAdjuster)
     
     var tap = UITapGestureRecognizer(target: ctl, action: "expandByTap")
     ctl.view.addGestureRecognizer(tap)
@@ -40,12 +49,13 @@ func testAnimatableTextViewCtl(onCtl: RootViewCtl, viewToAttachOn: UIView) -> An
 // MARK: - Animatable textView
 
 class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
+    var firstGlyphOriginFromListInCtlView: CGPoint! // Prerequisite
+    
     var originalViewToMock: UITextView! // Prerequisite
-    var highlightColor = UIColor.blackColor()
-    var normalColor = UIColor.grayColor()
     var attriTextToHighlight: NSMutableAttributedString! // Prerequisite
-    var attriFullText: NSMutableAttributedString! // Prerequisite
-    var maxWidth: CGFloat! // Prerequisite
+    
+    var verticalAdjuster: UIScrollView!
+    var highlightColor = UIColor.blackColor()
     
     var glyphRangesInOriginalViewToMock = [NSRange]()
     var lineRectsInOriginalViewToMock = [CGRect]()
@@ -64,15 +74,11 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
         }
         return i
     }
-    var highlightedTextCharacterRange: NSRange {
-        get {
-            return (attriFullText.string as NSString).rangeOfString(attriTextToHighlight.string as String)
-        }
-    }
     var highlightedTextGlyphRangeInOriginalViewToMock: NSRange {
-        get {
-            return originalViewToMock.layoutManager.glyphRangeForCharacterRange(highlightedTextCharacterRange, actualCharacterRange: nil)
-        }
+        return originalViewToMock.layoutManager.glyphRangeForCharacterRange(highlightedTextCharacterRange, actualCharacterRange: nil)
+    }
+    var highlightedTextCharacterRange: NSRange {
+        return (originalViewToMock.attributedText!.string as NSString).rangeOfString(attriTextToHighlight.string as String)
     }
     
     var animatedLineMainViews = [AnimatableOneLineTextView]()
@@ -81,6 +87,11 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
         return animatedLineMainViews + animatedLineExtraViews
     }
     var isExpanded = false
+    var animateHighlightOnly = true
+    
+    func getFirstHighlightedGlyphOriginInOneAnimatableOneLineTextView(view: AnimatableOneLineTextView) -> CGPoint {
+        return view.textView.layoutManager.boundingRectForGlyphRange(view.textView.layoutManager.glyphRangeForCharacterRange(highlightedTextCharacterRange, actualCharacterRange: nil), inTextContainer: view.textView.textContainer).origin
+    }
     
     override func loadView() {
         view = UIView(frame: originalViewToMock.frame)
@@ -170,12 +181,17 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
         if views.count > 0 {
             var j = 0
             let isForMain = views[0].isEqual(animatedLineMainViews[0]) ? true : false
+            var o = CGFloat(0)
+            if views.count > 0 {
+                let k = views[0].convertPoint(firstGlyphOriginFromListInCtlView, fromView: view)
+                o = getFirstHighlightedGlyphOriginInOneAnimatableOneLineTextView(views[0]).x - k.x
+            }
             for v in views {
                 // Reset contentOffset
-                v.setContentOffset(CGPointMake(view.frame.width * CGFloat(j), 0), animated: false)
+                v.setContentOffset(CGPointMake(o + view.frame.width * CGFloat(j), 0), animated: false)
                 // Reset visiability.
-                let charRange = isForMain ? NSMakeRange(highlightedTextCharacterRange.location, lastGlyphIndexesInLinesInOriginalViewToMock[j] + 1) : NSMakeRange(firstExtraGlyphIndexesInLinesInOriginalViewToMock[j], (v.textView.attributedText.string as NSString).length - firstExtraGlyphIndexesInLinesInOriginalViewToMock[j])
-                v.textView.attributedText = setGlyphsVisiability(attriFullText, charRange, highlightColor)
+                let charRange = isForMain ? NSMakeRange(highlightedTextCharacterRange.location, lastGlyphIndexesInLinesInOriginalViewToMock[j] - highlightedTextCharacterRange.location + 1) : NSMakeRange(firstExtraGlyphIndexesInLinesInOriginalViewToMock[j], (v.textView.attributedText.string as NSString).length - firstExtraGlyphIndexesInLinesInOriginalViewToMock[j])
+                v.textView.attributedText = setGlyphsVisiability(originalViewToMock.attributedText!, charRange, highlightColor)
                 v.visiableCharacterRange = charRange
                 j++
             }
@@ -185,37 +201,31 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
         glyphRangesInOriginalViewToMock.removeAll(keepCapacity: true)
         lineRectsInOriginalViewToMock.removeAll(keepCapacity: true)
         let s = originalViewToMock.attributedText.string as NSString
-        let g = originalViewToMock.layoutManager.glyphRangeForCharacterRange(NSMakeRange(0, s.length), actualCharacterRange: nil)
+        let g = animateHighlightOnly ? getGlyphRangeForTextOccupiedLines(attriTextToHighlight, originalViewToMock) : originalViewToMock.layoutManager.glyphRangeForCharacterRange(NSMakeRange(0, s.length), actualCharacterRange: nil)
         if g.length > 0 {
-            var lineIndex = 0
-            while g.length > (lineIndex == 0 ? 0 : glyphRangesInOriginalViewToMock.last!.location + glyphRangesInOriginalViewToMock.last!.length) {
-                let lastLineRect = lineIndex > 0 ? lineRectsInOriginalViewToMock[lineIndex - 1] : CGRectZero
-                let lineGlyphRange = originalViewToMock.layoutManager.glyphRangeForBoundingRect(CGRectMake(0, lastLineRect.maxY + 1, 1, 1), inTextContainer: originalViewToMock.textContainer)
-                let lineRect = originalViewToMock.layoutManager.boundingRectForGlyphRange(lineGlyphRange, inTextContainer: originalViewToMock.textContainer)
-                glyphRangesInOriginalViewToMock.append(lineGlyphRange)
-                lineRectsInOriginalViewToMock.append(lineRect)
-                lineIndex++
+            var lastRect = CGRectZero
+            while g.location + g.length > (glyphRangesInOriginalViewToMock.count > 0 ? glyphRangesInOriginalViewToMock.last!.location + glyphRangesInOriginalViewToMock.last!.length : 0) {
+                let lineGlyphRange = originalViewToMock.layoutManager.glyphRangeForBoundingRect(CGRectMake(0, lastRect.maxY + 1, 1, 1), inTextContainer: originalViewToMock.textContainer)
+                lastRect = originalViewToMock.layoutManager.boundingRectForGlyphRange(lineGlyphRange, inTextContainer: originalViewToMock.textContainer)
+                if NSIntersectionRange(lineGlyphRange, highlightedTextGlyphRangeInOriginalViewToMock).length > 0 {
+                    glyphRangesInOriginalViewToMock.append(lineGlyphRange)
+                    lineRectsInOriginalViewToMock.append(lastRect)
+                }
             }
         }
-        
     }
-    
     func getOneAnimatableOneLineTextView(origin: CGPoint, width: CGFloat = 10000, height: CGFloat = 100) -> AnimatableOneLineTextView {
         var r = UITextView(frame: CGRectMake(0, 0, width, height))
         configTextView(r)
-        r.attributedText = attriFullText
+        r.attributedText = originalViewToMock.attributedText!
         return AnimatableOneLineTextView(textViewToInsert: r, rect: CGRectMake(origin.x, origin.y, view.frame.width - origin.x * 2, height))
     }
     func configTextView(view: UITextView) {
         view.backgroundColor = UIColor.clearColor()
-//        view.alpha = 0.5
         view.contentInset = UIEdgeInsetsZero
         view.textContainer.lineFragmentPadding = 0
         view.showsHorizontalScrollIndicator = false
         view.showsVerticalScrollIndicator = false
-    }
-    func getCharacterRangeFullContentViewForRect(rect: CGRect) -> NSRange {
-        return originalViewToMock.layoutManager.characterRangeForGlyphRange(originalViewToMock.layoutManager.glyphRangeForBoundingRect(rect, inTextContainer: originalViewToMock.textContainer), actualGlyphRange: nil)
     }
 }
 
