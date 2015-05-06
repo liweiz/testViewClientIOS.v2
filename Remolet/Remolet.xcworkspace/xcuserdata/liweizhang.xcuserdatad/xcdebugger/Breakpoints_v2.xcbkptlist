@@ -15,7 +15,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "197"
             endingLineNumber = "197"
-            landmarkName = "refreshAppearance(_:)"
+            landmarkName = "refreshLinesInfo()"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -47,7 +47,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "194"
             endingLineNumber = "194"
-            landmarkName = "refreshAppearance(_:)"
+            landmarkName = "refreshLinesInfo()"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -63,7 +63,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "195"
             endingLineNumber = "195"
-            landmarkName = "refreshAppearance(_:)"
+            landmarkName = "refreshLinesInfo()"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

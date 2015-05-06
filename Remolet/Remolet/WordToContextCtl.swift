@@ -131,7 +131,9 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
                     }
                 } else {
                     if i + 1 < animatedLineExtraViews.count {
+                        
                         animatedLineExtraViews[i + 1].adjustToMatchLineWrap(true)
+                        
                     } else {
                         isExpanded = true
                     }
@@ -144,14 +146,6 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
         refreshLinesInfo()
         refreshAnimatableOneLineTextViews(&animatedLineMainViews)
         refreshAnimatableOneLineTextViews(&animatedLineExtraViews)
-        if animatedLineExtraViews.count > 0 {
-            var r0 = animatedLineMainViews
-            r0.removeAtIndex(0)
-            (animatedLineExtraViews[0] as AnimatableOneLineTextView).nextLineTextViewsInChain = r0
-            var r1 = animatedLineExtraViews
-            r1.removeAtIndex(0)
-            (animatedLineExtraViews[0] as AnimatableOneLineTextView).nextLineExtraTextViewsInChain = r1
-        }
     }
     func refreshAnimatableOneLineTextViews(inout views: [AnimatableOneLineTextView]) {
         // Match the number of views.
@@ -229,15 +223,57 @@ class AnimatableTextViewCtl: UIViewController, UIScrollViewDelegate {
     }
 }
 
+func adjustToMatchLineMove(isForWrap: Bool, viewFollowed: AnimatableOneLineTextView, mainViews: [AnimatableOneLineTextView], extraViews: [AnimatableOneLineTextView]) {
+    if let i = find(mainViews, viewFollowed) {
+        var followings = isForWrap ? [AnimatableOneLineTextView]() : [extraViews[i]]
+        followings = mainViews.filter{ find(mainViews, $0)! > i }
+        if followings.count == 0 { return }
+        followings = followings + extraViews.filter{ find(extraViews, $0)! > i }
+        if isForWrap {
+            
+        }
+        syncFollowingViews(viewFollowed, followings)
+    }
+}
+
+func adjustToMatchLineWrap(animated: Bool, mainViews: [AnimatableOneLineTextView], extraViews: [AnimatableOneLineTextView]) {
+    for m in mainViews {
+        if let i = find(mainViews, m) {
+            var next = mainViews.filter{ find(mainViews, $0)! > i }
+            if next.count == 0 { return }
+            var nextExtra = extraViews.filter{ find(extraViews, $0)! > i }
+            m.baseContentOffsetX = m.contentOffset.x
+            updateFollowingViewsBaseContentOffsetX(m, next + nextExtra)
+            if m.visiableGlyphsRectX < m.contentOffset.x + m.frame.width { // Visiable part is still visiable.
+                m.isTrigger = true
+                m.extraXTiggered = m.visiableGlyphsRectX - m.contentOffset.x - m.frame.width
+                m.setContentOffset(CGPointMake(m.baseContentOffsetX + m.extraXTiggered, m.contentOffset.y), animated: animated) // Animated move synces one by one after the previous one finishes.
+                if !animated {
+                    syncFollowingViews(m, next + nextExtra)
+                }
+            }
+        }
+    }
+}
+
+
+
+func updateFollowingViewsBaseContentOffsetX(viewFollowed: AnimatableOneLineTextView, followingViews: [AnimatableOneLineTextView]) {
+    for v in followingViews {
+        v.baseContentOffsetX = v.contentOffset.x
+    }
+}
+
+func syncFollowingViews(viewFollowed: AnimatableOneLineTextView, followingViews: [AnimatableOneLineTextView]) {
+    for v in followingViews {
+        v.contentOffset = CGPointMake(v.baseContentOffsetX + viewFollowed.contentOffset.x - viewFollowed.baseContentOffsetX, v.contentOffset.y)
+    }
+}
+
 // MARK: - Animatable Line
 
 class AnimatableOneLineTextView: UIScrollView {
     var textView: UITextView!
-    var nextLineTextViewsInChain: [AnimatableOneLineTextView]! // Prerequisite for nextLineExtraTextViewsInChain items
-    var nextLineExtraTextViewsInChain: [AnimatableOneLineTextView]! // Prerequisite for nextLineExtraTextViewsInChain items
-    var nextViews: [AnimatableOneLineTextView] {
-        return nextLineTextViewsInChain + nextLineExtraTextViewsInChain
-    }
     var baseContentOffsetX: CGFloat!
     var extraXTiggered = CGFloat(0) // Store distance moved triggered by this on x axis.
     var isTrigger = false
@@ -261,49 +297,10 @@ class AnimatableOneLineTextView: UIScrollView {
     }
     
     // There are two stage of the transition: 1. every SyncedTextView changes its contentOffset synchronistically till expected position for first glyph in the text range is reached 2. adjust line wrap one line after another. This method is used on stage 2. So it's only used on extraTextView.
-    func adjustToMatchLineWrap(animated: Bool) {
-        if nextLineExtraTextViewsInChain.count > 0 {
-            var r0 = nextLineTextViewsInChain
-            r0.removeAtIndex(0)
-            var r1 = nextLineExtraTextViewsInChain
-            r1.removeAtIndex(0)
-            nextLineExtraTextViewsInChain[0].nextLineTextViewsInChain = r0
-            nextLineExtraTextViewsInChain[0].nextLineExtraTextViewsInChain = r1
-        } else {
-            return
-        }
-        baseContentOffsetX = contentOffset.x
-        for v in nextViews {
-            v.baseContentOffsetX = v.contentOffset.x
-        }
-        if visiableGlyphsRectX >= contentOffset.x + frame.width {
-            // Whole visiable part is not visiable now.
-            proceedToNext(animated)
-        } else {
-            // Visiable part is still visiable.
-            isTrigger = true
-            extraXTiggered = visiableGlyphsRectX - contentOffset.x - frame.width
-            setContentOffset(CGPointMake(baseContentOffsetX + extraXTiggered, contentOffset.y), animated: animated)
-            if !animated {
-                updateFollowersContentOffset(contentOffset.x - baseContentOffsetX)
-                proceedToNext(animated)
-            }
-        }
-    }
     override func layoutSubviews() {
         super.layoutSubviews()
         if isTrigger {
             updateFollowersContentOffset(contentOffset.x - baseContentOffsetX)
-        }
-    }
-    func proceedToNext(animated: Bool) {
-        if nextLineExtraTextViewsInChain.count > 0 {
-            nextLineExtraTextViewsInChain[0].adjustToMatchLineWrap(animated)
-        }
-    }
-    func updateFollowersContentOffset(deltaOnX: CGFloat) {
-        for v in nextViews {
-            v.contentOffset = CGPointMake(v.baseContentOffsetX + deltaOnX, v.contentOffset.y)
         }
     }
 }
