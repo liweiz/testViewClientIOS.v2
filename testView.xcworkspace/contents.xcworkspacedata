@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:pLangStep1/pLangStep1.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:Remolet/Remolet.xcodeproj">
    </FileRef>
    <FileRef

@@ -19,7 +19,7 @@ class InfiniteHorizontalScrolledPageView: UIScrollView, UIScrollViewDelegate {
     override func layoutSubviews() {
         super.layoutSubviews()
         if contentOffset.x == 0 || contentOffset.x == frame.width * 2 {
-            if let r = recenter(self, viewsToRotate) {
+            if let r = recenter(self, views: viewsToRotate) {
                 viewsToRotate = r
             }
         }
@@ -43,7 +43,7 @@ func recenter(view: UIScrollView, views: [UIView]) -> [UIView]? {
     } else {
         return nil
     }
-    repositionSubviews(view, updatedViews)
+    repositionSubviews(view, views: updatedViews)
     view.setContentOffset(CGPointMake(view.frame.size.width, 0), animated: false)
     return updatedViews
 }

@@ -27,7 +27,7 @@ class VerticalScrollSwitchView: UIScrollView, UIScrollViewDelegate {
     
     var allStops: [CGFloat] {
         get {
-            return getAllStops(stops, 0, contentSize.height)
+            return getAllStops(stops, topStop: 0, bottomStop: contentSize.height)
         }
     }
     var viewToForwardTouch: UIView!
@@ -36,11 +36,11 @@ class VerticalScrollSwitchView: UIScrollView, UIScrollViewDelegate {
     }
     func scrollViewWillEndDragging(scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         targetPositionY = targetContentOffset.memory.y
-        targetContentOffset.memory.y = getNextStop(allStops, dragStartPointY, scrollView.contentOffset.y, targetPositionY, basePositionY)
-        println("target: \(targetContentOffset.memory.y)")
+        targetContentOffset.memory.y = getNextStop(allStops, dragStartOffsetY: dragStartPointY, dragEndOffsetY: scrollView.contentOffset.y, targetOffsetY: targetPositionY, baseOffsetY: basePositionY)
+        print("target: \(targetContentOffset.memory.y)")
         userTriggered = true
         basePositionY = targetContentOffset.memory.y
-        println("base: \(basePositionY)")
+        print("base: \(basePositionY)")
     }
 }
 
@@ -80,7 +80,7 @@ class ViewSet: UIView, UITextViewDelegate {
         }
     }
     
-    required init(coder decoder: NSCoder) {
+    required init?(coder decoder: NSCoder) {
         super.init(coder: decoder)
     }
     override init(frame: CGRect) {
@@ -158,7 +158,7 @@ two senarioes:
 // direction is determined by drag end point and initial target deceleration point
 // If targetPosition == startPosition, which means no decelaration, set start as the startPositoin
 func getNextStop(allStops: [CGFloat], dragStartOffsetY: CGFloat, dragEndOffsetY: CGFloat, targetOffsetY: CGFloat, baseOffsetY: CGFloat) -> CGFloat {
-    let r = getUpDownStops(allStops, baseOffsetY)
+    let r = getUpDownStops(allStops, basePositionY: baseOffsetY)
     var upDistance: CGFloat = -1
     var downDistance: CGFloat = -1
     if r.up >= 0 {
@@ -168,7 +168,7 @@ func getNextStop(allStops: [CGFloat], dragStartOffsetY: CGFloat, dragEndOffsetY:
         downDistance = r.down - baseOffsetY
     }
     var detectedDistance: CGFloat
-    println("dragEndOffsetY: \(dragEndOffsetY)")
+    print("dragEndOffsetY: \(dragEndOffsetY)")
     // Use targetOffsetY - dragEndOffsetY as indicator for swipe direction and distance is good untill there is no further place to swipe, such as both vertical ends, which lead back to the edge points instead of going further. To resolve this, we provide extra space on both ends to let the targetOffsetY / dragEndOffsetY detection work again for direction indication.
     if targetOffsetY != dragEndOffsetY {
         detectedDistance = targetOffsetY - dragEndOffsetY
@@ -212,7 +212,7 @@ func getAllStops(stops: [CGFloat], topStop: CGFloat, bottomStop: CGFloat) -> [CG
 }
 
 func getViewSetBetweenStops(allStops: [CGFloat], baseY: CGFloat, viewSets: [UIView]) -> UIView? {
-    let r = getUpDownStops(allStops, baseY)
+    let r = getUpDownStops(allStops, basePositionY: baseY)
     for u in viewSets {
         if u.frame.origin.y >= baseY && CGRectGetMaxY(u.frame) >= r.down {
             return u
