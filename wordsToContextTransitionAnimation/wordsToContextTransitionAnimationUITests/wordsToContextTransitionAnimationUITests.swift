@@ -2,7 +2,7 @@
 //  wordsToContextTransitionAnimationUITests.swift
 //  wordsToContextTransitionAnimationUITests
 //
-//  Created by Liwei Zhang on 2015-08-05.
+//  Created by Liwei Zhang on 2015-08-06.
 //  Copyright © 2015 Liwei Zhang. All rights reserved.
 //
 
